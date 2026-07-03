@@ -1,0 +1,33 @@
+[
+  {
+    "question": "Ich ___ Ahmad.",
+    "questionArabic": "اختر الفعل الصحيح.",
+    "audioText": "Ich heiße Ahmad.",
+    "options": ["bin", "bist", "ist", "sind"],
+    "correctAnswer": "bin",
+    "level": "A1",
+    "category": "sein",
+    "difficulty": "easy",
+    "explanation": "مع ich نستخدم bin."
+  },
+  {
+    "question": "____ Haus ist groß.",
+    "questionArabic": "اختر أداة التعريف الصحيحة.",
+    "options": ["Der", "Die", "Das", "Den"],
+    "correctAnswer": "Das",
+    "level": "A1",
+    "category": "artikel",
+    "difficulty": "easy",
+    "explanation": "Haus اسم محايد (das Haus)."
+  },
+  {
+    "question": "Der Zug ist ___ als der Bus.",
+    "questionArabic": "اختر صيغة المقارنة الصحيحة.",
+    "options": ["schnell", "schneller", "am schnellsten", "schnellsten"],
+    "correctAnswer": "schneller",
+    "level": "A2",
+    "category": "Komparativ",
+    "difficulty": "medium",
+    "explanation": "صيغة المقارنة (Komparativ) لكلمة schnell هي schneller."
+  }
+]

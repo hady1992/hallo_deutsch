@@ -1,0 +1,23 @@
+[
+  {
+    "id": "pt-101",
+    "question": "Wie ___ du?",
+    "options": ["heißt", "heißen", "hast", "heiße"],
+    "correctAnswer": 0,
+    "level": "A1"
+  },
+  {
+    "id": "pt-102",
+    "question": "___ Frau ist Lehrerin.",
+    "options": ["Der", "Die", "Das", "Den"],
+    "correctAnswer": 1,
+    "level": "A1"
+  },
+  {
+    "id": "pt-201",
+    "question": "Ich ___ das Buch schon gelesen.",
+    "options": ["bin", "habe", "war", "hatte"],
+    "correctAnswer": 1,
+    "level": "A2"
+  }
+]

@@ -1,0 +1,15 @@
+## Pages
+- [Untitled Page](/adminpanel): No description available
+- [Untitled Page](/exams): No description available
+- [Untitled Page](/exercises): تمارين وتدريبات تفاعلية في القواعد والمفردات الألمانية لجميع المستويات.
+- [Untitled Page](/grammar): No description available
+- [Untitled Page](/home): تعلم اللغة الألمانية من المبتدئ إلى المتقدم مع دروس مبسطة وتمارين تفاعلية ونماذج امتحانات رسمية.
+- [Untitled Page](/kids): No description available
+- [Untitled Page](/levela1): دروس المستوى الأول A1 في اللغة الألمانية - تعلم الأساسيات والحروف والأرقام والمحادثات البسيطة.
+- [Untitled Page](/levela2): دروس المستوى الثاني A2 في اللغة الألمانية - الماضي التام، حروف الجر، الصفات والمقارنة.
+- [Untitled Page](/levelb1): دروس المستوى الثالث B1 في اللغة الألمانية - الجمل الجانبية، المبني للمجهول، الأفعال المنعكسة.
+- [Untitled Page](/levelb2): دروس المستوى الرابع B2 في اللغة الألمانية - الجمل الموصولة، صيغ التمني، النصوص المعقدة.
+- [Untitled Page](/levels): اختر مستواك من A1 إلى B2 وابدأ رحلتك في تعلم اللغة الألمانية
+- [Untitled Page](/placementmigration): No description available
+- [Untitled Page](/placementtest): No description available
+- [Untitled Page](/vocabulary): No description available

@@ -1,0 +1,20 @@
+[
+  {
+    "german": "Der Hund",
+    "arabic": "الكلب",
+    "category": "animals",
+    "image": "🐶"
+  },
+  {
+    "german": "Der Apfel",
+    "arabic": "التفاحة",
+    "category": "food",
+    "image": "🍎"
+  },
+  {
+    "german": "Das Auto",
+    "arabic": "السيارة",
+    "category": "transport",
+    "image": "🚗"
+  }
+]

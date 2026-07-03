@@ -1,0 +1,34 @@
+[
+  {
+    "id": "exam-a1-001",
+    "level": "A1",
+    "title": "اختبار A1 تجريبي",
+    "questions": [
+      {
+        "question": "Ich ___ Ahmad.",
+        "options": ["bin", "bist", "ist", "sind"],
+        "correctAnswer": "bin",
+        "explanation": "مع ich نستخدم bin."
+      },
+      {
+        "question": "Wie ___ du?",
+        "options": ["heißt", "heißen", "heiße", "heißest"],
+        "correctAnswer": "heißt",
+        "explanation": "مع du نستخدم heißt."
+      }
+    ]
+  },
+  {
+    "id": "exam-a2-001",
+    "level": "A2",
+    "title": "اختبار A2 تجريبي",
+    "questions": [
+      {
+        "question": "Ich ___ gestern ins Kino gegangen.",
+        "options": ["bin", "habe", "war", "hatte"],
+        "correctAnswer": "bin",
+        "explanation": "الفعل gehen يستخدم sein بصيغة الماضي التام (Perfekt)."
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "german": "das Haus",
+    "translation": "المنزل",
+    "noun": "Haus",
+    "gender": "neuter",
+    "article": "das",
+    "plural": "die Häuser",
+    "example": "Das Haus ist groß.",
+    "exampleArabic": "المنزل كبير."
+  },
+  {
+    "german": "die Katze",
+    "translation": "القطة",
+    "noun": "Katze",
+    "gender": "feminine",
+    "article": "die",
+    "plural": "die Katzen",
+    "example": "Die Katze schläft.",
+    "exampleArabic": "القطة نائمة."
+  },
+  {
+    "german": "der Tisch",
+    "translation": "الطاولة",
+    "noun": "Tisch",
+    "gender": "masculine",
+    "article": "der",
+    "plural": "die Tische",
+    "example": "Der Tisch ist neu.",
+    "exampleArabic": "الطاولة جديدة."
+  }
+]

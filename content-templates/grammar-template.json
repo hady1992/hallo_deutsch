@@ -1,0 +1,22 @@
+[
+  {
+    "title": "أدوات التعريف (Der, Die, Das)",
+    "level": "A1",
+    "explanation": "تُستخدم أدوات التعريف حسب جنس الاسم بالألمانية: der للمذكر، die للمؤنث، das للمحايد.",
+    "examples": ["Der Mann ist groß.", "Die Frau ist nett.", "Das Kind spielt."],
+    "notes": "يجب حفظ جنس كل اسم مع الاسم نفسه لأن قاعدة ثابتة له غير موجودة."
+  },
+  {
+    "title": "الفعل في زمن المضارع (Präsens)",
+    "level": "A1",
+    "explanation": "يُستخدم زمن المضارع للتعبير عن أفعال حالية أو حقائق ثابتة أو عادات متكررة.",
+    "examples": ["Ich spiele Fußball.", "Sie liest ein Buch."]
+  },
+  {
+    "title": "الماضي التام (Perfekt)",
+    "level": "A2",
+    "explanation": "يُستخدم الماضي التام للحديث عن أحداث انتهت في الماضي، ويتكون من فعل مساعد (haben أو sein) + التصريف الثالث للفعل.",
+    "examples": ["Ich habe gegessen.", "Er ist gegangen."],
+    "notes": "أفعال الحركة والتغيّر غالبًا تستخدم sein بدل haben."
+  }
+]

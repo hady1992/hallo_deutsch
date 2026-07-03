@@ -1,0 +1,30 @@
+[
+  {
+    "german": "das Buch",
+    "translation": "الكتاب",
+    "type": "noun",
+    "level": "A1",
+    "category": "أشياء",
+    "pronunciation": "das buukh",
+    "example": "Ich lese ein Buch.",
+    "exampleArabic": "أنا أقرأ كتابًا."
+  },
+  {
+    "german": "laufen",
+    "translation": "يركض",
+    "type": "verb",
+    "level": "A2",
+    "category": "أفعال",
+    "example": "Er läuft jeden Morgen.",
+    "exampleArabic": "هو يركض كل صباح."
+  },
+  {
+    "german": "schön",
+    "translation": "جميل",
+    "type": "adjective",
+    "level": "A1",
+    "category": "صفات",
+    "example": "Das ist ein schönes Haus.",
+    "exampleArabic": "هذا منزل جميل."
+  }
+]

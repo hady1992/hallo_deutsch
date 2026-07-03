@@ -1,0 +1,52 @@
+[
+  {
+    "german": "gehen",
+    "translation": "يذهب",
+    "type": "strong",
+    "conjugations": {
+      "Präsens": {
+        "ich": "gehe",
+        "du": "gehst",
+        "er": "geht",
+        "sie": "geht",
+        "es": "geht",
+        "wir": "gehen",
+        "ihr": "geht",
+        "Sie": "gehen"
+      },
+      "Perfekt": {
+        "ich": "bin gegangen",
+        "du": "bist gegangen",
+        "er": "ist gegangen",
+        "sie": "ist gegangen",
+        "es": "ist gegangen",
+        "wir": "sind gegangen",
+        "ihr": "seid gegangen",
+        "Sie": "sind gegangen"
+      }
+    },
+    "examples": {
+      "Präsens": { "de": "Ich gehe zur Schule.", "ar": "أنا أذهب إلى المدرسة." }
+    }
+  },
+  {
+    "german": "machen",
+    "translation": "يفعل",
+    "type": "weak",
+    "conjugations": {
+      "Präsens": {
+        "ich": "mache",
+        "du": "machst",
+        "er": "macht",
+        "sie": "macht",
+        "es": "macht",
+        "wir": "machen",
+        "ihr": "macht",
+        "Sie": "machen"
+      }
+    },
+    "examples": {
+      "Präsens": { "de": "Ich mache meine Hausaufgaben.", "ar": "أنا أقوم بواجبي المدرسي." }
+    }
+  }
+]
