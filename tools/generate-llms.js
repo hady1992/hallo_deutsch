@@ -27,6 +27,89 @@ const EXTRACTION_REGEX = {
   description: /<meta\s+name=["']description["']\s+content=["'](.*?)["']/i
 };
 
+const STATIC_PAGES = [
+  {
+    url: '/',
+    title: 'Hallo Deutsch',
+    description: 'منصة عربية لتعلم اللغة الألمانية من A1 إلى B2.'
+  },
+  {
+    url: '/levels',
+    title: 'المستويات',
+    description: 'اختيار مستوى التعلم والانتقال إلى دروس A1 أو المحتوى قيد التطوير للمستويات التالية.'
+  },
+  {
+    url: '/level/a1',
+    title: 'المستوى A1',
+    description: 'دروس الأساسيات والحروف والأرقام والمحادثات البسيطة.'
+  },
+  {
+    url: '/level/a2',
+    title: 'المستوى A2',
+    description: 'محتوى A2 المتاح حاليًا مع توضيح أن المستوى قيد التطوير.'
+  },
+  {
+    url: '/level/b1',
+    title: 'المستوى B1',
+    description: 'محتوى B1 المتاح حاليًا مع توضيح أن المستوى قيد التطوير.'
+  },
+  {
+    url: '/level/b2',
+    title: 'المستوى B2',
+    description: 'محتوى B2 المتاح حاليًا مع توضيح أن المستوى قيد التطوير.'
+  },
+  {
+    url: '/vocabulary',
+    title: 'المفردات',
+    description: 'مكتبة المفردات والأفعال والأسماء والقواعد المستوردة.'
+  },
+  {
+    url: '/grammar',
+    title: 'القواعد',
+    description: 'قواعد اللغة الألمانية وقواميس الأسماء والأفعال.'
+  },
+  {
+    url: '/exercises',
+    title: 'التمارين',
+    description: 'تمارين تفاعلية حسب المستوى والفئة.'
+  },
+  {
+    url: '/exams',
+    title: 'الامتحانات',
+    description: 'نماذج امتحانات A1 إلى B2.'
+  },
+  {
+    url: '/placement-test',
+    title: 'اختبار تحديد المستوى',
+    description: 'اختبار سريع لتقدير مستوى المتعلم.'
+  },
+  {
+    url: '/kids',
+    title: 'الأطفال',
+    description: 'قسم تعلم ألماني مبسط للأطفال.'
+  },
+  {
+    url: '/admin',
+    title: 'لوحة الإدارة',
+    description: 'صفحة محمية لإدارة واستيراد المحتوى.'
+  },
+  {
+    url: '/migration',
+    title: 'ترحيل اختبار المستوى',
+    description: 'صفحة إدارية محمية لترحيل بيانات اختبار المستوى.'
+  },
+  {
+    url: '/verbs/explorer',
+    title: 'مستكشف الأفعال',
+    description: 'عرض الأفعال المستوردة أو رسالة واضحة عند عدم توفر قاعدة أفعال.'
+  },
+  {
+    url: '/grammar/rules',
+    title: 'مرجع القواعد',
+    description: 'مرجع إضافي لقواعد اللغة الألمانية.'
+  }
+];
+
 function cleanContent(content) {
   return content
     .replace(CLEAN_CONTENT_REGEX.comments, '')
@@ -109,8 +192,8 @@ function extractHelmetData(content, filePath, routes) {
   
   return {
     url,
-    title: title || 'Untitled Page',
-    description: description || 'No description available'
+    title: title || fileName,
+    description: description || 'وصف الصفحة غير متوفر'
   };
 }
 
@@ -145,27 +228,7 @@ function processPageFile(filePath, routes) {
 }
 
 function main() {
-  const pagesDir = path.join(process.cwd(), 'src', 'pages');
-  const appJsxPath = path.join(process.cwd(), 'src', 'App.jsx');
-
-  let pages = [];
-  
-  if (!fs.existsSync(pagesDir)) {
-    pages.push(processPageFile(appJsxPath, []))
-    pages = pages.filter(Boolean);
-  } else {
-    const routes = extractRoutes(appJsxPath);
-    const reactFiles = findReactFiles(pagesDir);
-
-    pages = reactFiles
-      .map(filePath => processPageFile(filePath, routes))
-      .filter(Boolean);
-  }
-
-  if (pages.length === 0) {
-    console.error('❌ No pages with Helmet components found!');
-    process.exit(1);
-  }
+  const pages = STATIC_PAGES;
 
 
   const llmsTxtContent = generateLlmsTxt(pages);

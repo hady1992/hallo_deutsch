@@ -16,6 +16,7 @@ import PlacementTest from '@/pages/PlacementTest';
 import AdminPanel from '@/pages/AdminPanel';
 import Kids from '@/pages/Kids'; 
 import PlacementMigration from '@/pages/PlacementMigration';
+import AdminGate from '@/components/AdminGate';
 import { Toaster } from '@/components/ui/toaster';
 import VerbConjugationExplorer from '@/components/VerbConjugationExplorer';
 import GrammarRulesDatabase from '@/components/GrammarRulesDatabase';
@@ -72,7 +73,7 @@ function App() {
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/migration" element={<PlacementMigration />} />
+            <Route path="/migration" element={<AdminGate><PlacementMigration /></AdminGate>} />
             
             {/* Feature Routes */}
             <Route path="/grammar/rules" element={<GrammarRulesDatabase />} />

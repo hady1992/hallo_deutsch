@@ -4,6 +4,7 @@ import { Search, Printer, Play, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getImportedVerbs } from '@/utils/storageManager';
+import { germanVerbsComprehensive } from '@/data/germanVerbsComprehensive';
 
 // Defined order for sorting, everything else comes after
 const TENSE_ORDER = ['Präsens', 'Präteritum', 'Perfekt', 'Plusquamperfekt', 'Futur I', 'Futur II', 'Konjunktiv I', 'Konjunktiv II'];
@@ -17,9 +18,9 @@ const VerbConjugationExplorer = () => {
   const [activeTense, setActiveTense] = useState('');
 
   useEffect(() => {
-    // Only use imported verbs
     const imported = getImportedVerbs();
-    setVerbs(imported);
+    const defaults = Array.isArray(germanVerbsComprehensive) ? germanVerbsComprehensive : [];
+    setVerbs(imported.length > 0 ? imported : defaults);
   }, []);
 
   const verbTypes = ['All', 'Weak', 'Strong', 'Irregular', 'Modal'];
@@ -66,9 +67,11 @@ const VerbConjugationExplorer = () => {
       return (
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
                <FileUp className="h-16 w-16 text-slate-200 mb-6" />
-               <h3 className="text-xl font-bold text-slate-800 mb-2">لا توجد أفعال مستوردة</h3>
-               <p className="text-slate-500 mb-6 max-w-lg">لم يتم العثور على أي أفعال في قاعدة البيانات المحلية. يرجى الذهاب للوحة التحكم واستيراد ملف الأفعال.</p>
-               <Button onClick={() => window.location.href = '/admin'}>استيراد البيانات</Button>
+               <h3 className="text-xl font-bold text-slate-800 mb-2">قاعدة الأفعال العامة غير جاهزة بعد</h3>
+               <p className="text-slate-500 mb-6 max-w-lg">
+                لا توجد أفعال مستوردة أو قاعدة افتراضية متاحة حاليًا. يمكن للمدير إضافة ملف أفعال من لوحة التحكم، وباقي صفحات القواعد والمفردات تعمل بشكل طبيعي.
+               </p>
+               <Button variant="outline" onClick={() => window.location.href = '/grammar'}>العودة إلى القواعد</Button>
           </div>
       );
   }

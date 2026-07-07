@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-function LevelCard({ level, name, description, lessonsCount, color, index, path }) {
+function LevelCard({ level, name, description, lessonsCount, statusText, color, index, path }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -29,7 +29,7 @@ function LevelCard({ level, name, description, lessonsCount, color, index, path 
       <p className="text-white/90 mb-4 leading-relaxed">{description}</p>
       <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm flex justify-between items-center">
         <p className="text-sm">
-          <span className="font-semibold">{lessonsCount}</span> درس متاح
+          {statusText || <><span className="font-semibold">{lessonsCount}</span> درس متاح</>}
         </p>
         <span className="text-xs bg-white/20 px-2 py-1 rounded">اضغط للدخول</span>
       </div>

@@ -10,22 +10,20 @@ import QuestionAdder from '@/components/QuestionAdder';
 import QuestionList from '@/components/QuestionList';
 import QuestionImporter from '@/components/QuestionImporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 
 function LevelContent({ title, description, objectives, sections, prevLevel, nextLevel, levelId, onDeleteLesson }) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [expandedSection, setExpandedSection] = useState(0);
   const [completedSections, setCompletedSections] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const isAdmin = isAuthorizedAdminEmail(user?.email);
   
   // Tabs for managing content vs viewing lessons
   const [viewMode, setViewMode] = useState('lessons'); // 'lessons' or 'questions'
-
-  useEffect(() => {
-    // Simple admin check
-    setIsAdmin(localStorage.getItem('isAdmin') === 'true');
-  }, []);
 
   const toggleSection = (index) => {
     setExpandedSection(expandedSection === index ? null : index);
@@ -164,7 +162,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
             /* --- LESSONS VIEW (Default) --- */
             <>
                 {/* Uploader */}
-                {levelId && (
+                {levelId && isAdmin && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <LessonUploader levelId={levelId} />
                     </motion.div>
@@ -280,7 +278,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                                     </Button>
                                 </div>
 
-                                {section.isCustom && onDeleteLesson && (
+                                {isAdmin && section.isCustom && onDeleteLesson && (
                                     <Button
                                         onClick={(e) => {
                                             e.stopPropagation();
