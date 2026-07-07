@@ -11,7 +11,7 @@ export const normalizeAdminEmail = (value = '') => value.trim().toLowerCase();
 // Supabase Authentication > Users. يجب أن يطابق البريد هنا بريد مستخدم Supabase
 // بعد تطبيق trim + lowercase. لا تضع كلمة مرور أو أي سر داخل الكود.
 export const ADMIN_EMAILS = [
-  'admin@hallo-deutsch.local',
+  'hady19923@gmail.com',
 ].map(normalizeAdminEmail).filter(Boolean);
 
 export const isAuthorizedAdminEmail = (email) => (
