@@ -5,13 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShieldAlert, Loader2 } from 'lucide-react';
 
-// ⚠️ مهم جدًا قبل النشر: ضع هنا البريد الإلكتروني الحقيقي لحساب/حسابات الإدارة
-// (يجب أن يكون حسابًا تم إنشاؤه فعليًا في مشروع Supabase الخاص بكم عبر
-// Authentication > Users، أو عبر signUp مرة واحدة من بيئة آمنة).
-// إن تركت هذه القائمة فارغة فلن يستطيع أي شخص (ولا حتى أنت) الدخول للوحة التحكم.
-const ADMIN_EMAILS = [
-  // 'admin@example.com',
-];
+export const normalizeAdminEmail = (value = '') => value.trim().toLowerCase();
+
+// مهم قبل النشر: استبدل البريد أدناه ببريد حساب إداري موجود فعليًا في
+// Supabase Authentication > Users. يجب أن يطابق البريد هنا بريد مستخدم Supabase
+// بعد تطبيق trim + lowercase. لا تضع كلمة مرور أو أي سر داخل الكود.
+export const ADMIN_EMAILS = [
+  'hady19923@gmail.com',
+].map(normalizeAdminEmail).filter(Boolean);
+
+export const isAuthorizedAdminEmail = (email) => (
+  ADMIN_EMAILS.includes(normalizeAdminEmail(email))
+);
 
 /**
  * بوابة حماية لصفحات الإدارة (/admin و /migration).
@@ -31,7 +36,7 @@ const AdminGate = ({ children }) => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const isAuthorizedAdmin = !!user && ADMIN_EMAILS.includes(user.email);
+  const isAuthorizedAdmin = !!user && isAuthorizedAdminEmail(user.email);
 
   useEffect(() => {
     // إبقاء العلَم القديم (isAdmin) متوافقًا مع حالة الدخول الحقيقية، حتى تستمر
@@ -45,7 +50,7 @@ const AdminGate = ({ children }) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    const { error: signInError } = await signIn(email, password);
+    const { error: signInError } = await signIn(normalizeAdminEmail(email), password);
     setSubmitting(false);
     if (signInError) {
       setError('فشل تسجيل الدخول. تحقق من البريد وكلمة المرور.');

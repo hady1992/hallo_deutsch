@@ -260,7 +260,7 @@ const PlacementTest = () => {
                          )}
                       >
                          {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'التالي'}
-                         {!currentQuestionIndex === questions.length - 1 && <ArrowLeft className="w-4 h-4" />}
+                         {currentQuestionIndex !== questions.length - 1 && <ArrowLeft className="w-4 h-4" />}
                       </Button>
                    </div>
                 </Card>

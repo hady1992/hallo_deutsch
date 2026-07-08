@@ -9,7 +9,7 @@ function Levels() {
       level: 'A1',
       name: 'المستوى الأول',
       description: 'مستوى المبتدئين - تعلم الأساسيات والتعبيرات البسيطة',
-      lessonsCount: 25,
+      statusText: '8 دروس متاحة',
       color: 'from-green-400 to-green-600',
       path: '/level/a1'
     },
@@ -17,7 +17,7 @@ function Levels() {
       level: 'A2',
       name: 'المستوى الثاني',
       description: 'مستوى ما قبل المتوسط - بناء المهارات الأساسية',
-      lessonsCount: 30,
+      statusText: 'درس واحد متاح - قيد التطوير',
       color: 'from-blue-400 to-blue-600',
       path: '/level/a2'
     },
@@ -25,7 +25,7 @@ function Levels() {
       level: 'B1',
       name: 'المستوى الثالث',
       description: 'المستوى المتوسط - تطوير القدرة على التواصل',
-      lessonsCount: 35,
+      statusText: 'درس واحد متاح - قيد التطوير',
       color: 'from-orange-400 to-orange-600',
       path: '/level/b1'
     },
@@ -33,7 +33,7 @@ function Levels() {
       level: 'B2',
       name: 'المستوى الرابع',
       description: 'المستوى فوق المتوسط - إتقان اللغة بشكل متقدم',
-      lessonsCount: 40,
+      statusText: 'درس واحد متاح - قيد التطوير',
       color: 'from-red-400 to-red-600',
       path: '/level/b2'
     }
