@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://ublwagjjoaemjyftkzaj.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHdhZ2pqb2FlbWp5ZnRremFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NTIwODYsImV4cCI6MjA4NDUyODA4Nn0.jnOgpup9l2tG2XfBIFPAghpUxHANqBJiV81IoaOGPGk';
+const supabaseUrl = 'https://wgmcctnihewszwyeqjjk.supabase.co';
+// Public anon key for this Supabase project. Never use service_role or secret keys in frontend code.
+const supabaseAnonKey = 'sb_publishable_2bSF6jHZuon6-XQaFCWd2w_1qmeWRLv';
+
+if (import.meta.env.DEV) {
+    console.info('[Supabase] URL:', supabaseUrl);
+}
 
 const customSupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
