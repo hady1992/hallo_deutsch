@@ -20,6 +20,7 @@ import {
 } from '@/utils/articleHuntUtils';
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
+const SHOT_MODE_STORAGE_KEY = 'articleHuntShotMode';
 
 const ARTICLE_STYLES = {
   der: {
@@ -39,6 +40,147 @@ const ARTICLE_STYLES = {
   },
 };
 
+const SHOT_MODES = [
+  {
+    id: 'bubbles',
+    label: 'فقاعات',
+    icon: '🫧',
+    hint: 'فقاعة تطير نحو الهدف',
+    toolLabel: 'قاذف فقاعات',
+    actionText: 'أطلق الفقاعة نحو الهدف الصحيح',
+  },
+  {
+    id: 'laser',
+    label: 'ليزر كرتوني',
+    icon: '✨',
+    hint: 'شعاع ملون لطيف',
+    toolLabel: 'شعاع كرتوني',
+    actionText: 'صوّب الشعاع الملون نحو الهدف الصحيح',
+  },
+  {
+    id: 'stars',
+    label: 'نجوم',
+    icon: '⭐',
+    hint: 'نجمة صغيرة تلمع',
+    toolLabel: 'مرسل النجوم',
+    actionText: 'أرسل النجمة نحو الهدف الصحيح',
+  },
+];
+
+const PROJECTILE_TARGETS = {
+  der: { left: '17%', top: '66%', rotate: -28 },
+  die: { left: '50%', top: '66%', rotate: 0 },
+  das: { left: '83%', top: '66%', rotate: 28 },
+};
+
+const getInitialShotMode = () => {
+  try {
+    const storedMode = localStorage.getItem(SHOT_MODE_STORAGE_KEY);
+    return SHOT_MODES.some((mode) => mode.id === storedMode) ? storedMode : 'bubbles';
+  } catch {
+    return 'bubbles';
+  }
+};
+
+const playHuntTone = (type) => {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const audioContext = new AudioContextClass();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.value = type === 'success' ? 740 : 220;
+    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(type === 'success' ? 0.08 : 0.045, audioContext.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.18);
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch {
+    // Audio feedback is optional; the game should keep working without it.
+  }
+};
+
+const ProjectileEffect = ({ projectile }) => {
+  if (!projectile) return null;
+
+  const target = PROJECTILE_TARGETS[projectile.article] || PROJECTILE_TARGETS.die;
+  const burstItems = Array.from({ length: 7 });
+
+  if (projectile.mode === 'laser') {
+    return (
+      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+        <motion.div
+          className="absolute bottom-20 left-1/2 h-4 w-[42%] origin-left rounded-full bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-yellow-200 shadow-[0_0_24px_rgba(34,211,238,0.6)]"
+          style={{ rotate: target.rotate }}
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: [0, 1, 1], opacity: [0, 1, 0] }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+        />
+        <motion.div
+          className="absolute h-16 w-16 rounded-full border-4 border-cyan-200 bg-white/60"
+          style={{ left: target.left, top: target.top }}
+          initial={{ scale: 0.3, opacity: 0 }}
+          animate={{ scale: [0.3, 1.15, 0], opacity: [0, 1, 0] }}
+          transition={{ duration: 0.55, delay: 0.16 }}
+        />
+      </div>
+    );
+  }
+
+  const isStarMode = projectile.mode === 'stars';
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+      <motion.div
+        className={cn(
+          'absolute flex h-12 w-12 items-center justify-center rounded-full text-3xl shadow-xl',
+          isStarMode
+            ? 'bg-yellow-200 text-yellow-500 shadow-yellow-200'
+            : 'border-4 border-white/80 bg-cyan-200/80 text-cyan-600 shadow-cyan-200'
+        )}
+        initial={{ left: '50%', top: '86%', scale: 0.35, opacity: 0.9 }}
+        animate={{
+          left: target.left,
+          top: target.top,
+          scale: [0.35, 1, 0.8],
+          opacity: [0.9, 1, 0],
+        }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        {isStarMode ? '⭐' : ''}
+      </motion.div>
+
+      <div className="absolute" style={{ left: target.left, top: target.top }}>
+        {burstItems.map((_, index) => (
+          <motion.span
+            key={`${projectile.id}-${index}`}
+            className={cn(
+              'absolute flex h-5 w-5 items-center justify-center rounded-full text-sm',
+              isStarMode ? 'text-yellow-400' : 'bg-cyan-100 text-cyan-500'
+            )}
+            initial={{ x: 0, y: 0, scale: 0.2, opacity: 0 }}
+            animate={{
+              x: Math.cos((Math.PI * 2 * index) / burstItems.length) * 36,
+              y: Math.sin((Math.PI * 2 * index) / burstItems.length) * 36,
+              scale: [0.2, 1, 0],
+              opacity: [0, 1, 0],
+            }}
+            transition={{ duration: 0.5, delay: 0.26 }}
+          >
+            {isStarMode ? '✦' : ''}
+          </motion.span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const getTopicPool = (nouns, topic) => (
   topic === 'all' ? nouns : nouns.filter((noun) => noun.topic === topic)
 );
@@ -47,6 +189,7 @@ const ArticleHuntGame = ({ onExit }) => {
   const [nouns, setNouns] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [questionCount, setQuestionCount] = useState(10);
+  const [shotMode, setShotMode] = useState(getInitialShotMode);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -55,6 +198,7 @@ const ArticleHuntGame = ({ onExit }) => {
   const [mistakes, setMistakes] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [projectile, setProjectile] = useState(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [locked, setLocked] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -75,6 +219,14 @@ const ArticleHuntGame = ({ onExit }) => {
     return () => events.forEach((eventName) => window.removeEventListener(eventName, loadNouns));
   }, []);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHOT_MODE_STORAGE_KEY, shotMode);
+    } catch {
+      // Keep the selected mode in memory if localStorage is not available.
+    }
+  }, [shotMode]);
+
   const topics = useMemo(() => getAvailableArticleHuntTopics(nouns), [nouns]);
 
   const availablePool = useMemo(
@@ -89,6 +241,7 @@ const ArticleHuntGame = ({ onExit }) => {
 
   const actualQuestionCount = Math.min(questionCount, availablePool.length);
   const currentQuestion = questions[currentIndex];
+  const currentShotMode = SHOT_MODES.find((mode) => mode.id === shotMode) || SHOT_MODES[0];
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
   const successRate = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
 
@@ -100,6 +253,7 @@ const ArticleHuntGame = ({ onExit }) => {
     setMistakes([]);
     setSelectedArticle(null);
     setFeedback(null);
+    setProjectile(null);
     setShowAnswer(false);
     setLocked(false);
     setFinished(false);
@@ -140,14 +294,33 @@ const ArticleHuntGame = ({ onExit }) => {
   const handleTargetClick = (article) => {
     if (!currentQuestion || locked) return;
 
-    setSelectedArticle(article);
+    const isCorrect = article === currentQuestion.article;
 
-    if (article === currentQuestion.article) {
-      setLocked(true);
+    setSelectedArticle(article);
+    setLocked(true);
+    setProjectile({
+      id: `${Date.now()}-${article}`,
+      article,
+      mode: shotMode,
+      isCorrect,
+    });
+
+    window.setTimeout(() => setProjectile(null), 650);
+
+    window.setTimeout(() => {
+      if (isCorrect) {
       setShowAnswer(true);
-      setFeedback({ type: 'success', text: 'رائع! فقاعتك وصلت للهدف الصحيح' });
+      setFeedback({
+        type: 'success',
+        text: shotMode === 'laser'
+          ? 'رائع! الشعاع وصل للهدف الصحيح'
+          : shotMode === 'stars'
+            ? 'رائع! النجمة وصلت للهدف الصحيح'
+            : 'رائع! فقاعتك وصلت للهدف الصحيح',
+      });
       setScore((value) => value + 1);
       setCorrectCount((value) => value + 1);
+      playHuntTone('success');
 
       confetti({
         particleCount: 80,
@@ -156,27 +329,30 @@ const ArticleHuntGame = ({ onExit }) => {
         colors: ['#38bdf8', '#fb7185', '#34d399', '#facc15'],
       });
 
-      window.setTimeout(goToNextQuestion, 1400);
-      return;
-    }
+        window.setTimeout(goToNextQuestion, 1200);
+        return;
+      }
 
-    setWrongCount((value) => value + 1);
-    setFeedback({ type: 'try-again', text: 'حاول مرة أخرى' });
-    setMistakes((items) => [
-      ...items,
-      {
-        id: `${currentQuestion.id}-${currentIndex}-${article}-${items.length}`,
-        word: currentQuestion.word,
-        translation: currentQuestion.translation,
-        chosen: article,
-        correct: currentQuestion.article,
-      },
-    ]);
+      playHuntTone('error');
+      setWrongCount((value) => value + 1);
+      setFeedback({ type: 'try-again', text: 'حاول مرة أخرى' });
+      setMistakes((items) => [
+        ...items,
+        {
+          id: `${currentQuestion.id}-${currentIndex}-${article}-${items.length}`,
+          word: currentQuestion.word,
+          translation: currentQuestion.translation,
+          chosen: article,
+          correct: currentQuestion.article,
+        },
+      ]);
 
-    window.setTimeout(() => {
-      setSelectedArticle(null);
-      setFeedback(null);
-    }, 900);
+      window.setTimeout(() => {
+        setSelectedArticle(null);
+        setFeedback(null);
+        setLocked(false);
+      }, 800);
+    }, 380);
   };
 
   if (finished) {
@@ -349,6 +525,32 @@ const ArticleHuntGame = ({ onExit }) => {
                 ))}
               </div>
 
+              <h3 className="mb-4 mt-6 text-2xl font-black text-slate-800">3. طريقة الصيد</h3>
+              <div className="grid gap-3">
+                {SHOT_MODES.map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setShotMode(mode.id)}
+                    className={cn(
+                      'flex items-center justify-between gap-3 rounded-2xl border-2 p-4 text-right transition-all',
+                      shotMode === mode.id
+                        ? 'border-purple-400 bg-purple-50 text-purple-700 shadow-md'
+                        : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-purple-200 hover:bg-white'
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-3xl">{mode.icon}</span>
+                      <span>
+                        <span className="block text-base font-black">{mode.label}</span>
+                        <span className="block text-xs font-bold text-slate-400">{mode.hint}</span>
+                      </span>
+                    </span>
+                    {shotMode === mode.id && <CheckCircle2 size={22} />}
+                  </button>
+                ))}
+              </div>
+
               <div className="mt-5 rounded-2xl bg-yellow-50 p-4 text-sm font-bold leading-relaxed text-yellow-800">
                 المتاح في هذا الاختيار: {availablePool.length} اسم.
                 {actualQuestionCount < questionCount && (
@@ -402,6 +604,7 @@ const ArticleHuntGame = ({ onExit }) => {
       >
         <div className="pointer-events-none absolute -left-8 top-10 h-24 w-24 rounded-full bg-white/50" />
         <div className="pointer-events-none absolute right-10 top-20 h-14 w-14 rounded-full bg-cyan-200/40" />
+        <ProjectileEffect projectile={projectile} />
 
         <div className="relative z-10 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-purple-700 shadow-sm">
@@ -466,25 +669,40 @@ const ArticleHuntGame = ({ onExit }) => {
                     style.button,
                     !locked && style.idle,
                     isChosen && isCorrect && 'ring-4 ring-green-300 ring-offset-4',
-                    isChosen && !isCorrect && 'ring-4 ring-rose-300 ring-offset-4'
+                    isChosen && !isCorrect && 'animate-pulse ring-4 ring-rose-300 ring-offset-4'
                   )}
                   aria-label={`اختر ${article}`}
                 >
                   <span>{article}</span>
                   <span className={cn('mt-2 rounded-full px-3 py-1 text-xs font-black md:text-sm', style.bubble)}>
-                    فقاعة
+                    هدف
                   </span>
                 </motion.button>
               );
             })}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-3 text-sm font-black text-slate-500">
-            <span className="rounded-full bg-purple-500 px-4 py-2 text-white shadow-md">قاذف الفقاعات</span>
-            <span className="h-4 w-4 rounded-full bg-cyan-200" />
-            <span className="h-6 w-6 rounded-full bg-yellow-200" />
-            <span className="h-3 w-3 rounded-full bg-rose-200" />
-            <span>أطلق الفقاعة نحو الهدف الصحيح</span>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 text-sm font-black text-slate-500">
+            <div className="relative flex h-28 w-full max-w-sm items-end justify-center">
+              <div className="absolute bottom-0 h-12 w-28 rounded-t-[2rem] rounded-b-xl bg-purple-500 shadow-lg shadow-purple-200" />
+              <div className="absolute bottom-9 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-cyan-200 text-3xl shadow-lg">
+                {currentShotMode.icon}
+              </div>
+              <motion.div
+                animate={{ y: [-4, 4, -4], rotate: [-4, 4, -4] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute bottom-20 rounded-full bg-white px-4 py-2 text-purple-700 shadow-md"
+              >
+                {currentShotMode.toolLabel}
+              </motion.div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <span className="rounded-full bg-purple-500 px-4 py-2 text-white shadow-md">{currentShotMode.label}</span>
+              <span className="h-4 w-4 rounded-full bg-cyan-200" />
+              <span className="h-6 w-6 rounded-full bg-yellow-200" />
+              <span className="h-3 w-3 rounded-full bg-rose-200" />
+              <span>{currentShotMode.actionText}</span>
+            </div>
           </div>
         </div>
 
