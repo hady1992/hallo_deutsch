@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { kidsGamesQuestionsData } from '@/data/kidsGamesQuestionsData';
 import confetti from 'canvas-confetti';
 import AudioSpeedControl from '@/components/AudioSpeedControl';
+import ArticleHuntGame from '@/components/kids/ArticleHuntGame';
 
 const KidsGamesAndQuestions = () => {
   const [activeGameType, setActiveGameType] = useState(null);
@@ -18,12 +19,18 @@ const KidsGamesAndQuestions = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
   const gameTypes = [
+    { id: 'article-hunt', title: 'صيد الأرتيكل', icon: '🫧', desc: 'Artikel-Jagd: اختر der أو die أو das', color: 'bg-purple-500' },
     { id: 'multiple-choice', title: 'الاختيار الذكي', icon: '🧠', desc: 'اختر الإجابة الصحيحة', color: 'bg-blue-500' },
     { id: 'fill-in', title: 'أكمل الجملة', icon: '✍️', desc: 'اكتب الكلمة الناقصة', color: 'bg-green-500' },
     { id: 'true-false', title: 'صح أم خطأ', icon: '🤔', desc: 'هل هذه الجملة صحيحة؟', color: 'bg-orange-500' },
   ];
 
   const startGame = (type) => {
+    if (type === 'article-hunt') {
+      setActiveGameType(type);
+      return;
+    }
+
     const filtered = kidsGamesQuestionsData.filter(q => q.type === type);
     const shuffled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 10);
     setQuestions(shuffled);
@@ -102,7 +109,7 @@ const KidsGamesAndQuestions = () => {
 
   if (!activeGameType) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto p-4">
         {gameTypes.map((game) => (
           <motion.div 
             whileHover={{ scale: 1.05, rotate: 1 }}
@@ -124,6 +131,10 @@ const KidsGamesAndQuestions = () => {
         ))}
       </div>
     );
+  }
+
+  if (activeGameType === 'article-hunt') {
+    return <ArticleHuntGame onExit={returnToMenu} />;
   }
 
   if (showResult) {
