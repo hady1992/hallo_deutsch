@@ -39,7 +39,7 @@ const Kids = () => {
     { id: 'sentences', label: 'محادثات', icon: <MessageCircle size={18} />, color: 'data-[state=active]:bg-blue-500' },
     { id: 'exercises', label: 'تمارين', icon: <Dumbbell size={18} />, color: 'data-[state=active]:bg-teal-500' },
     { id: 'games', label: 'ألعاب', icon: <Gamepad2 size={18} />, color: 'data-[state=active]:bg-purple-500' },
-    { id: 'quizzes', label: 'مسابقات', icon: <Trophy size={18} />, color: 'data-[state=active]:bg-green-500' },
+    { id: 'quizzes', label: 'مسابقات مخصصة', icon: <Trophy size={18} />, color: 'data-[state=active]:bg-green-500' },
   ];
 
   return (

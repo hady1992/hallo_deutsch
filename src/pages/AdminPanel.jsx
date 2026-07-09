@@ -15,6 +15,7 @@ import {
   Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DataImportUtility from '@/components/DataImportUtility';
 import GrammarRulesImporter from '@/components/GrammarRulesImporter';
 import ExamModelsImporter from '@/components/ExamModelsImporter';
@@ -28,7 +29,16 @@ import AdminGate from '@/components/AdminGate';
 import KidsVocabularyImporter from '@/components/KidsVocabularyImporter';
 import KidsConversationAdder from '@/components/KidsConversationAdder';
 import CustomQuizManager from '@/components/CustomQuizManager';
+import KidsFileUploader from '@/components/KidsFileUploader';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+import {
+  getKidsExercises,
+  getKidsTopics,
+  getKidsVerbs,
+  saveKidsExercises,
+  saveKidsTopics,
+  saveKidsVerbs,
+} from '@/utils/storageManager';
 import { cn } from '@/lib/utils';
 
 const ADMIN_SECTIONS = [
@@ -104,7 +114,7 @@ const AdminPanel = () => {
   const [openSections, setOpenSections] = useState({
     content: false,
     upload: false,
-    kids: false,
+    kids: true,
     tests: false,
     system: false,
   });
@@ -115,6 +125,72 @@ const AdminPanel = () => {
       ...current,
       [sectionId]: !current[sectionId],
     }));
+  };
+
+  const refreshKidsData = () => {
+    window.dispatchEvent(new Event('kidsDataUpdated'));
+  };
+
+  const normalizeOptions = (options) => {
+    if (Array.isArray(options)) return options;
+    if (typeof options === 'string') {
+      return options.split('|').map((option) => option.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  const appendKidsItems = (readItems, writeItems, items, normalizeItem) => {
+    const currentItems = readItems();
+    const timestamp = Date.now();
+    const preparedItems = items
+      .map((item, index) => {
+        const sourceItem = item && typeof item === 'object' ? item : {};
+        const normalizedItem = normalizeItem(sourceItem, index);
+        if (!normalizedItem) return null;
+        return {
+          ...normalizedItem,
+          id: normalizedItem.id || sourceItem.id || timestamp + index,
+        };
+      })
+      .filter(Boolean);
+
+    if (preparedItems.length === 0) return;
+
+    writeItems([...currentItems, ...preparedItems]);
+    refreshKidsData();
+  };
+
+  const handleKidsTopicsImport = (items) => {
+    appendKidsItems(getKidsTopics, saveKidsTopics, items, (item) => ({
+      ...item,
+      title: item.title || item.german || '',
+      arabicTitle: item.arabicTitle || item.arabic || item.translation || '',
+      icon: item.icon || 'star',
+      color: item.color || 'bg-yellow-100 text-yellow-700',
+    }));
+  };
+
+  const handleKidsVerbsImport = (items) => {
+    appendKidsItems(getKidsVerbs, saveKidsVerbs, items, (item) => ({
+      ...item,
+      infinitive: item.infinitive || item.german || '',
+      arabic: item.arabic || item.translation || '',
+      category: item.category || 'daily',
+      level: item.level || 'medium',
+    }));
+  };
+
+  const handleKidsExercisesImport = (items) => {
+    appendKidsItems(getKidsExercises, saveKidsExercises, items, (item) => {
+      const options = normalizeOptions(item.options);
+      return {
+        ...item,
+        type: item.type || 'choice',
+        question: item.question || '',
+        options: options.length > 0 ? options : ['a', 'b'],
+        correct: item.correct || item.answer || '',
+      };
+    });
   };
 
   return (
@@ -236,13 +312,68 @@ const AdminPanel = () => {
             isOpen={openSections.kids}
             onToggle={() => toggleSection('kids')}
           >
-            <div className="grid gap-6 lg:grid-cols-2">
-              <KidsVocabularyImporter refreshData={() => window.dispatchEvent(new Event('kidsDataUpdated'))} />
-              <KidsConversationAdder />
-            </div>
-            <div className="mt-6">
-              <CustomQuizManager />
-            </div>
+            <Tabs defaultValue="kids-words" className="w-full">
+              <div className="mb-6 overflow-x-auto pb-2">
+                <TabsList className="h-auto min-w-max rounded-2xl bg-yellow-50 p-1">
+                  <TabsTrigger value="kids-words" className="rounded-xl px-4 py-2 font-black data-[state=active]:bg-white data-[state=active]:text-yellow-700">
+                    {'\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}
+                  </TabsTrigger>
+                  <TabsTrigger value="kids-conversations" className="rounded-xl px-4 py-2 font-black data-[state=active]:bg-white data-[state=active]:text-yellow-700">
+                    {'\u0645\u062d\u0627\u062f\u062b\u0627\u062a \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}
+                  </TabsTrigger>
+                  <TabsTrigger value="kids-quizzes" className="rounded-xl px-4 py-2 font-black data-[state=active]:bg-white data-[state=active]:text-yellow-700">
+                    {'\u0623\u0633\u0626\u0644\u0629 \u0648\u0645\u0633\u0627\u0628\u0642\u0627\u062a'}
+                  </TabsTrigger>
+                  <TabsTrigger value="kids-import" className="rounded-xl px-4 py-2 font-black data-[state=active]:bg-white data-[state=active]:text-yellow-700">
+                    {'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0644\u0641\u0627\u062a'}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="kids-words" className="mt-0">
+                <KidsVocabularyImporter refreshData={refreshKidsData} />
+              </TabsContent>
+
+              <TabsContent value="kids-conversations" className="mt-0">
+                <KidsConversationAdder />
+              </TabsContent>
+
+              <TabsContent value="kids-quizzes" className="mt-0">
+                <CustomQuizManager />
+              </TabsContent>
+
+              <TabsContent value="kids-import" className="mt-0">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <div className="rounded-2xl border border-yellow-100 bg-white p-5 shadow-sm">
+                    <h3 className="mb-2 text-lg font-black text-slate-800">{'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0648\u0627\u0636\u064a\u0639 \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}</h3>
+                    <p className="mb-4 text-sm font-bold text-slate-500">{'JSON/CSV \u0644\u0645\u0648\u0627\u0636\u064a\u0639 \u0642\u0633\u0645 \u0627\u0644\u0623\u0637\u0641\u0627\u0644.'}</p>
+                    <KidsFileUploader
+                      onUpload={handleKidsTopicsImport}
+                      label={'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0648\u0627\u0636\u064a\u0639'}
+                      templateData={[{ title: 'Space', arabicTitle: '\u0627\u0644\u0641\u0636\u0627\u0621', icon: 'star', color: 'bg-indigo-100 text-indigo-700' }]}
+                    />
+                  </div>
+                  <div className="rounded-2xl border border-pink-100 bg-white p-5 shadow-sm">
+                    <h3 className="mb-2 text-lg font-black text-slate-800">{'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0623\u0641\u0639\u0627\u0644 \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}</h3>
+                    <p className="mb-4 text-sm font-bold text-slate-500">{'JSON/CSV \u0644\u0623\u0641\u0639\u0627\u0644 \u0642\u0633\u0645 \u0627\u0644\u0623\u0637\u0641\u0627\u0644.'}</p>
+                    <KidsFileUploader
+                      onUpload={handleKidsVerbsImport}
+                      label={'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0623\u0641\u0639\u0627\u0644'}
+                      templateData={[{ infinitive: 'singen', arabic: '\u064a\u063a\u0646\u064a', category: 'creative', level: 'medium' }]}
+                    />
+                  </div>
+                  <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
+                    <h3 className="mb-2 text-lg font-black text-slate-800">{'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u062a\u0645\u0627\u0631\u064a\u0646 \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}</h3>
+                    <p className="mb-4 text-sm font-bold text-slate-500">{'\u0644\u0644\u062a\u0645\u0627\u0631\u064a\u0646 \u0628\u0635\u064a\u063a\u0629 JSON/CSV\u060c \u0648\u0627\u0641\u0635\u0644 \u0627\u0644\u062e\u064a\u0627\u0631\u0627\u062a \u0641\u064a CSV \u0628\u0631\u0645\u0632 |.'}</p>
+                    <KidsFileUploader
+                      onUpload={handleKidsExercisesImport}
+                      label={'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u062a\u0645\u0627\u0631\u064a\u0646'}
+                      templateData={[{ type: 'choice', question: '?', options: 'a|b', correct: 'a' }]}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </AdminSection>
 
           <AdminSection
