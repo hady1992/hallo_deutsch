@@ -5,6 +5,19 @@ import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { migrateVerbData } from '@/utils/verbDataMigration';
+import { nounsDatabase } from '@/data/nounsDatabase';
+import { vocabularyA1 } from '@/data/vocabularyA1';
+import { vocabularyA2 } from '@/data/vocabularyA2';
+import { vocabularyB1 } from '@/data/vocabularyB1';
+import { vocabularyB2 } from '@/data/vocabularyB2';
+import { getContentDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+
+const DEFAULT_REFERENCES = {
+  nouns: nounsDatabase,
+  vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
+  verbs: [],
+  grammar: [],
+};
 
 const DataImportUtility = ({ contentType = 'verbs', className }) => {
   const { toast } = useToast();
@@ -331,24 +344,19 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         // Validate & Migrate
         let validationResult;
         let storageKey;
-        let uniqueField;
 
         if (contentType === 'verbs') {
             validationResult = validateVerbData(content);
             storageKey = 'importedVerbs';
-            uniqueField = 'infinitive';
         } else if (contentType === 'nouns') {
             validationResult = validateNounData(content);
             storageKey = 'importedNouns';
-            uniqueField = 'german';
         } else if (contentType === 'vocabulary') {
             validationResult = validateVocabularyData(content);
             storageKey = 'importedVocabulary';
-            uniqueField = 'german';
         } else if (contentType === 'grammar') {
             validationResult = validateGrammarData(content);
             storageKey = 'importedGrammarRules';
-            uniqueField = 'title';
         } else {
             validationResult = { validItems: content, errors: [] };
         }
@@ -361,27 +369,26 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
         if (validItems.length > 0) {
             const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            
-            const existingMap = new Map(existingData.map(i => [(i[uniqueField] || i.title || i.german).toLowerCase(), i]));
-            
-            validItems.forEach(item => {
-                const key = (item[uniqueField] || item.title || item.german)?.toLowerCase();
-                if (key) existingMap.set(key, item);
-            });
-
-            const mergedData = Array.from(existingMap.values());
+            const referenceData = [
+              ...(DEFAULT_REFERENCES[contentType] || []),
+              ...existingData,
+            ];
+            const dedupKey = (item) => getContentDedupKey(contentType, item);
+            const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(validItems, referenceData, dedupKey);
+            const mergedData = [...existingData, ...newItems];
             localStorage.setItem(storageKey, JSON.stringify(mergedData));
 
             setImportStats({
-                count: validItems.length,
+                count: newItems.length,
+                duplicates,
                 total: content.length,
                 errors: errors.length
             });
 
             if (errors.length === 0) {
                 toast({
-                    title: "تم الاستيراد بنجاح",
-                    description: `تمت إضافة ${validItems.length} عنصر بصيغة حديثة.`,
+                    title: newItems.length > 0 ? "تم الاستيراد بنجاح" : "لم تتم إضافة عناصر جديدة",
+                    description: `تمت إضافة ${newItems.length}، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors.length}.`,
                     className: "bg-green-50 border-green-200 text-green-800"
                 });
                  setTimeout(() => {
@@ -392,9 +399,9 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                 }, 2000);
             } else {
                  toast({
-                    title: "تم الاستيراد جزئياً",
-                    description: `تم قبول ${validItems.length} ورفض ${errors.length}. راجع الأخطاء.`,
-                    variant: "warning"
+                     title: "تم الاستيراد جزئياً",
+                    description: `تمت إضافة ${newItems.length}، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors.length}.`,
+                     variant: "warning"
                 });
             }
         } else {
@@ -499,6 +506,14 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                 </div>
 
                 {/* Validation Errors Box */}
+                {importStats && (
+                    <div className="mb-4 grid gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm font-bold text-slate-700 sm:grid-cols-3">
+                        <span className="rounded-md bg-green-100 px-3 py-2 text-green-700">تمت إضافة: {importStats.count}</span>
+                        <span className="rounded-md bg-yellow-100 px-3 py-2 text-yellow-800">تم تجاهل مكرر: {importStats.duplicates || 0}</span>
+                        <span className="rounded-md bg-red-100 px-3 py-2 text-red-700">أخطاء: {importStats.errors}</span>
+                    </div>
+                )}
+
                 {validationErrors.length > 0 && (
                     <div className="bg-red-50 border border-red-100 rounded-lg p-4 max-h-60 overflow-y-auto">
                         <div className="flex items-center gap-2 text-red-700 font-bold mb-2 sticky top-0 bg-red-50 pb-2">

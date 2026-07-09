@@ -1,5 +1,14 @@
 import { defaultData } from '@/data/defaultData';
 import { supabase } from '@/lib/customSupabaseClient';
+import {
+  dedupeByKey,
+  getExamDedupKey,
+  getExerciseDedupKey,
+  getNounDedupKey,
+  getPlacementQuestionDedupKey,
+  getVerbDedupKey,
+  getVocabularyDedupKey,
+} from '@/utils/contentDedupUtils';
 
 // Local Storage Keys
 const VERBS_KEY = 'importedVerbs';
@@ -37,20 +46,12 @@ const dispatchDataEvents = (specificEventName) => {
 export const mergeDataWithDefaults = (storedData, defaultData, uniqueField = 'id') => {
     const safeStored = Array.isArray(storedData) ? storedData : [];
     const safeDefault = Array.isArray(defaultData) ? defaultData : [];
-    
-    const storedMap = new Map();
-    safeStored.forEach(item => {
-        if (item && item[uniqueField]) storedMap.set(item[uniqueField], item);
-    });
 
-    const mergedMap = new Map();
-    safeDefault.forEach(item => {
-        if (item && item[uniqueField]) mergedMap.set(item[uniqueField], item);
-    });
+    const getKey = typeof uniqueField === 'function'
+      ? uniqueField
+      : (item) => item?.[uniqueField] || item?.id || item?.german || item?.question || '';
 
-    storedMap.forEach((item, key) => mergedMap.set(key, item));
-
-    return Array.from(mergedMap.values());
+    return dedupeByKey([...safeDefault, ...safeStored], getKey);
 };
 
 // --- SUPABASE SYNC LOGIC ---
@@ -167,7 +168,7 @@ export const getImportedExercises = () => {
     const data = localStorage.getItem(EXERCISES_KEY);
     const stored = data ? JSON.parse(data) : [];
     const defaults = (defaultData && defaultData.exercises) ? defaultData.exercises : [];
-    return mergeDataWithDefaults(stored, defaults, 'id');
+    return mergeDataWithDefaults(stored, defaults, getExerciseDedupKey);
   } catch (e) {
     return (defaultData && defaultData.exercises) ? defaultData.exercises : [];
   }
@@ -175,11 +176,11 @@ export const getImportedExercises = () => {
 
 export const saveImportedExercises = (exercises) => {
   try {
-    const sanitized = exercises.map(ex => ({
+    const sanitized = dedupeByKey(exercises.map(ex => ({
       ...ex,
       id: ex.id || `custom_exercise_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       uploadedAt: new Date().toISOString()
-    }));
+    })), getExerciseDedupKey);
     localStorage.setItem(EXERCISES_KEY, JSON.stringify(sanitized));
     dispatchDataEvents('exercisesUpdated');
     
@@ -214,18 +215,18 @@ export const clearImportedExercises = () => {
 export const getImportedVocabulary = () => {
   try {
     const data = localStorage.getItem(VOCABULARY_KEY);
-    return data ? JSON.parse(data) : [];
+    return dedupeByKey(data ? JSON.parse(data) : [], getVocabularyDedupKey);
   } catch (e) { return []; }
 };
 
 export const saveImportedVocabulary = (vocabulary) => {
   try {
-    const sanitized = vocabulary.map(item => ({
+    const sanitized = dedupeByKey(vocabulary.map(item => ({
       ...item,
       id: item.id || `vocab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       level: item.level || 'A1',
       uploadedAt: new Date().toISOString()
-    }));
+    })), getVocabularyDedupKey);
     localStorage.setItem(VOCABULARY_KEY, JSON.stringify(sanitized));
     dispatchDataEvents('vocabularyUpdated');
     
@@ -249,7 +250,7 @@ export const getImportedExams = (level) => {
         const data = localStorage.getItem(key);
         const stored = data ? JSON.parse(data) : [];
         const defaults = (defaultData && defaultData.exams) ? defaultData.exams.filter(e => e.level === level) : [];
-        return mergeDataWithDefaults(stored, defaults, 'id');
+        return mergeDataWithDefaults(stored, defaults, getExamDedupKey);
     } catch (e) {
          return (defaultData && defaultData.exams) ? defaultData.exams.filter(e => e.level === level) : [];
     }
@@ -258,11 +259,11 @@ export const getImportedExams = (level) => {
 export const saveImportedExams = (level, exams) => {
     try {
         const key = `${CUSTOM_EXAMS_KEY_PREFIX}${level}`;
-        const sanitized = exams.map(ex => ({
+        const sanitized = dedupeByKey(exams.map(ex => ({
             ...ex,
             id: ex.id || `custom_exam_${level}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             uploadedAt: new Date().toISOString()
-        }));
+        })), getExamDedupKey);
         localStorage.setItem(key, JSON.stringify(sanitized));
         dispatchDataEvents(`examsUpdated_${level}`);
         
@@ -285,7 +286,7 @@ export const getCustomPlacementTestQuestions = () => {
         const data = localStorage.getItem(CUSTOM_PLACEMENT_TEST_KEY);
         const stored = data ? JSON.parse(data) : [];
         const defaults = (defaultData && defaultData.placementTest) ? defaultData.placementTest : [];
-        return mergeDataWithDefaults(stored, defaults, 'id');
+        return mergeDataWithDefaults(stored, defaults, getPlacementQuestionDedupKey);
     } catch (e) {
         return (defaultData && defaultData.placementTest) ? defaultData.placementTest : [];
     }
@@ -293,11 +294,11 @@ export const getCustomPlacementTestQuestions = () => {
 
 export const saveCustomPlacementTestQuestions = (questions) => {
     try {
-        const sanitized = questions.map(q => ({
+        const sanitized = dedupeByKey(questions.map(q => ({
             ...q,
             id: q.id || `custom_placement_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             uploadedAt: new Date().toISOString()
-        }));
+        })), getPlacementQuestionDedupKey);
         localStorage.setItem(CUSTOM_PLACEMENT_TEST_KEY, JSON.stringify(sanitized));
         dispatchDataEvents('placementTestsUpdated');
         
@@ -318,10 +319,10 @@ export const deleteCustomPlacementTestQuestion = (id) => {
 
 // Verbs
 export const getImportedVerbs = () => {
-    try { return JSON.parse(localStorage.getItem(VERBS_KEY) || '[]'); } catch { return []; }
+    try { return dedupeByKey(JSON.parse(localStorage.getItem(VERBS_KEY) || '[]'), getVerbDedupKey); } catch { return []; }
 };
 export const saveImportedVerbs = (verbs) => {
-    localStorage.setItem(VERBS_KEY, JSON.stringify(verbs));
+    localStorage.setItem(VERBS_KEY, JSON.stringify(dedupeByKey(verbs, getVerbDedupKey)));
     dispatchDataEvents('verbsUpdated');
     return true;
 };
@@ -338,10 +339,10 @@ export const clearImportedVerbs = () => {
 
 // Nouns
 export const getImportedNouns = () => {
-    try { return JSON.parse(localStorage.getItem(NOUNS_KEY) || '[]'); } catch { return []; }
+    try { return dedupeByKey(JSON.parse(localStorage.getItem(NOUNS_KEY) || '[]'), getNounDedupKey); } catch { return []; }
 };
 export const saveImportedNouns = (nouns) => {
-    localStorage.setItem(NOUNS_KEY, JSON.stringify(nouns));
+    localStorage.setItem(NOUNS_KEY, JSON.stringify(dedupeByKey(nouns, getNounDedupKey)));
     dispatchDataEvents('nounsUpdated');
     return true;
 };
@@ -412,8 +413,8 @@ export const deleteImportedLesson = (id) => {
 };
 
 // Kids Data
-export const getKidsVocabulary = () => { try { return JSON.parse(localStorage.getItem(KIDS_VOCABULARY_KEY) || '[]'); } catch { return []; } };
-export const saveKidsVocabulary = (data) => { localStorage.setItem(KIDS_VOCABULARY_KEY, JSON.stringify(data)); dispatchDataEvents('kidsVocabularyUpdated'); return true; };
+export const getKidsVocabulary = () => { try { return dedupeByKey(JSON.parse(localStorage.getItem(KIDS_VOCABULARY_KEY) || '[]'), getVocabularyDedupKey); } catch { return []; } };
+export const saveKidsVocabulary = (data) => { localStorage.setItem(KIDS_VOCABULARY_KEY, JSON.stringify(dedupeByKey(data, getVocabularyDedupKey))); dispatchDataEvents('kidsVocabularyUpdated'); return true; };
 
 export const getKidsVerbs = () => { try { return JSON.parse(localStorage.getItem(KIDS_VERBS_KEY) || '[]'); } catch { return []; } };
 export const saveKidsVerbs = (data) => { localStorage.setItem(KIDS_VERBS_KEY, JSON.stringify(data)); dispatchDataEvents('kidsVerbsUpdated'); return true; };

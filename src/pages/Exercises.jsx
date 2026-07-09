@@ -11,6 +11,7 @@ import AudioButton from '@/components/AudioButton';
 import ExerciseResults from '@/components/ExerciseResults';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
+import { dedupeByKey, getExerciseDedupKey } from '@/utils/contentDedupUtils';
 
 const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20, 'all'];
 
@@ -63,7 +64,10 @@ const Exercises = () => {
   }, []);
 
   // القائمة الكاملة: التمارين الثابتة + التمارين المستوردة المُطبَّعة
-  const allExercises = useMemo(() => [...exercisesData, ...importedExercises], [importedExercises]);
+  const allExercises = useMemo(
+    () => dedupeByKey([...exercisesData, ...importedExercises], getExerciseDedupKey),
+    [importedExercises]
+  );
 
   // Group exercises by level for display stats
   const getLevelCount = (level) => allExercises.filter(ex => ex.level === level).length;

@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { defaultData } from '@/data/defaultData';
+import {
+  dedupeByKey,
+  getExerciseDedupKey,
+  getPlacementQuestionDedupKey,
+} from '@/utils/contentDedupUtils';
 
 // Storage Keys
 const LOCAL_STORAGE_KEYS = {
@@ -9,7 +14,7 @@ const LOCAL_STORAGE_KEYS = {
 
 // Helper: Merge arrays by ID
 // Strategy: Cloud > Local > Default
-const mergeData = (local, remote, defaults = []) => {
+const mergeData = (local, remote, defaults = [], getKey = (item) => item?.id || item?.question || '') => {
   const map = new Map();
   
   // 1. Start with defaults
@@ -17,7 +22,7 @@ const mergeData = (local, remote, defaults = []) => {
       defaults.forEach(item => {
         if (item && (item.id || item.question)) {
           // Use ID if available, otherwise hash or question text as key (fallback)
-          const key = item.id || item.question;
+          const key = getKey(item) || item.id || item.question;
           map.set(key, { ...item, source: 'default' });
         }
       });
@@ -26,8 +31,9 @@ const mergeData = (local, remote, defaults = []) => {
   // 2. Apply LocalStorage (overrides defaults)
   if (Array.isArray(local)) {
       local.forEach(item => {
-        if (item && item.id) {
-          map.set(item.id, { ...item, source: 'local' });
+        if (item && (item.id || item.question)) {
+          const key = getKey(item) || item.id || item.question;
+          if (!map.has(key)) map.set(key, { ...item, source: 'local' });
         }
       });
   }
@@ -35,7 +41,7 @@ const mergeData = (local, remote, defaults = []) => {
   // 3. Apply Remote (overrides local)
   if (Array.isArray(remote)) {
       remote.forEach(item => {
-        if (item && item.id) {
+        if (item && (item.id || item.content?.question)) {
           // If remote item has content wrapper (common in Supabase jsonb patterns), unwrap it
           // But ensure we keep the top-level ID from the DB
           const content = item.content || item;
@@ -45,12 +51,13 @@ const mergeData = (local, remote, defaults = []) => {
             level: item.level || content.level,
             source: 'cloud' 
           };
-          map.set(item.id, merged);
+          const key = getKey(merged) || item.id;
+          if (!map.has(key)) map.set(key, merged);
         }
       });
   }
 
-  return Array.from(map.values());
+  return dedupeByKey(Array.from(map.values()), getKey);
 };
 
 // --- Placement Tests ---
@@ -76,7 +83,7 @@ export const getPersistentPlacementTestQuestions = async () => {
     }
 
     // 3. Merge
-    const merged = mergeData(localData, remoteData, defaultData.placementTest || []);
+    const merged = mergeData(localData, remoteData, defaultData.placementTest || [], getPlacementQuestionDedupKey);
     
     // 4. Update Local Cache with "user added" items to keep localStorage in sync for offline
     // We filter out 'default' so we don't bloat LS with hardcoded data
@@ -101,7 +108,8 @@ export const savePlacementTestQuestions = async (questions) => {
     console.log(`Saving ${questions.length} placement questions...`);
     
     // 1. Save to LocalStorage immediately (Safety)
-    localStorage.setItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS, JSON.stringify(questions));
+    const dedupedQuestions = dedupeByKey(questions, getPlacementQuestionDedupKey);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS, JSON.stringify(dedupedQuestions));
 
     // 2. Sync to Supabase
     const { data: { session } } = await supabase.auth.getSession();
@@ -112,7 +120,7 @@ export const savePlacementTestQuestions = async (questions) => {
     // Filter: You might want to upsert EVERYTHING from the "user added" list to ensure sync
     // But typically we only need to upsert items that are modified. 
     // For simplicity and robustness: Upsert all.
-    const payload = questions.map(q => ({
+    const payload = dedupedQuestions.map(q => ({
       id: q.id, // Supabase expects UUID. If your ID is not UUID, this might fail unless column type is text.
                   // Ideally, ensure IDs generated are UUIDs.
       level: q.level || 'A1',
@@ -151,7 +159,7 @@ export const getPersistentExercises = async () => {
         console.warn('Supabase fetch warning (exercises):', dbError.message);
     }
 
-    const merged = mergeData(localData, remoteData, defaultData.exercises || []);
+    const merged = mergeData(localData, remoteData, defaultData.exercises || [], getExerciseDedupKey);
     
     // Update cache
     const userAdded = merged.filter(i => i.source !== 'default');
@@ -172,12 +180,13 @@ export const getPersistentExercises = async () => {
 export const saveExercises = async (exercises) => {
   try {
     console.log(`Saving ${exercises.length} exercises...`);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.EXERCISES, JSON.stringify(exercises));
+    const dedupedExercises = dedupeByKey(exercises, getExerciseDedupKey);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.EXERCISES, JSON.stringify(dedupedExercises));
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return { success: true, warning: 'Saved locally only' };
 
-    const payload = exercises.map(ex => ({
+    const payload = dedupedExercises.map(ex => ({
       id: ex.id,
       level: ex.level || 'A1',
       content: ex,

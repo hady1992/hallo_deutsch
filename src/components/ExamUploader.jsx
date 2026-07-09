@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getImportedExams, saveImportedExams, deleteImportedExam } from '@/utils/storageManager';
+import { getExamDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا (بدل أي نص تقني إنجليزي طويل).
 // التفاصيل التقنية الكاملة تُسجَّل بالـ Console فقط عبر console.error.
@@ -254,15 +255,25 @@ question,optionA,optionB,optionC,optionD,correctAnswer
       if (!byLevel[lvl]) byLevel[lvl] = [];
       byLevel[lvl].push(exam);
     });
+    let duplicateExams = 0;
+    let addedExams = 0;
     Object.entries(byLevel).forEach(([lvl, newExams]) => {
       const current = getImportedExams(lvl);
-      saveImportedExams(lvl, [...current, ...newExams]);
+      const { unique, skipped } = splitNewUniqueItems(newExams, current, getExamDedupKey);
+      duplicateExams += skipped;
+      addedExams += unique.length;
+      if (unique.length > 0) saveImportedExams(lvl, [...current, ...unique]);
     });
+
+    if (addedExams === 0 && skippedExams === 0) {
+      throw new Error('كل نماذج الامتحان موجودة مسبقًا.');
+    }
 
     return {
       successCount: totalQuestions,
       skipped: skippedExams,
-      examsAdded: validExams.length,
+      duplicates: duplicateExams,
+      examsAdded: addedExams,
     };
   };
 
@@ -277,7 +288,7 @@ question,optionA,optionB,optionC,optionD,correctAnswer
       const isJson = file.name.toLowerCase().endsWith('.json');
       const result = isJson ? await processJsonFile(file) : await processCsvFile(file);
 
-      setStats({ success: result.successCount, skipped: result.skipped });
+      setStats({ success: result.successCount, skipped: result.skipped, duplicates: result.duplicates || 0 });
       toast({
         title: "تم الاستيراد",
         description: result.examsAdded > 1
@@ -369,6 +380,11 @@ question,optionA,optionB,optionC,optionD,correctAnswer
              {stats.skipped > 0 && (
                 <span className="text-amber-600 flex items-center gap-1 mr-2">
                     <AlertTriangle size={14} /> تم تخطي {stats.skipped} عنصر ناقص.
+                </span>
+             )}
+             {stats.duplicates > 0 && (
+                <span className="text-yellow-700 flex items-center gap-1 mr-2">
+                    <AlertTriangle size={14} /> مكرر تم تجاهله: {stats.duplicates}
                 </span>
              )}
          </div>

@@ -5,6 +5,7 @@ import {
   getImportedVocabulary,
   getKidsVocabulary,
 } from '@/utils/storageManager';
+import { dedupeByKey, getArticleHuntNounDedupKey } from '@/utils/contentDedupUtils';
 
 export const ARTICLE_OPTIONS = ['der', 'die', 'das'];
 
@@ -123,23 +124,16 @@ export const getKidNounsByTopic = () => {
     { name: 'vocabulary-local', items: safeRead(getImportedVocabulary) },
   ];
 
-  const merged = new Map();
+  const merged = [];
   sources.forEach(({ name, items }) => {
     (Array.isArray(items) ? items : []).forEach((item) => {
       const normalized = normalizeNounItem(item, name);
       if (!normalized) return;
-      const key = `${normalized.article}-${normalized.word.toLowerCase()}`;
-      const existing = merged.get(key);
-      merged.set(key, {
-        ...existing,
-        ...normalized,
-        translation: normalized.translation || existing?.translation || '',
-        topic: normalized.topic || existing?.topic || 'عام',
-      });
+      merged.push(normalized);
     });
   });
 
-  return Array.from(merged.values()).sort((a, b) => (
+  return dedupeByKey(merged, getArticleHuntNounDedupKey).sort((a, b) => (
     getTopicSortIndex(a.topic) - getTopicSortIndex(b.topic) ||
     a.topic.localeCompare(b.topic, 'ar') ||
     a.word.localeCompare(b.word, 'de')

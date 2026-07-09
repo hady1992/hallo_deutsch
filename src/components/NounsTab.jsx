@@ -1,15 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Trash2, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
 import AudioButton from '@/components/AudioButton';
-import { getImportedNouns, deleteImportedNoun, clearImportedNouns, mergeWithDefaults } from '@/utils/storageManager';
+import { getImportedNouns, mergeWithDefaults } from '@/utils/storageManager';
 import { nounsDatabase } from '@/data/nounsDatabase';
+import { getNounDedupKey } from '@/utils/contentDedupUtils';
 
 const NounsTab = () => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGender, setSelectedGender] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
@@ -24,7 +23,7 @@ const NounsTab = () => {
 
   const allNouns = useMemo(() => {
     const defaults = Array.isArray(nounsDatabase) ? nounsDatabase : [];
-    return mergeWithDefaults(importedNouns, defaults, 'noun');
+    return mergeWithDefaults(importedNouns, defaults, getNounDedupKey);
   }, [importedNouns]);
 
   const filteredNouns = allNouns.filter(noun => {
@@ -45,21 +44,6 @@ const NounsTab = () => {
 
     return matchSearch && matchGender;
   });
-
-  const handleDelete = (e, id) => {
-    e.stopPropagation();
-    if(window.confirm("حذف هذا الاسم؟")) {
-        deleteImportedNoun(id);
-        toast({ title: "تم الحذف", description: "تم حذف الاسم بنجاح", className: "bg-red-50 border-red-200 text-red-800" });
-    }
-  };
-
-  const handleClearAll = () => {
-    if(window.confirm("هل أنت متأكد من حذف جميع الأسماء المستوردة؟")) {
-        clearImportedNouns();
-        toast({ title: "تم مسح الكل", className: "bg-red-50 border-red-200 text-red-800" });
-    }
-  };
 
   const getArticleColor = (article) => {
     switch(article?.toLowerCase()) {
@@ -98,11 +82,6 @@ const NounsTab = () => {
                     </Button>
                 ))}
             </div>
-            {importedNouns.length > 0 && (
-                <Button variant="destructive" size="icon" onClick={handleClearAll} title="مسح الكل">
-                    <Trash2 size={16} />
-                </Button>
-            )}
         </div>
       </div>
 
@@ -126,16 +105,6 @@ const NounsTab = () => {
                     </Badge>
                     <div className="flex gap-1">
                         <AudioButton text={`${article || ''} ${word}`} size={16} />
-                        {noun.isImported && (
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-6 w-6 text-red-300 hover:text-red-500 hover:bg-red-50"
-                                onClick={(e) => handleDelete(e, uniqueId)}
-                            >
-                                <Trash2 size={14} />
-                            </Button>
-                        )}
                     </div>
                   </div>
                   

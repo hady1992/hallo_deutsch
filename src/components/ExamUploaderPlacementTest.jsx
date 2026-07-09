@@ -9,6 +9,7 @@ import {
     savePlacementTestQuestions, 
     getPersistentPlacementTestQuestions 
 } from '@/utils/persistentDataStorage';
+import { getPlacementQuestionDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة تُسجَّل
 // بالـ Console فقط عبر console.error.
@@ -263,20 +264,34 @@ const ExamUploaderPlacementTest = () => {
       if (validQuestions.length === 0) throw new Error(FRIENDLY_ERRORS.NO_VALID_ITEMS);
 
       const current = await getPersistentPlacementTestQuestions();
+      const { unique, skipped: duplicates } = splitNewUniqueItems(
+        validQuestions,
+        current,
+        getPlacementQuestionDedupKey
+      );
+
+      if (unique.length === 0 && errors === 0) {
+        setImportStats({ success: 0, duplicates, errors });
+        toast({
+          title: "لم تتم إضافة أسئلة جديدة",
+          description: `تم تجاهل مكرر: ${duplicates}.`,
+          variant: "warning"
+        });
+        return;
+      }
+
       const customOnly = current.filter(q => q.source !== 'default');
-      const updatedList = [...customOnly, ...validQuestions];
+      const updatedList = [...customOnly, ...unique];
       const result = await savePlacementTestQuestions(updatedList);
 
-      setImportStats({ success: validQuestions.length, errors });
+      setImportStats({ success: unique.length, duplicates, errors });
       loadData();
       window.dispatchEvent(new Event('placementTestsUpdated'));
 
       if (result.success) {
         toast({
           title: "تم الاستيراد بنجاح",
-          description: errors > 0
-            ? `${FRIENDLY_ERRORS.PARTIAL_SKIPPED} (تمت إضافة ${validQuestions.length} سؤال، وتجاهل ${errors}).`
-            : `تمت إضافة ${validQuestions.length} سؤال ومزامنتها مع السحابة.`,
+          description: `تمت إضافة ${unique.length} سؤال، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors}.`,
           className: "bg-green-50 border-green-200 text-green-800"
         });
       } else {
@@ -356,8 +371,13 @@ const ExamUploaderPlacementTest = () => {
               {importStats && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-100 rounded-lg flex items-center justify-between text-sm flex-wrap gap-2">
                       <span className="text-green-800 flex items-center gap-2">
-                          <Check size={16} /> تم إضافة {importStats.success} سؤال بنجاح
+                          <Check size={16} /> تم إضافة {importStats.success} سؤال
                       </span>
+                      {importStats.duplicates > 0 && (
+                          <span className="text-yellow-700 flex items-center gap-2">
+                              <AlertTriangle size={16} /> مكرر تم تجاهله: {importStats.duplicates}
+                          </span>
+                      )}
                       {importStats.errors > 0 && (
                           <span className="text-amber-600 flex items-center gap-2">
                               <AlertTriangle size={16} /> {FRIENDLY_ERRORS.PARTIAL_SKIPPED} ({importStats.errors} عنصر)

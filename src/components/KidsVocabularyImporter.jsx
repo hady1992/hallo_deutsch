@@ -6,9 +6,10 @@ import { useToast } from '@/components/ui/use-toast';
 import KidsFileUploader from './KidsFileUploader';
 import { 
   getKidsVocabulary, 
-  saveKidsVocabulary, 
-  deleteImportedVocabulary 
+  saveKidsVocabulary
 } from '@/utils/storageManager';
+import { kidsVocabularyData } from '@/data/kidsVocabularyData';
+import { getVocabularyDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 const KidsVocabularyImporter = ({ refreshData }) => {
   const [importedItems, setImportedItems] = useState(getKidsVocabulary().filter(i => i.id.toString().length > 10)); // Assuming generated IDs are long timestamps
@@ -34,10 +35,15 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     }
 
     const currentVocab = getKidsVocabulary();
-    const newItems = processedData.map((item, idx) => ({
+    const preparedItems = processedData.map((item, idx) => ({
       ...item,
       id: Date.now() + idx
     }));
+    const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(
+      preparedItems,
+      [...kidsVocabularyData, ...currentVocab],
+      getVocabularyDedupKey
+    );
 
     const updatedVocab = [...currentVocab, ...newItems];
     saveKidsVocabulary(updatedVocab);
@@ -46,8 +52,8 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     if(refreshData) refreshData();
 
     toast({
-      title: "تم الاستيراد بنجاح! 🎉",
-      description: `تمت إضافة ${newItems.length} كلمة جديدة.`,
+      title: newItems.length > 0 ? "تم الاستيراد بنجاح! 🎉" : "لم تتم إضافة كلمات جديدة",
+      description: `تمت إضافة ${newItems.length} كلمة، وتم تجاهل مكرر: ${duplicates}.`,
       className: "bg-green-50 text-green-800"
     });
   };

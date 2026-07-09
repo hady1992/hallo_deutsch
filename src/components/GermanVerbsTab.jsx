@@ -29,8 +29,8 @@ const GermanVerbsTab = () => {
       return (
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
                <FileUp className="h-16 w-16 text-slate-200 mb-6" />
-               <h3 className="text-xl font-bold text-slate-800 mb-2">لا توجد أفعال مستوردة</h3>
-               <p className="text-slate-500 mb-6 max-w-lg">لم يتم العثور على أي أفعال في قاعدة البيانات المحلية. يرجى الذهاب للوحة التحكم واستيراد ملف الأفعال.</p>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">لا توجد أفعال متاحة</h3>
+                <p className="text-slate-500 mb-6 max-w-lg">لم يتم العثور على أفعال جاهزة للعرض في هذا القسم حاليًا.</p>
           </div>
       );
   }

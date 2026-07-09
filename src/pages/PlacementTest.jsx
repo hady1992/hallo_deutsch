@@ -8,6 +8,7 @@ import { placementTestQuestions } from '@/data/placementTestQuestions';
 import { getPersistentPlacementTestQuestions } from '@/utils/persistentDataStorage';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
+import { dedupeByKey, getPlacementQuestionDedupKey } from '@/utils/contentDedupUtils';
 
 const PlacementTest = () => {
   const [started, setStarted] = useState(false);
@@ -37,7 +38,7 @@ const PlacementTest = () => {
   }, []);
 
   const questions = useMemo(
-    () => [...(placementTestQuestions || []), ...importedQuestions],
+    () => dedupeByKey([...(placementTestQuestions || []), ...importedQuestions], getPlacementQuestionDedupKey),
     [importedQuestions]
   );
 
@@ -291,7 +292,7 @@ const PlacementTest = () => {
                 </div>
                 <h1 className="text-4xl font-black mb-4">اختبار تحديد المستوى</h1>
                 <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-                    قيم مهاراتك في اللغة الألمانية من خلال 40 سؤالاً تغطي القواعد والمفردات والفهم القرائي من A1 إلى B2.
+                    40 سؤالًا تغطي القواعد والمفردات والفهم القرائي
                 </p>
             </div>
             

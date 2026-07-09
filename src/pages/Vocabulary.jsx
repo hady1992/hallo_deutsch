@@ -16,6 +16,7 @@ import NounsTab from '@/components/NounsTab';
 import { getImportedVocabulary, mergeWithDefaults, getImportedGrammarRules } from '@/utils/storageManager';
 import { Badge } from '@/components/ui/badge';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { getVocabularyDedupKey } from '@/utils/contentDedupUtils';
 
 // Grammar Rules View (Internal Component)
 const GrammarRulesView = () => {
@@ -105,7 +106,7 @@ function Vocabulary() {
     
     // Merge: Cloud + Imported + Defaults
     // Use mergeWithDefaults for intelligent deduplication based on German word
-    return mergeWithDefaults([...importedWithFlag, ...cloudWithFlag], defaultVocab, 'german');
+    return mergeWithDefaults([...importedWithFlag, ...cloudWithFlag], defaultVocab, getVocabularyDedupKey);
   }, [importedVocabulary, supabaseVocabulary]);
 
   const categories = useMemo(() => {

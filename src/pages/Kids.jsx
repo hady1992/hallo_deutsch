@@ -2,33 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Smile, Book, Mic, Gamepad2, Trophy, BookOpen, MessageCircle, PenTool, BrainCircuit, PlaySquare, Settings2, Dumbbell, Star } from 'lucide-react';
+import { Smile, Book, Gamepad2, Trophy, BookOpen, MessageCircle, Dumbbell, Star } from 'lucide-react';
 import KidsTopics from '@/components/KidsTopics';
 import KidsVocabulary from '@/components/KidsVocabulary';
 import KidsVerbs from '@/components/KidsVerbs';
 import KidsSentences from '@/components/KidsSentences';
 import KidsExercises from '@/components/KidsExercises';
-import KidsConversationAdder from '@/components/KidsConversationAdder';
 import KidsGamesAndQuestions from '@/components/KidsGamesAndQuestions';
 import KidsQuizzes from '@/components/KidsQuizzes';
-import KidsVocabularyImporter from '@/components/KidsVocabularyImporter';
-import CustomQuizManager from '@/components/CustomQuizManager';
 import { kidsConversationsDatabase } from '@/data/kidsConversationsDatabase';
 import { getKidsProgress } from '@/utils/storageManager';
 
 const Kids = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("topics");
   const [conversationsCount, setConversationsCount] = useState(0);
   const [completedExercises, setCompletedExercises] = useState(0);
 
   useEffect(() => {
-    // Check admin status
-    const checkAdmin = () => {
-        const storedAdmin = localStorage.getItem('isAdmin') === 'true';
-        setIsAdmin(storedAdmin);
-    };
-    checkAdmin();
     setConversationsCount(kidsConversationsDatabase.length);
 
     // Load child's progress (stars) and keep it in sync as exercises are completed
@@ -50,14 +40,7 @@ const Kids = () => {
     { id: 'exercises', label: 'تمارين', icon: <Dumbbell size={18} />, color: 'data-[state=active]:bg-teal-500' },
     { id: 'games', label: 'ألعاب', icon: <Gamepad2 size={18} />, color: 'data-[state=active]:bg-purple-500' },
     { id: 'quizzes', label: 'مسابقات', icon: <Trophy size={18} />, color: 'data-[state=active]:bg-green-500' },
-    { id: 'custom-quizzes', label: 'مسابقات مخصصة', icon: <Settings2 size={18} />, color: 'data-[state=active]:bg-indigo-500' },
   ];
-
-  // "إضافة محادثة" أداة تأليف محتوى موجهة للمعلم/الإدارة فقط، وليست لعبة للطفل
-  if (isAdmin) {
-    tabs.push({ id: 'manual-conv', label: 'إضافة', icon: <PenTool size={18} />, color: 'data-[state=active]:bg-cyan-600' });
-    tabs.push({ id: 'import', label: 'استيراد', icon: <BrainCircuit size={18} />, color: 'data-[state=active]:bg-slate-700' });
-  }
 
   return (
     <>
@@ -120,30 +103,24 @@ const Kids = () => {
                 {/* Content Areas */}
                 <div className="min-h-[400px]">
                     <TabsContent value="topics">
-                        <KidsTopics isAdmin={isAdmin} />
+                        <KidsTopics isAdmin={false} />
                     </TabsContent>
                     
                     <TabsContent value="vocab">
-                        <KidsVocabulary isAdmin={isAdmin} onSwitchToImport={() => setActiveTab('import')} />
+                        <KidsVocabulary isAdmin={false} />
                     </TabsContent>
 
                     <TabsContent value="verbs">
-                        <KidsVerbs isAdmin={isAdmin} />
+                        <KidsVerbs isAdmin={false} />
                     </TabsContent>
 
                     <TabsContent value="sentences">
-                        <KidsSentences isAdmin={isAdmin} />
+                        <KidsSentences isAdmin={false} />
                     </TabsContent>
 
                     <TabsContent value="exercises">
-                        <KidsExercises isAdmin={isAdmin} />
+                        <KidsExercises isAdmin={false} />
                     </TabsContent>
-
-                    {isAdmin && (
-                        <TabsContent value="manual-conv">
-                            <KidsConversationAdder />
-                        </TabsContent>
-                    )}
 
                     <TabsContent value="games">
                         <KidsGamesAndQuestions />
@@ -152,18 +129,6 @@ const Kids = () => {
                     <TabsContent value="quizzes">
                         <KidsQuizzes />
                     </TabsContent>
-
-                    <TabsContent value="custom-quizzes">
-                        <CustomQuizManager />
-                    </TabsContent>
-
-                    {isAdmin && (
-                        <TabsContent value="import">
-                            <KidsVocabularyImporter refreshData={() => {
-                                window.dispatchEvent(new Event('kidsDataUpdated'));
-                            }} />
-                        </TabsContent>
-                    )}
                 </div>
             </Tabs>
         </div>

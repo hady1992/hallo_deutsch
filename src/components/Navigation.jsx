@@ -3,20 +3,16 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, PenTool, Shield, ShieldCheck, Baby, Trophy, Dumbbell, BookOpen, Layers } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 
 function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdmin = () => setIsAdmin(localStorage.getItem('isAdmin') === 'true');
-    checkAdmin();
-    window.addEventListener('storage', checkAdmin);
-    return () => window.removeEventListener('storage', checkAdmin);
-  }, [location.pathname]);
+  const { user } = useAuth();
+  const isAdmin = isAuthorizedAdminEmail(user?.email);
 
   const navItems = [
     { path: '/', label: 'الرئيسية' },

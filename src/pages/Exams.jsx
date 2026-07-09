@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Clock, BarChart2, PlayCircle, ShieldCheck, Loader2, AlertCircle } from 'lucide-react';
+import { Clock, BarChart2, PlayCircle, Loader2, AlertCircle } from 'lucide-react';
 import { examsA1 } from '@/data/examsA1';
 import { examsA2 } from '@/data/examsA2';
 import { examsB1 } from '@/data/examsB1';
@@ -11,7 +11,6 @@ import { examsB2 } from '@/data/examsB2';
 import ExamComponent from '@/components/ExamComponent';
 import ExamResults from '@/components/ExamResults';
 import ExamReview from '@/components/ExamReview';
-import ExamUploader from '@/components/ExamUploader';
 import { getImportedExams } from '@/utils/storageManager';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 
@@ -28,7 +27,6 @@ function Exams() {
   const [examState, setExamState] = useState('list');
   const [results, setResults] = useState(null);
   const [userHistory, setUserHistory] = useState({});
-  const [isAdmin, setIsAdmin] = useState(false);
   const [importedExams, setImportedExams] = useState({ A1: [], A2: [], B1: [], B2: [] });
   const [supabaseExams, setSupabaseExams] = useState({ A1: [], A2: [], B1: [], B2: [] });
   const [cloudError, setCloudError] = useState(false);
@@ -36,8 +34,6 @@ function Exams() {
   const { fetchExams, loading: cloudLoading } = useSupabaseData();
 
   useEffect(() => {
-    setIsAdmin(localStorage.getItem('isAdmin') === 'true');
-
     // History
     const savedHistory = localStorage.getItem('exam_results');
     if (savedHistory) {
@@ -148,11 +144,6 @@ function Exams() {
                         <span>تعذر تحميل الامتحانات حاليًا. يرجى المحاولة لاحقًا أو التحقق من الاتصال.</span>
                     </div>
                 )}
-                {isAdmin && (
-                  <div className="absolute top-0 right-0 hidden md:flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
-                    <ShieldCheck size={14} /> Admin Mode
-                  </div>
-                )}
               </div>
 
               <Tabs defaultValue="A1" value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -217,12 +208,6 @@ function Exams() {
                         );
                       })}
                     </div>
-
-                    {isAdmin && (
-                        <div className="max-w-4xl mx-auto pt-8">
-                            <ExamUploader level={level} />
-                        </div>
-                    )}
                   </TabsContent>
                 ))}
               </Tabs>

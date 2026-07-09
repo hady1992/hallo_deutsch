@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, BookOpen, ChevronDown, ChevronUp, Trash2, FileUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, BookOpen, ChevronDown, ChevronUp, FileUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
-import { getImportedVerbs, deleteImportedVerb, clearImportedVerbs } from '@/utils/storageManager';
+import { getImportedVerbs } from '@/utils/storageManager';
+import { dedupeByKey, getVerbDedupKey } from '@/utils/contentDedupUtils';
 
 const VerbsTabExtended = () => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [expandedVerb, setExpandedVerb] = useState(null);
@@ -21,7 +19,7 @@ const VerbsTabExtended = () => {
   }, []);
 
   // Use only imported verbs
-  const allVerbs = importedVerbs;
+  const allVerbs = useMemo(() => dedupeByKey(importedVerbs, getVerbDedupKey), [importedVerbs]);
 
   const verbTypes = ['All', 'Regular', 'Strong', 'Irregular', 'Modal', 'Auxiliary', 'Separable'];
 
@@ -31,29 +29,6 @@ const VerbsTabExtended = () => {
     const matchesFilter = filterType === 'All' || (verb.type && verb.type.toLowerCase() === filterType.toLowerCase());
     return matchesSearch && matchesFilter;
   });
-
-  const handleDelete = (e, id) => {
-    e.stopPropagation();
-    if(window.confirm("هل أنت متأكد من حذف هذا الفعل؟")) {
-        deleteImportedVerb(id);
-        toast({
-            title: "تم الحذف",
-            description: "تم حذف الفعل بنجاح",
-            className: "bg-red-50 border-red-200 text-red-800"
-        });
-    }
-  };
-
-  const handleClearAll = () => {
-    if(window.confirm("تحذير: هل أنت متأكد من حذف جميع الأفعال المستوردة؟")) {
-        clearImportedVerbs();
-        toast({
-            title: "تم مسح الكل",
-            description: "تم حذف جميع الأفعال المستوردة بنجاح",
-            className: "bg-red-50 border-red-200 text-red-800"
-        });
-    }
-  };
 
   const getTypeColor = (type) => {
     switch (type?.toLowerCase()) {
@@ -93,11 +68,6 @@ const VerbsTabExtended = () => {
                 className="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
                 />
             </div>
-            {importedVerbs.length > 0 && (
-                <Button variant="destructive" onClick={handleClearAll} className="gap-2">
-                    <Trash2 size={16} /> مسح المستورد
-                </Button>
-            )}
           </div>
         </div>
 
@@ -153,15 +123,7 @@ const VerbsTabExtended = () => {
                 </div>
                 
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                   <Button 
-                     variant="ghost" 
-                     size="icon" 
-                     className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                     onClick={(e) => handleDelete(e, verb.id)}
-                   >
-                     <Trash2 size={18} />
-                   </Button>
-                   {expandedVerb === verb.id ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
+                    {expandedVerb === verb.id ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
                 </div>
               </div>
 
@@ -241,8 +203,7 @@ const VerbsTabExtended = () => {
                  <>
                     <FileUp className="mx-auto h-12 w-12 mb-4 opacity-20" />
                     <h3 className="text-lg font-bold text-slate-600 mb-2">لا توجد أفعال مستوردة</h3>
-                    <p className="max-w-md mx-auto mb-4">لم يتم استيراد أي أفعال بعد. يرجى استيراد ملف CSV أو JSON يحتوي على الأفعال من لوحة التحكم.</p>
-                    <Button variant="outline" onClick={() => window.location.href = '/admin'}>الذهاب للوحة التحكم</Button>
+                    <p className="mx-auto mb-4 max-w-md">لا توجد أفعال متاحة حاليًا في هذا القسم.</p>
                  </>
              ) : (
                  <>

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getPersistentExercises, saveExercises } from '@/utils/persistentDataStorage';
 import { Badge } from '@/components/ui/badge';
+import { getExerciseDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة (سبب رفض
 // كل عنصر بالضبط) تُسجَّل بالـ Console فقط عبر console.error.
@@ -151,14 +152,30 @@ const ExerciseImporter = () => {
       // Fetch fresh list
       const currentExercises = await getPersistentExercises();
 
+      const { unique, skipped: duplicates } = splitNewUniqueItems(
+        newExercises,
+        currentExercises,
+        getExerciseDedupKey
+      );
+
+      if (unique.length === 0 && errors === 0) {
+        setImportStats({ success: 0, duplicates, errors });
+        toast({
+          title: "لم تتم إضافة تمارين جديدة",
+          description: `تم تجاهل مكرر: ${duplicates}.`,
+          variant: "warning"
+        });
+        return;
+      }
+
       // Only keep custom ones for saving back (exclude defaults to avoid bloat)
       const customOnly = currentExercises.filter(ex => ex.source !== 'default');
-      const merged = [...customOnly, ...newExercises];
+      const merged = [...customOnly, ...unique];
 
       // Save
       const result = await saveExercises(merged);
 
-      setImportStats({ success: newExercises.length, errors });
+      setImportStats({ success: unique.length, duplicates, errors });
 
       // Update View
       loadData();
@@ -167,9 +184,7 @@ const ExerciseImporter = () => {
       if (result.success) {
         toast({
           title: "تم الاستيراد بنجاح",
-          description: errors > 0
-            ? `${FRIENDLY_ERRORS.PARTIAL_SKIPPED} (تمت إضافة ${newExercises.length} تمرين، وتجاهل ${errors}).`
-            : `تمت إضافة ${newExercises.length} تمرين ومزامنتها مع السحابة.`,
+          description: `تمت إضافة ${unique.length} تمرين، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors}.`,
           className: "bg-green-50 border-green-200 text-green-800"
         });
       } else {
@@ -419,8 +434,13 @@ const ExerciseImporter = () => {
              {importStats && (
                 <div className="mt-4 p-3 bg-green-50 border border-green-100 rounded-lg flex items-center justify-between text-sm">
                     <span className="text-green-800 flex items-center gap-2">
-                        <Check size={16} /> تم إضافة {importStats.success} تمرين بنجاح
+                        <Check size={16} /> تم إضافة {importStats.success} تمرين
                     </span>
+                    {importStats.duplicates > 0 && (
+                        <span className="text-yellow-700 flex items-center gap-2">
+                            <AlertTriangle size={16} /> مكرر تم تجاهله: {importStats.duplicates}
+                    </span>
+                    )}
                     {importStats.errors > 0 && (
                         <span className="text-amber-600 flex items-center gap-2">
                             <AlertTriangle size={16} /> {FRIENDLY_ERRORS.PARTIAL_SKIPPED} ({importStats.errors} عنصر)
