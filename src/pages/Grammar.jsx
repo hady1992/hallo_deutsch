@@ -8,13 +8,7 @@ import { cn } from '@/lib/utils';
 import AudioButton from '@/components/AudioButton';
 
 // Import Data
-import { grammarA1Full } from '@/data/grammarA1Full';
-import { grammarA2Full } from '@/data/grammarA2Full';
-import { grammarB1Full } from '@/data/grammarB1Full';
-import { grammarB2Full } from '@/data/grammarB2Full';
-import { nounsDatabase } from '@/data/nounsDatabase';
-import { germanVerbsComprehensive } from '@/data/germanVerbsComprehensive'; // Importing default verbs
-import { getImportedVerbs, getImportedNouns, mergeWithDefaults } from '@/utils/storageManager';
+import { getGrammarRules, getNouns, getVerbs } from '@/services/contentRepository';
 
 // Import Components
 import GrammarDisplayComponent from '@/components/GrammarDisplayComponent';
@@ -24,7 +18,8 @@ function Grammar() {
   const [activeLevel, setActiveLevel] = useState('A1');
   const [activeMainTab, setActiveMainTab] = useState('grammar');
   const [allVerbs, setAllVerbs] = useState([]);
-  const [allNouns, setAllNouns] = useState(nounsDatabase);
+  const [allNouns, setAllNouns] = useState([]);
+  const [allRules, setAllRules] = useState([]);
 
   // Grammar Rules Search State
   const [grammarSearch, setGrammarSearch] = useState("");
@@ -33,17 +28,7 @@ function Grammar() {
   const [nounSearch, setNounSearch] = useState("");
   const [nounGenderFilter, setNounGenderFilter] = useState("all");
 
-  const getGrammarData = (level) => {
-    switch(level) {
-      case 'A1': return grammarA1Full;
-      case 'A2': return grammarA2Full;
-      case 'B1': return grammarB1Full;
-      case 'B2': return grammarB2Full;
-      default: return grammarA1Full;
-    }
-  };
-
-  const currentRules = getGrammarData(activeLevel);
+  const currentRules = allRules.filter((rule) => rule.level === activeLevel);
 
   const filteredRules = useMemo(() => {
     const q = grammarSearch.trim().toLowerCase();
@@ -60,20 +45,18 @@ function Grammar() {
   }, [currentRules, grammarSearch]);
 
   useEffect(() => {
-    const loadData = () => {
-      // Verbs: Merge imported verbs with the comprehensive default database
-      const importedVerbs = getImportedVerbs();
-      
-      // Ensure germanVerbsComprehensive is an array before using
-      const defaultVerbs = Array.isArray(germanVerbsComprehensive) ? germanVerbsComprehensive : [];
-      
-      const mergedVerbs = mergeWithDefaults(importedVerbs, defaultVerbs, 'infinitive');
-      setAllVerbs(mergedVerbs);
-
-      // Nouns: Merge imported nouns with default database
-      const importedNouns = getImportedNouns();
-      const mergedNouns = mergeWithDefaults(importedNouns, nounsDatabase, 'german');
-      setAllNouns(mergedNouns);
+    const loadData = async () => {
+      const [rules, verbs, nouns] = await Promise.all([
+        getGrammarRules(),
+        getVerbs(),
+        getNouns(),
+      ]);
+      setAllRules(rules.map((rule) => ({
+        ...rule,
+        title: typeof rule.title === 'string' ? { ar: rule.title, de: '' } : rule.title,
+      })));
+      setAllVerbs(verbs);
+      setAllNouns(nouns);
     };
     
     loadData();

@@ -1,10 +1,8 @@
-import { kidsVocabularyData } from '@/data/kidsVocabularyData';
-import { nounsDatabase } from '@/data/nounsDatabase';
 import {
-  getImportedNouns,
-  getImportedVocabulary,
   getKidsVocabulary,
-} from '@/utils/storageManager';
+  getNouns,
+  getVocabulary,
+} from '@/services/contentRepository';
 import { dedupeByKey, getArticleHuntNounDedupKey } from '@/utils/contentDedupUtils';
 
 export const ARTICLE_OPTIONS = ['der', 'die', 'das'];
@@ -106,22 +104,16 @@ const normalizeNounItem = (item, source) => {
   };
 };
 
-const safeRead = (reader) => {
-  try {
-    const data = reader();
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-};
-
-export const getKidNounsByTopic = () => {
+export const getKidNounsByTopic = async () => {
+  const [kidsItems, nouns, vocabulary] = await Promise.all([
+    getKidsVocabulary(),
+    getNouns(),
+    getVocabulary(),
+  ]);
   const sources = [
-    { name: 'kids-default', items: kidsVocabularyData },
-    { name: 'kids-local', items: safeRead(getKidsVocabulary) },
-    { name: 'nouns-default', items: nounsDatabase },
-    { name: 'nouns-local', items: safeRead(getImportedNouns) },
-    { name: 'vocabulary-local', items: safeRead(getImportedVocabulary) },
+    { name: 'kids', items: kidsItems },
+    { name: 'nouns', items: nouns },
+    { name: 'vocabulary', items: vocabulary },
   ];
 
   const merged = [];

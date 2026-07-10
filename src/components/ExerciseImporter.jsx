@@ -189,9 +189,9 @@ const ExerciseImporter = () => {
         });
       } else {
         toast({
-          title: "تم الحفظ محلياً",
-          description: "فشلت المزامنة مع السحابة، لكن تم الحفظ محليًا بنجاح.",
-          variant: "warning"
+          title: "فشل النشر",
+          description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
+          variant: "destructive"
         });
       }
 

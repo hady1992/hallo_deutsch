@@ -11,6 +11,7 @@ import { vocabularyA2 } from '@/data/vocabularyA2';
 import { vocabularyB1 } from '@/data/vocabularyB1';
 import { vocabularyB2 } from '@/data/vocabularyB2';
 import { getContentDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { publishContentItems } from '@/services/contentRepository';
 
 const DEFAULT_REFERENCES = {
   nouns: nounsDatabase,
@@ -375,6 +376,18 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
             ];
             const dedupKey = (item) => getContentDedupKey(contentType, item);
             const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(validItems, referenceData, dedupKey);
+            const publishResult = await publishContentItems(contentType, newItems);
+
+            if (!publishResult.success) {
+              toast({
+                title: "فشل النشر",
+                description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
+                variant: "destructive"
+              });
+              return;
+            }
+
+            // Local storage is an offline backup only after cloud publication succeeds.
             const mergedData = [...existingData, ...newItems];
             localStorage.setItem(storageKey, JSON.stringify(mergedData));
 
@@ -387,8 +400,8 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
             if (errors.length === 0) {
                 toast({
-                    title: newItems.length > 0 ? "تم الاستيراد بنجاح" : "لم تتم إضافة عناصر جديدة",
-                    description: `تمت إضافة ${newItems.length}، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors.length}.`,
+                    title: "تم النشر للزوار",
+                    description: `تمت إضافة ${publishResult.count}، وتم تجاهل مكرر: ${duplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
                     className: "bg-green-50 border-green-200 text-green-800"
                 });
                  setTimeout(() => {
@@ -399,8 +412,8 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                 }, 2000);
             } else {
                  toast({
-                     title: "تم الاستيراد جزئياً",
-                    description: `تمت إضافة ${newItems.length}، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors.length}.`,
+                     title: "تم النشر للزوار",
+                    description: `تمت إضافة ${publishResult.count}، وتم تجاهل مكرر: ${duplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
                      variant: "warning"
                 });
             }

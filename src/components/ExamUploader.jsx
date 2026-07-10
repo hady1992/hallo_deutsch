@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getImportedExams, saveImportedExams, deleteImportedExam } from '@/utils/storageManager';
+import { publishContentItems } from '@/services/contentRepository';
 import { getExamDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا (بدل أي نص تقني إنجليزي طويل).
@@ -165,6 +166,8 @@ question,optionA,optionB,optionC,optionD,correctAnswer
     };
 
     const currentExams = getImportedExams(level);
+    const publishResult = await publishContentItems('exams', [newExam]);
+    if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
     saveImportedExams(level, [...currentExams, newExam]);
 
     return { successCount: questions.length, skipped, examsAdded: 1 };
@@ -257,13 +260,17 @@ question,optionA,optionB,optionC,optionD,correctAnswer
     });
     let duplicateExams = 0;
     let addedExams = 0;
-    Object.entries(byLevel).forEach(([lvl, newExams]) => {
+    for (const [lvl, newExams] of Object.entries(byLevel)) {
       const current = getImportedExams(lvl);
       const { unique, skipped } = splitNewUniqueItems(newExams, current, getExamDedupKey);
       duplicateExams += skipped;
       addedExams += unique.length;
-      if (unique.length > 0) saveImportedExams(lvl, [...current, ...unique]);
-    });
+      if (unique.length > 0) {
+        const publishResult = await publishContentItems('exams', unique);
+        if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
+        saveImportedExams(lvl, [...current, ...unique]);
+      }
+    }
 
     if (addedExams === 0 && skippedExams === 0) {
       throw new Error('كل نماذج الامتحان موجودة مسبقًا.');

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Volume2 } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
-import { getKidsVocabulary, saveKidsVocabulary } from '@/utils/storageManager';
-import { kidsVocabularyData } from '@/data/kidsVocabularyData';
+import { getKidsVocabulary } from '@/services/contentRepository';
 import { Button } from '@/components/ui/button';
 
 const KidsVocabulary = ({ isAdmin, onSwitchToImport }) => {
@@ -15,22 +14,7 @@ const KidsVocabulary = ({ isAdmin, onSwitchToImport }) => {
 
   // Initial Data Load & Merge
   useEffect(() => {
-    const loadData = () => {
-      const stored = getKidsVocabulary();
-      // Merge static data with stored (imported) data
-      // Ensure no duplicates by ID if possible, but static IDs are short (e.g. 'an1') and imports are timestamps
-      
-      // Use a Map to prioritize stored items if they override static ones (though unlikely here)
-      const mergedMap = new Map();
-      
-      // 1. Add static data
-      kidsVocabularyData.forEach(item => mergedMap.set(item.id, item));
-      
-      // 2. Add stored data (mostly dynamic imports)
-      stored.forEach(item => mergedMap.set(item.id, item));
-
-      setVocab(Array.from(mergedMap.values()));
-    };
+    const loadData = async () => setVocab(await getKidsVocabulary());
 
     loadData();
     // Listen for updates from importer

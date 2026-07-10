@@ -1,30 +1,23 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AudioButton from '@/components/AudioButton';
-import { getImportedNouns, mergeWithDefaults } from '@/utils/storageManager';
-import { nounsDatabase } from '@/data/nounsDatabase';
-import { getNounDedupKey } from '@/utils/contentDedupUtils';
+import { getNouns } from '@/services/contentRepository';
 
 const NounsTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGender, setSelectedGender] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
-  const [importedNouns, setImportedNouns] = useState([]);
+  const [allNouns, setAllNouns] = useState([]);
 
   useEffect(() => {
-    setImportedNouns(getImportedNouns());
-    const handleUpdate = () => setImportedNouns(getImportedNouns());
+    const handleUpdate = async () => setAllNouns(await getNouns());
+    handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
   }, []);
-
-  const allNouns = useMemo(() => {
-    const defaults = Array.isArray(nounsDatabase) ? nounsDatabase : [];
-    return mergeWithDefaults(importedNouns, defaults, getNounDedupKey);
-  }, [importedNouns]);
 
   const filteredNouns = allNouns.filter(noun => {
     const searchLower = searchTerm.toLowerCase();

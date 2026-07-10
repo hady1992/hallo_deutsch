@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { getImportedGrammarRules, deleteImportedGrammarRule, clearImportedGrammarRules } from '@/utils/storageManager';
+import { getImportedGrammarRules, deleteImportedGrammarRule, clearImportedGrammarRules, saveImportedGrammarRules } from '@/utils/storageManager';
 import { Badge } from '@/components/ui/badge';
+import { publishContentItems } from '@/services/contentRepository';
 
 const GrammarRulesImporter = () => {
   const { toast } = useToast();
@@ -135,13 +136,15 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
         // Merge with existing
         const currentRules = getImportedGrammarRules();
         const merged = [...currentRules, ...newRules];
-        localStorage.setItem('importedGrammarRules', JSON.stringify(merged));
+        const publishResult = await publishContentItems('grammar', newRules);
+        if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
+        saveImportedGrammarRules(merged);
         
         setImportStats({ success: newRules.length, errors });
         setRules(merged);
         
         toast({
-            title: "تم الاستيراد بنجاح",
+            title: "تم النشر للزوار",
             description: `تمت إضافة ${newRules.length} قاعدة جديدة.`,
             className: "bg-green-50 border-green-200 text-green-800"
         });

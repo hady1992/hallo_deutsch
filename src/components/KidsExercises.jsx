@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import KidsFileUploader from './KidsFileUploader';
-import { getKidsExercises, saveKidsExercises, getKidsProgress, saveKidsProgress } from '@/utils/storageManager';
+import { saveKidsExercises, getKidsProgress, saveKidsProgress } from '@/utils/storageManager';
+import { getKidsExercises } from '@/services/contentRepository';
 
 const defaultExercises = [
   { 
@@ -30,7 +31,8 @@ const KidsExercises = ({ isAdmin }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const loaded = getKidsExercises();
+    const loadData = async () => {
+    const loaded = await getKidsExercises();
     if (loaded && loaded.length > 0) {
       setExercises(loaded);
     } else {
@@ -38,8 +40,9 @@ const KidsExercises = ({ isAdmin }) => {
     }
     
     // Load progress
-    const savedProgress = getKidsProgress();
-    // (Simplified progress logic for demo)
+    getKidsProgress();
+    };
+    loadData();
   }, []);
 
   const handleUpload = (data) => {

@@ -93,7 +93,7 @@ export const useSupabaseData = () => {
         
       if (error) throw error;
       
-      toast({ title: "Success", description: "Exercise saved to cloud." });
+      toast({ title: "تم النشر للزوار", description: "تم حفظ التمرين في السحابة." });
       return { ...data[0].content, supabaseId: data[0].id, source: 'supabase' };
     } catch (error) {
       return handleMutationError(error, 'save exercise');
@@ -155,7 +155,7 @@ export const useSupabaseData = () => {
       const { data, error } = await supabase.from('vocabulary').insert([payload]).select();
       if (error) throw error;
       
-      toast({ title: "Success", description: "Vocabulary saved to cloud." });
+      toast({ title: "تم النشر للزوار", description: "تم حفظ الكلمة في السحابة." });
       return { ...data[0].content, supabaseId: data[0].id, source: 'supabase' };
     } catch (error) {
       return handleMutationError(error, 'save vocabulary');
@@ -217,7 +217,7 @@ export const useSupabaseData = () => {
       const { data, error } = await supabase.from('exams').insert([payload]).select();
       if (error) throw error;
       
-      toast({ title: "Success", description: "Exam saved to cloud." });
+      toast({ title: "تم النشر للزوار", description: "تم حفظ الامتحان في السحابة." });
       return { ...data[0].content, supabaseId: data[0].id, source: 'supabase' };
     } catch (error) {
       return handleMutationError(error, 'save exam');
@@ -274,7 +274,7 @@ export const useSupabaseData = () => {
       const { data, error } = await supabase.from('placement_tests').insert([payload]).select();
       if (error) throw error;
       
-      toast({ title: "Success", description: "Placement test question saved." });
+      toast({ title: "تم النشر للزوار", description: "تم حفظ سؤال تحديد المستوى في السحابة." });
       return { ...data[0].content, supabaseId: data[0].id, source: 'supabase' };
     } catch (error) {
       return handleMutationError(error, 'save placement test');

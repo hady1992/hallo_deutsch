@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AudioButton from '@/components/AudioButton';
 import KidsFileUploader from './KidsFileUploader';
-import { getKidsVerbs, saveKidsVerbs } from '@/utils/storageManager';
-import { kidsVerbsDatabase } from '@/data/kidsVerbsDatabase';
+import { saveKidsVerbs } from '@/utils/storageManager';
+import { getKidsVerbs } from '@/services/contentRepository';
 import { useToast } from '@/components/ui/use-toast';
 import confetti from 'canvas-confetti';
 
@@ -29,16 +29,8 @@ const KidsVerbs = ({ isAdmin }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadData = () => {
-      const stored = getKidsVerbs();
-      
-      // Merge: create a map to handle duplicates, prioritize imported/stored items if needed
-      // Assuming IDs are unique enough (static are 'v1', imported are timestamps)
-      const mergedMap = new Map();
-      kidsVerbsDatabase.forEach(item => mergedMap.set(item.id, item));
-      stored.forEach(item => mergedMap.set(item.id, item));
-      
-      const allVerbs = Array.from(mergedMap.values());
+    const loadData = async () => {
+      const allVerbs = await getKidsVerbs();
       setVerbs(allVerbs);
       setFilteredVerbs(allVerbs);
     };

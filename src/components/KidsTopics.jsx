@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, Shapes, Car, Apple, Cat, Home, Sun, School } from 'lucide-react';
 import KidsFileUploader from './KidsFileUploader';
 import { getKidsTopics, saveKidsTopics } from '@/utils/storageManager';
+import { getKidsTopics as getPublishedKidsTopics } from '@/services/contentRepository';
 
 const defaultTopics = [
   { id: 1, title: 'Animals', arabicTitle: 'الحيوانات', icon: 'cat', color: 'bg-orange-100 text-orange-600', count: 15 },
@@ -18,12 +19,17 @@ const KidsTopics = ({ isAdmin }) => {
   const [topics, setTopics] = useState([]);
 
   useEffect(() => {
-    const loaded = getKidsTopics();
+    const loadData = async () => {
+    const loaded = await getPublishedKidsTopics();
     if (loaded && loaded.length > 0) {
-      setTopics(loaded);
+      const merged = new Map(defaultTopics.map((topic) => [topic.title, topic]));
+      loaded.forEach((topic) => merged.set(topic.title, topic));
+      setTopics(Array.from(merged.values()));
     } else {
       setTopics(defaultTopics);
     }
+    };
+    loadData();
   }, []);
 
   const handleUpload = (data) => {

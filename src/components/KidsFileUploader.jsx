@@ -37,7 +37,7 @@ const KidsFileUploader = ({ onUpload, label = "Upload File", templateData = [] }
     setIsUploading(true);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         let data;
         const fileContent = event.target.result;
@@ -55,11 +55,11 @@ const KidsFileUploader = ({ onUpload, label = "Upload File", templateData = [] }
         }
 
         validateData(data);
-        onUpload(data);
+        await Promise.resolve(onUpload(data));
         
         toast({
-          title: "نجاح التحميل! 🎉",
-          description: `تم استيراد ${data.length} عنصر بنجاح.`,
+          title: "تم النشر للزوار",
+          description: `تم استيراد ${data.length} عنصر ونشره بنجاح.`,
           className: "bg-green-50 border-green-200 text-green-800"
         });
 

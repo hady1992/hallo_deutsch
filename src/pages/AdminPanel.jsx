@@ -40,6 +40,7 @@ import {
   saveKidsVerbs,
 } from '@/utils/storageManager';
 import { cn } from '@/lib/utils';
+import { publishContentItems } from '@/services/contentRepository';
 
 const ADMIN_SECTIONS = [
   {
@@ -139,7 +140,7 @@ const AdminPanel = () => {
     return [];
   };
 
-  const appendKidsItems = (readItems, writeItems, items, normalizeItem) => {
+  const appendKidsItems = async (readItems, writeItems, items, normalizeItem, contentType = null) => {
     const currentItems = readItems();
     const timestamp = Date.now();
     const preparedItems = items
@@ -156,32 +157,39 @@ const AdminPanel = () => {
 
     if (preparedItems.length === 0) return;
 
+    if (contentType) {
+      const publishResult = await publishContentItems(contentType, preparedItems);
+      if (!publishResult.success) {
+        throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
+      }
+    }
+
     writeItems([...currentItems, ...preparedItems]);
     refreshKidsData();
   };
 
-  const handleKidsTopicsImport = (items) => {
-    appendKidsItems(getKidsTopics, saveKidsTopics, items, (item) => ({
+  const handleKidsTopicsImport = async (items) => {
+    await appendKidsItems(getKidsTopics, saveKidsTopics, items, (item) => ({
       ...item,
       title: item.title || item.german || '',
       arabicTitle: item.arabicTitle || item.arabic || item.translation || '',
       icon: item.icon || 'star',
       color: item.color || 'bg-yellow-100 text-yellow-700',
-    }));
+    }), 'kids_topics');
   };
 
-  const handleKidsVerbsImport = (items) => {
-    appendKidsItems(getKidsVerbs, saveKidsVerbs, items, (item) => ({
+  const handleKidsVerbsImport = async (items) => {
+    await appendKidsItems(getKidsVerbs, saveKidsVerbs, items, (item) => ({
       ...item,
       infinitive: item.infinitive || item.german || '',
       arabic: item.arabic || item.translation || '',
       category: item.category || 'daily',
       level: item.level || 'medium',
-    }));
+    }), 'kids_verbs');
   };
 
-  const handleKidsExercisesImport = (items) => {
-    appendKidsItems(getKidsExercises, saveKidsExercises, items, (item) => {
+  const handleKidsExercisesImport = async (items) => {
+    await appendKidsItems(getKidsExercises, saveKidsExercises, items, (item) => {
       const options = normalizeOptions(item.options);
       return {
         ...item,
@@ -190,7 +198,7 @@ const AdminPanel = () => {
         options: options.length > 0 ? options : ['a', 'b'],
         correct: item.correct || item.answer || '',
       };
-    });
+    }, 'kids_exercises');
   };
 
   return (

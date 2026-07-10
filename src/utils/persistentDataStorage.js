@@ -5,6 +5,7 @@ import {
   getExerciseDedupKey,
   getPlacementQuestionDedupKey,
 } from '@/utils/contentDedupUtils';
+import { publishContentItems } from '@/services/contentRepository';
 
 // Storage Keys
 const LOCAL_STORAGE_KEYS = {
@@ -106,36 +107,11 @@ export const getPersistentPlacementTestQuestions = async () => {
 export const savePlacementTestQuestions = async (questions) => {
   try {
     console.log(`Saving ${questions.length} placement questions...`);
-    
-    // 1. Save to LocalStorage immediately (Safety)
     const dedupedQuestions = dedupeByKey(questions, getPlacementQuestionDedupKey);
+    const result = await publishContentItems('placement_tests', dedupedQuestions);
+    if (!result.success) return result;
     localStorage.setItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS, JSON.stringify(dedupedQuestions));
-
-    // 2. Sync to Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-        return { success: true, warning: 'Saved locally only (not logged in)' };
-    }
-
-    // Filter: You might want to upsert EVERYTHING from the "user added" list to ensure sync
-    // But typically we only need to upsert items that are modified. 
-    // For simplicity and robustness: Upsert all.
-    const payload = dedupedQuestions.map(q => ({
-      id: q.id, // Supabase expects UUID. If your ID is not UUID, this might fail unless column type is text.
-                  // Ideally, ensure IDs generated are UUIDs.
-      level: q.level || 'A1',
-      content: q, // Store full object in content JSONB
-      updated_at: new Date().toISOString()
-    }));
-
-    // Chunking could be added here if payload is massive, but for hundreds it's fine.
-    const { error } = await supabase
-      .from('placement_tests')
-      .upsert(payload, { onConflict: 'id' });
-
-    if (error) throw error;
-
-    return { success: true };
+    return result;
   } catch (err) {
     console.error('Error saving placement tests to Supabase:', err);
     // Return success: false but the local save succeeded, so technically data isn't "lost" to the user immediately.
@@ -181,25 +157,10 @@ export const saveExercises = async (exercises) => {
   try {
     console.log(`Saving ${exercises.length} exercises...`);
     const dedupedExercises = dedupeByKey(exercises, getExerciseDedupKey);
+    const result = await publishContentItems('exercises', dedupedExercises);
+    if (!result.success) return result;
     localStorage.setItem(LOCAL_STORAGE_KEYS.EXERCISES, JSON.stringify(dedupedExercises));
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return { success: true, warning: 'Saved locally only' };
-
-    const payload = dedupedExercises.map(ex => ({
-      id: ex.id,
-      level: ex.level || 'A1',
-      content: ex,
-      updated_at: new Date().toISOString()
-    }));
-
-    const { error } = await supabase
-      .from('exercises')
-      .upsert(payload, { onConflict: 'id' });
-
-    if (error) throw error;
-
-    return { success: true };
+    return result;
   } catch (err) {
     console.error('Error saving exercises to Supabase:', err);
     return { success: false, error: err.message };

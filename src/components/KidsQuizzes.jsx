@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trophy, ArrowLeft, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { kidsQuizzesData } from '@/data/kidsQuizzesData';
 import confetti from 'canvas-confetti';
 import AudioSpeedControl from '@/components/AudioSpeedControl';
 import AudioButton from '@/components/AudioButton';
 import { motion } from 'framer-motion';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import { getCustomQuizzes } from '@/services/contentRepository';
 
 const KidsQuizzes = () => {
   const [activeQuizId, setActiveQuizId] = useState(null);
@@ -17,12 +17,19 @@ const KidsQuizzes = () => {
   const [answerStatus, setAnswerStatus] = useState(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
 
-  // Get active quiz metadata (title, icon) from static data
-  const activeQuizInfo = kidsQuizzesData.find(q => q.id === activeQuizId);
+  useEffect(() => {
+    const loadQuizzes = async () => setQuizzes(await getCustomQuizzes());
+    loadQuizzes();
+    window.addEventListener('custom_quizzesUpdated', loadQuizzes);
+    return () => window.removeEventListener('custom_quizzesUpdated', loadQuizzes);
+  }, []);
+
+  const activeQuizInfo = quizzes.find(q => q.id === activeQuizId);
 
   const startQuiz = (id) => {
-    const quizData = kidsQuizzesData.find(q => q.id === id);
+    const quizData = quizzes.find(q => q.id === id);
     if (!quizData) return;
 
     // Shuffle options for all questions at the start of the quiz
@@ -86,7 +93,7 @@ const KidsQuizzes = () => {
       return (
           <div className="max-w-6xl mx-auto p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {kidsQuizzesData.map((quiz, idx) => (
+                  {quizzes.map((quiz, idx) => (
                       <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

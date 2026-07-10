@@ -204,7 +204,7 @@ const ArticleHuntGame = ({ onExit }) => {
   const [finished, setFinished] = useState(false);
 
   useEffect(() => {
-    const loadNouns = () => setNouns(getKidNounsByTopic());
+    const loadNouns = async () => setNouns(await getKidNounsByTopic());
     loadNouns();
 
     const events = [

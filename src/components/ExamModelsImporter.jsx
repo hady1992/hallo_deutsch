@@ -105,15 +105,6 @@ const ExamModelsImporter = () => {
     }
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -123,14 +114,8 @@ const ExamModelsImporter = () => {
         throw new Error("الاسم والمستوى حقول مطلوبة");
       }
 
-      let pdfDataUrl = null;
-      let audioDataUrl = null;
-
-      if (formData.pdfFile) {
-        pdfDataUrl = await convertFileToBase64(formData.pdfFile);
-      }
-      if (formData.audioFile) {
-        audioDataUrl = await convertFileToBase64(formData.audioFile);
+      if (formData.pdfFile || formData.audioFile) {
+        throw new Error("تخزين الملفات الكبيرة محليًا غير مناسب للإنتاج. سيتم ربط تخزين ملفات خارجي لاحقًا.");
       }
 
       const newModel = {
@@ -139,8 +124,8 @@ const ExamModelsImporter = () => {
         level: formData.level,
         description: formData.description,
         date: formData.date,
-        pdfUrl: pdfDataUrl,
-        audioUrl: audioDataUrl,
+        pdfUrl: null,
+        audioUrl: null,
         uploadedAt: new Date().toISOString()
       };
 
@@ -193,6 +178,9 @@ const ExamModelsImporter = () => {
                 <Upload size={20} className="text-blue-600" />
                 إضافة نموذج امتحان جديد
             </h3>
+            <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              تخزين الملفات الكبيرة محليًا غير مناسب للإنتاج. سيتم ربط تخزين ملفات خارجي لاحقًا.
+            </p>
             
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

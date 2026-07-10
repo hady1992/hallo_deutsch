@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AudioButton from '@/components/AudioButton';
 import AudioSpeedControl from '@/components/AudioSpeedControl';
-import { getKidsSentences, saveKidsSentences, getKidsProgress, saveKidsProgress } from '@/utils/storageManager';
-import { kidsConversationsDatabase } from '@/data/kidsConversationsDatabase';
+import { getKidsProgress, saveKidsProgress } from '@/utils/storageManager';
+import { getKidsConversations } from '@/services/contentRepository';
 import { useToast } from '@/components/ui/use-toast';
 
 const KidsSentences = ({ isAdmin }) => {
@@ -35,19 +35,15 @@ const KidsSentences = ({ isAdmin }) => {
   const itemsPerPage = 5;
 
   useEffect(() => {
+    const loadData = async () => {
     // Load favorites
     const storedFavs = JSON.parse(localStorage.getItem('kidsConvFavorites') || '[]');
     setFavorites(storedFavs);
-    
-    // Load custom conversations if any
-    const customConvs = getKidsSentences() || [];
-    const allConvs = [...kidsConversationsDatabase, ...customConvs];
-    
-    // Remove duplicates based on ID (prefer custom/newer)
-    const uniqueConvs = Array.from(new Map(allConvs.map(item => [item.id, item])).values());
-    
-    setConversations(uniqueConvs);
-    setFilteredConversations(uniqueConvs);
+    const allConvs = await getKidsConversations();
+    setConversations(allConvs);
+    setFilteredConversations(allConvs);
+    };
+    loadData();
   }, []);
 
   useEffect(() => {

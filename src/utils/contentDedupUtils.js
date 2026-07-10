@@ -92,6 +92,28 @@ export const getExamDedupKey = (item = {}) => {
   return item.title ? makeKey(normalizeLevel(item.level), item.title) : '';
 };
 
+export const getGrammarDedupKey = (item = {}) => {
+  const title = typeof item.title === 'object'
+    ? item.title.ar || item.title.de
+    : item.title;
+  return title ? makeKey(normalizeLevel(item.level), title) : '';
+};
+
+export const getKidsVocabularyDedupKey = (item = {}) => {
+  const german = item.german || item.word || item.noun || '';
+  const arabic = item.arabic || item.translation || '';
+  if (!german) return '';
+  return makeKey(item.topic || item.category || 'general', german, arabic);
+};
+
+export const getKidsConversationDedupKey = (item = {}) => (
+  makeKey(item.id || item.title || '')
+);
+
+export const getCustomQuizDedupKey = (item = {}) => (
+  makeKey(item.id || item.title || '')
+);
+
 export const getContentDedupKey = (contentType, item) => {
   switch (contentType) {
     case 'nouns':
@@ -104,9 +126,22 @@ export const getContentDedupKey = (contentType, item) => {
       return getExerciseDedupKey(item);
     case 'placement':
     case 'placement-tests':
+    case 'placement_tests':
       return getPlacementQuestionDedupKey(item);
     case 'exams':
       return getExamDedupKey(item);
+    case 'grammar':
+      return getGrammarDedupKey(item);
+    case 'kids_vocabulary':
+      return getKidsVocabularyDedupKey(item);
+    case 'kids_conversations':
+      return getKidsConversationDedupKey(item);
+    case 'kids_verbs':
+      return getVerbDedupKey(item);
+    case 'kids_exercises':
+      return getExerciseDedupKey(item);
+    case 'custom_quizzes':
+      return getCustomQuizDedupKey(item);
     default:
       return makeKey(item?.id || item?.title || item?.german || item?.question || '');
   }

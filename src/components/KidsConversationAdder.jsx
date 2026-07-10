@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Save, Play, RefreshCw, MessageCircle } from 'lucide-react';
+import { Plus, Trash2, Save, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { getKidsSentences, saveKidsSentences } from '@/utils/storageManager';
+import { publishContentItem } from '@/services/contentRepository';
 
 const KidsConversationAdder = () => {
   const { toast } = useToast();
@@ -32,7 +33,7 @@ const KidsConversationAdder = () => {
     setSentences(newSentences);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (!title || !topic || !char1 || !char2) {
       toast({ title: "خطأ", description: "يرجى ملء جميع الحقول الأساسية", variant: "destructive" });
@@ -59,9 +60,14 @@ const KidsConversationAdder = () => {
     };
 
     const existing = getKidsSentences() || [];
+    const publishResult = await publishContentItem('kids_conversations', newConversation);
+    if (!publishResult.success) {
+      toast({ title: "فشل النشر", description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار", variant: "destructive" });
+      return;
+    }
     saveKidsSentences([...existing, newConversation]);
     
-    toast({ title: "تم الحفظ!", description: "تمت إضافة المحادثة بنجاح", className: "bg-green-500 text-white" });
+    toast({ title: "تم النشر للزوار", description: "تمت إضافة المحادثة ونشرها بنجاح", className: "bg-green-500 text-white" });
     
     // Reset form
     setTitle('');

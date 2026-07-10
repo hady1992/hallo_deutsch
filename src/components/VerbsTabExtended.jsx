@@ -1,25 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, BookOpen, ChevronDown, ChevronUp, FileUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { getImportedVerbs } from '@/utils/storageManager';
-import { dedupeByKey, getVerbDedupKey } from '@/utils/contentDedupUtils';
+import { getVerbs } from '@/services/contentRepository';
 
 const VerbsTabExtended = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [expandedVerb, setExpandedVerb] = useState(null);
-  const [importedVerbs, setImportedVerbs] = useState([]);
+  const [allVerbs, setAllVerbs] = useState([]);
 
   useEffect(() => {
-    setImportedVerbs(getImportedVerbs());
-    const handleUpdate = () => setImportedVerbs(getImportedVerbs());
+    const handleUpdate = async () => setAllVerbs(await getVerbs());
+    handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
   }, []);
-
-  // Use only imported verbs
-  const allVerbs = useMemo(() => dedupeByKey(importedVerbs, getVerbDedupKey), [importedVerbs]);
 
   const verbTypes = ['All', 'Regular', 'Strong', 'Irregular', 'Modal', 'Auxiliary', 'Separable'];
 

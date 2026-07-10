@@ -5,13 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dumbbell, ArrowRight, Layers, ListFilter, Hash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exercisesData } from '@/data/exercisesData';
-import { getPersistentExercises } from '@/utils/persistentDataStorage';
+import { getExercises } from '@/services/contentRepository';
 import { getExerciseCategoryKey, getCategoryLabel, getExerciseAudioText } from '@/utils/exerciseAudio';
 import AudioButton from '@/components/AudioButton';
 import ExerciseResults from '@/components/ExerciseResults';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
-import { dedupeByKey, getExerciseDedupKey } from '@/utils/contentDedupUtils';
 
 const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20, 'all'];
 
@@ -27,22 +26,18 @@ const Exercises = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
-  const [importedExercises, setImportedExercises] = useState([]);
+  const [allExercises, setAllExercises] = useState(exercisesData);
 
   // تحميل التمارين المستوردة عبر لوحة التحكم (محليًا أو سحابيًا)، ودمجها مع
   // التمارين الثابتة الأصلية دون تعديل بنية exercisesData.js نفسها.
   useEffect(() => {
     const loadImported = async () => {
       try {
-        const persistent = await getPersistentExercises();
-        // نستبعد النسخة الافتراضية الموازية (exercisesA1-B2.js) لتفادي تكرار
-        // محتوى موجود أصلًا ضمن exercisesData.js المعروض بهذه الصفحة، ونُبقي فقط
-        // التمارين المُضافة فعليًا عبر الاستيراد (محليًا أو سحابيًا).
-        const customOnly = persistent.filter(ex => ex.source === 'local' || ex.source === 'cloud');
+        const persistent = await getExercises();
         // توحيد شكل الإجابة الصحيحة للعرض فقط: بعض التمارين المستوردة قديمًا قد
         // تكون بصيغة نصية، بينما هذه الصفحة تقارن بموضع الخيار (index) — نحوّلها
         // هنا فقط لغرض العرض، دون تغيير البيانات المخزّنة أصلًا.
-        const normalized = customOnly
+        const normalized = persistent
           .filter(ex => Array.isArray(ex.options) && ex.options.length > 0 && ex.question)
           .map(ex => {
             if (typeof ex.correctAnswer === 'number') return ex;
@@ -53,7 +48,7 @@ const Exercises = () => {
               explanation: ex.explanation || '',
             };
           });
-        setImportedExercises(normalized);
+        setAllExercises(normalized);
       } catch (e) {
         console.error('تعذر تحميل التمارين المستوردة:', e);
       }
@@ -62,12 +57,6 @@ const Exercises = () => {
     window.addEventListener('exercisesUpdated', loadImported);
     return () => window.removeEventListener('exercisesUpdated', loadImported);
   }, []);
-
-  // القائمة الكاملة: التمارين الثابتة + التمارين المستوردة المُطبَّعة
-  const allExercises = useMemo(
-    () => dedupeByKey([...exercisesData, ...importedExercises], getExerciseDedupKey),
-    [importedExercises]
-  );
 
   // Group exercises by level for display stats
   const getLevelCount = (level) => allExercises.filter(ex => ex.level === level).length;

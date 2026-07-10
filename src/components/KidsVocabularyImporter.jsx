@@ -9,13 +9,14 @@ import {
   saveKidsVocabulary
 } from '@/utils/storageManager';
 import { kidsVocabularyData } from '@/data/kidsVocabularyData';
-import { getVocabularyDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { getKidsVocabularyDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { publishContentItems } from '@/services/contentRepository';
 
 const KidsVocabularyImporter = ({ refreshData }) => {
   const [importedItems, setImportedItems] = useState(getKidsVocabulary().filter(i => i.id.toString().length > 10)); // Assuming generated IDs are long timestamps
   const { toast } = useToast();
 
-  const handleUpload = (data, category) => {
+  const handleUpload = async (data, category) => {
     // Basic validation & enhancement
     const processedData = data.map(item => ({
       ...item,
@@ -42,8 +43,18 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(
       preparedItems,
       [...kidsVocabularyData, ...currentVocab],
-      getVocabularyDedupKey
+      getKidsVocabularyDedupKey
     );
+
+    const publishResult = await publishContentItems('kids_vocabulary', newItems);
+    if (!publishResult.success) {
+      toast({
+        title: "فشل النشر",
+        description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
+        variant: "destructive"
+      });
+      throw new Error("فشل الحفظ السحابي، لن يظهر المحتوى للزوار");
+    }
 
     const updatedVocab = [...currentVocab, ...newItems];
     saveKidsVocabulary(updatedVocab);
@@ -52,7 +63,7 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     if(refreshData) refreshData();
 
     toast({
-      title: newItems.length > 0 ? "تم الاستيراد بنجاح! 🎉" : "لم تتم إضافة كلمات جديدة",
+      title: "تم النشر للزوار",
       description: `تمت إضافة ${newItems.length} كلمة، وتم تجاهل مكرر: ${duplicates}.`,
       className: "bg-green-50 text-green-800"
     });

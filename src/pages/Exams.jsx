@@ -4,22 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Clock, BarChart2, PlayCircle, Loader2, AlertCircle } from 'lucide-react';
-import { examsA1 } from '@/data/examsA1';
-import { examsA2 } from '@/data/examsA2';
-import { examsB1 } from '@/data/examsB1';
-import { examsB2 } from '@/data/examsB2';
 import ExamComponent from '@/components/ExamComponent';
 import ExamResults from '@/components/ExamResults';
 import ExamReview from '@/components/ExamReview';
-import { getImportedExams } from '@/utils/storageManager';
-import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { getExams } from '@/services/contentRepository';
 
-const defaultExams = {
-  A1: examsA1,
-  A2: examsA2,
-  B1: examsB1,
-  B2: examsB2
-};
+const EXAM_LEVELS = ['A1', 'A2', 'B1', 'B2'];
 
 function Exams() {
   const [activeTab, setActiveTab] = useState('A1');
@@ -27,11 +17,9 @@ function Exams() {
   const [examState, setExamState] = useState('list');
   const [results, setResults] = useState(null);
   const [userHistory, setUserHistory] = useState({});
-  const [importedExams, setImportedExams] = useState({ A1: [], A2: [], B1: [], B2: [] });
-  const [supabaseExams, setSupabaseExams] = useState({ A1: [], A2: [], B1: [], B2: [] });
+  const [availableExams, setAvailableExams] = useState({ A1: [], A2: [], B1: [], B2: [] });
   const [cloudError, setCloudError] = useState(false);
-
-  const { fetchExams, loading: cloudLoading } = useSupabaseData();
+  const [cloudLoading, setCloudLoading] = useState(true);
 
   useEffect(() => {
     // History
@@ -47,60 +35,30 @@ function Exams() {
       setUserHistory(historyMap);
     }
 
-    // Load Local Data
-    loadImportedData();
-    
-    // Load Cloud Data
-    const loadCloud = async () => {
+    const loadData = async () => {
+        setCloudLoading(true);
         try {
-            // Fetch all levels? Or just active? 
-            // For now, fetch ALL to populate all tabs properly.
-            const allData = await fetchExams();
-            if (allData) {
-                const grouped = { A1: [], A2: [], B1: [], B2: [] };
-                allData.forEach(exam => {
-                    if (grouped[exam.level]) grouped[exam.level].push(exam);
-                });
-                setSupabaseExams(grouped);
-                setCloudError(false);
-            } else {
-                // fetchExams يرجع null عند فشل الاتصال (التفاصيل التقنية مسجّلة بالفعل بالـ Console).
-                // الامتحانات المحلية/الافتراضية تبقى ظاهرة بشكل طبيعي عبر getAllExams أدناه.
-                setCloudError(true);
-            }
+            const allData = await getExams();
+            const grouped = { A1: [], A2: [], B1: [], B2: [] };
+            allData.forEach((exam) => {
+                if (grouped[exam.level]) grouped[exam.level].push(exam);
+            });
+            setAvailableExams(grouped);
+            setCloudError(false);
         } catch (e) {
             console.error("Failed to load exams:", e);
             setCloudError(true);
+        } finally {
+            setCloudLoading(false);
         }
     };
-    loadCloud();
+    loadData();
 
-    window.addEventListener('dataImported', loadImportedData);
-    return () => window.removeEventListener('dataImported', loadImportedData);
-  }, [fetchExams]);
+    window.addEventListener('dataImported', loadData);
+    return () => window.removeEventListener('dataImported', loadData);
+  }, []);
 
-  const loadImportedData = () => {
-    setImportedExams({
-        A1: getImportedExams('A1'),
-        A2: getImportedExams('A2'),
-        B1: getImportedExams('B1'),
-        B2: getImportedExams('B2')
-    });
-  };
-
-  const getAllExams = (level) => {
-    const defaults = defaultExams[level] || [];
-    const local = importedExams[level] || [];
-    const cloud = supabaseExams[level] || [];
-    
-    // Deduplicate
-    const map = new Map();
-    defaults.forEach(e => map.set(e.id, e));
-    local.forEach(e => map.set(e.id, e));
-    cloud.forEach(e => map.set(e.id || e.supabaseId, e));
-    
-    return Array.from(map.values());
-  };
+  const getAllExams = (level) => availableExams[level] || [];
 
   const startExam = (exam) => {
     setCurrentExam(exam);
@@ -148,7 +106,7 @@ function Exams() {
 
               <Tabs defaultValue="A1" value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="flex flex-wrap justify-center gap-3 mb-12 bg-transparent h-auto p-0">
-                  {Object.keys(defaultExams).map(level => (
+                  {EXAM_LEVELS.map(level => (
                     <TabsTrigger 
                       key={level} 
                       value={level}
@@ -159,7 +117,7 @@ function Exams() {
                   ))}
                 </TabsList>
 
-                {Object.keys(defaultExams).map(level => (
+                {EXAM_LEVELS.map(level => (
                   <TabsContent key={level} value={level}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
                       {getAllExams(level).map((exam) => {

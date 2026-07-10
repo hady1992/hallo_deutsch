@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { getAvailableQuestions } from '@/utils/getAvailableQuestions';
 import { saveCustomQuiz } from '@/utils/storageManager';
+import { publishContentItem } from '@/services/contentRepository';
 
 const CustomQuizCreator = ({ onCancel, onSave }) => {
     const [quizName, setQuizName] = useState('');
@@ -27,7 +28,7 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
         setSelectedQuestions(selectedQuestions.filter(q => q.id !== id));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!quizName.trim()) {
             toast({ title: 'خطأ', description: 'الرجاء إدخال اسم المسابقة', variant: 'destructive' });
             return;
@@ -45,8 +46,13 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
             createdAt: new Date().toISOString()
         };
 
+        const publishResult = await publishContentItem('custom_quizzes', newQuiz);
+        if (!publishResult.success) {
+            toast({ title: 'فشل النشر', description: 'فشل الحفظ السحابي، لن يظهر المحتوى للزوار', variant: 'destructive' });
+            return;
+        }
         saveCustomQuiz(newQuiz);
-        toast({ title: 'تم الحفظ', description: 'تم إنشاء المسابقة بنجاح', className: "bg-green-50" });
+        toast({ title: 'تم النشر للزوار', description: 'تم إنشاء المسابقة ونشرها بنجاح', className: "bg-green-50" });
         onSave();
     };
 

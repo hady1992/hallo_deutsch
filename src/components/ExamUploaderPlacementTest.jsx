@@ -124,12 +124,10 @@ const ExamUploaderPlacementTest = () => {
             window.dispatchEvent(new Event('placementTestsUpdated'));
           } else {
              toast({
-                title: "تم الحفظ محلياً",
-                description: "فشلت المزامنة السحابية: " + (result.error || "Unknown error"),
-                variant: "warning"
+                title: "فشل النشر",
+                description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
+                variant: "destructive"
             });
-             // Still refresh list to show local add
-             loadData();
           }
 
       } catch (err) {

@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { vocabularyA1 } from '@/data/vocabularyA1';
-import { vocabularyA2 } from '@/data/vocabularyA2';
-import { vocabularyB1 } from '@/data/vocabularyB1';
-import { vocabularyB2 } from '@/data/vocabularyB2';
 import VocabularyCardSimple from '@/components/VocabularyCardSimple';
 import VocabularyFilter from '@/components/VocabularyFilter';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,10 +9,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VerbsTabExtended from '@/components/VerbsTabExtended';
 import NounsTab from '@/components/NounsTab';
-import { getImportedVocabulary, mergeWithDefaults, getImportedGrammarRules } from '@/utils/storageManager';
 import { Badge } from '@/components/ui/badge';
-import { useSupabaseData } from '@/hooks/useSupabaseData';
-import { getVocabularyDedupKey } from '@/utils/contentDedupUtils';
+import { getGrammarRules, getVocabulary } from '@/services/contentRepository';
 
 // Grammar Rules View (Internal Component)
 const GrammarRulesView = () => {
@@ -24,8 +18,11 @@ const GrammarRulesView = () => {
   const [filterLevel, setFilterLevel] = useState('All');
   
   useEffect(() => {
-    setRules(getImportedGrammarRules());
-    const handleUpdate = () => setRules(getImportedGrammarRules());
+    const handleUpdate = async () => {
+      const allRules = await getGrammarRules();
+      setRules(allRules.filter((rule) => rule.source === 'cloud' || typeof rule.title === 'string'));
+    };
+    handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
   }, []);
@@ -79,35 +76,20 @@ const GrammarRulesView = () => {
 
 function Vocabulary() {
   const { toast } = useToast();
-  const [importedVocabulary, setImportedVocabulary] = useState([]);
-  const [supabaseVocabulary, setSupabaseVocabulary] = useState([]);
-  const { fetchVocabulary, loading: cloudLoading } = useSupabaseData();
+  const [allVocabulary, setAllVocabulary] = useState([]);
+  const [cloudLoading, setCloudLoading] = useState(true);
 
   useEffect(() => {
-    const loadVocab = () => setImportedVocabulary(getImportedVocabulary());
-    loadVocab();
-
-    const loadCloud = async () => {
-        try {
-            const data = await fetchVocabulary();
-            if(data) setSupabaseVocabulary(data);
-        } catch (e) { console.error(e); }
+    const loadVocab = async () => {
+      setCloudLoading(true);
+      setAllVocabulary(await getVocabulary());
+      setCloudLoading(false);
     };
-    loadCloud();
+    loadVocab();
 
     window.addEventListener('dataImported', loadVocab);
     return () => window.removeEventListener('dataImported', loadVocab);
-  }, [fetchVocabulary]);
-
-  const allVocabulary = useMemo(() => {
-    const defaultVocab = [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2];
-    const importedWithFlag = importedVocabulary.map(item => ({ ...item, isImported: true }));
-    const cloudWithFlag = supabaseVocabulary.map(item => ({ ...item, isCloud: true }));
-    
-    // Merge: Cloud + Imported + Defaults
-    // Use mergeWithDefaults for intelligent deduplication based on German word
-    return mergeWithDefaults([...importedWithFlag, ...cloudWithFlag], defaultVocab, getVocabularyDedupKey);
-  }, [importedVocabulary, supabaseVocabulary]);
+  }, []);
 
   const categories = useMemo(() => {
     const cats = new Set(allVocabulary.map(item => item.category));

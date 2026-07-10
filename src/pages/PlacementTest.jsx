@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PlayCircle, GraduationCap, CheckCircle, ArrowRight, ArrowLeft, RefreshCw, BarChart, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { placementTestQuestions } from '@/data/placementTestQuestions';
-import { getPersistentPlacementTestQuestions } from '@/utils/persistentDataStorage';
+import { getPlacementTests } from '@/services/contentRepository';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
-import { dedupeByKey, getPlacementQuestionDedupKey } from '@/utils/contentDedupUtils';
 
 const PlacementTest = () => {
   const [started, setStarted] = useState(false);
@@ -16,18 +15,14 @@ const PlacementTest = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
-  const [importedQuestions, setImportedQuestions] = useState([]);
+  const [questions, setQuestions] = useState(placementTestQuestions || []);
 
   // تحميل أسئلة اختبار تحديد المستوى المستوردة عبر لوحة التحكم، ودمجها مع
   // الأسئلة الثابتة الأصلية دون تعديل بنية placementTestQuestions.js نفسها.
   useEffect(() => {
     const loadImported = async () => {
       try {
-        const persistent = await getPersistentPlacementTestQuestions();
-        // نستبعد طبقة "الافتراضي" الخاصة بنظام التخزين الدائم (ملف مختلف عن الأسئلة
-        // الأصلية المعروضة هنا فعليًا)، ونُبقي فقط الأسئلة المُضافة عبر الاستيراد.
-        const customOnly = persistent.filter(q => q.source === 'local' || q.source === 'cloud');
-        setImportedQuestions(customOnly);
+        setQuestions(await getPlacementTests());
       } catch (e) {
         console.error('تعذر تحميل أسئلة اختبار تحديد المستوى المستوردة:', e);
       }
@@ -36,11 +31,6 @@ const PlacementTest = () => {
     window.addEventListener('placementTestsUpdated', loadImported);
     return () => window.removeEventListener('placementTestsUpdated', loadImported);
   }, []);
-
-  const questions = useMemo(
-    () => dedupeByKey([...(placementTestQuestions || []), ...importedQuestions], getPlacementQuestionDedupKey),
-    [importedQuestions]
-  );
 
   // Calculate results
   const calculateResult = () => {
