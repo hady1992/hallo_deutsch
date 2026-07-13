@@ -30,17 +30,7 @@ grant execute on function public.is_content_admin() to anon, authenticated;
 
 create table if not exists public.content_items (
   id uuid primary key default gen_random_uuid(),
-  content_type text not null check (content_type in (
-    'nouns',
-    'verbs',
-    'grammar',
-    'kids_vocabulary',
-    'kids_conversations',
-    'kids_verbs',
-    'kids_exercises',
-    'kids_topics',
-    'custom_quizzes'
-  )),
+  content_type text not null,
   level text,
   topic text,
   title text,
@@ -52,6 +42,29 @@ create table if not exists public.content_items (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Recreate the constraint as well when this script is run against an existing
+-- content_items table. CREATE TABLE IF NOT EXISTS alone does not update checks.
+alter table public.content_items
+  drop constraint if exists content_items_content_type_check;
+
+alter table public.content_items
+  add constraint content_items_content_type_check check (content_type in (
+    'lessons',
+    'vocabulary',
+    'nouns',
+    'verbs',
+    'grammar',
+    'exercises',
+    'placement_tests',
+    'exams',
+    'kids_vocabulary',
+    'kids_conversations',
+    'kids_verbs',
+    'kids_exercises',
+    'kids_topics',
+    'custom_quizzes'
+  ));
 
 create index if not exists content_items_type_published_idx
   on public.content_items (content_type, is_published);

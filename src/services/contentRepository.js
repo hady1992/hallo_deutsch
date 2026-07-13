@@ -25,6 +25,7 @@ import {
   getImportedExams,
   getImportedExercises,
   getImportedGrammarRules,
+  getImportedLessons,
   getImportedNouns,
   getImportedVerbs,
   getImportedVocabulary,
@@ -40,7 +41,7 @@ import {
   splitNewUniqueItems,
 } from '@/utils/contentDedupUtils';
 
-const EXISTING_TABLES = {
+const LEGACY_TABLES = {
   vocabulary: 'vocabulary',
   exercises: 'exercises',
   placement_tests: 'placement_tests',
@@ -48,6 +49,7 @@ const EXISTING_TABLES = {
 };
 
 const STATIC_CONTENT = {
+  lessons: [],
   vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
   nouns: nounsDatabase,
   verbs: germanVerbsComprehensive,
@@ -69,6 +71,7 @@ const STATIC_CONTENT = {
 };
 
 const LOCAL_READERS = {
+  lessons: getImportedLessons,
   vocabulary: getImportedVocabulary,
   nouns: getImportedNouns,
   verbs: getImportedVerbs,
@@ -95,7 +98,7 @@ const readLocalFallback = (contentType) => {
   }
 };
 
-const unwrapRow = (row, contentType) => {
+const unwrapRow = (row, contentType, storageTable = 'content_items') => {
   const content = row?.content && typeof row.content === 'object' ? row.content : row;
   return {
     ...content,
@@ -104,22 +107,76 @@ const unwrapRow = (row, contentType) => {
     supabaseId: row?.id,
     source: 'cloud',
     contentType,
+    storageTable,
   };
 };
 
-const fetchCloudContent = async (contentType) => {
-  const tableName = EXISTING_TABLES[contentType];
-  const query = tableName
-    ? supabase.from(tableName).select('*')
-    : supabase
-      .from('content_items')
-      .select('*')
-      .eq('content_type', contentType)
-      .eq('is_published', true);
+const isMissingTableError = (error) => (
+  ['42P01', 'PGRST205'].includes(error?.code)
+  || /could not find the table|relation .* does not exist|schema cache/i.test(error?.message || '')
+);
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return asArray(data).map((row) => unwrapRow(row, contentType));
+const isUnsupportedContentTypeError = (error) => (
+  error?.code === '23514'
+  && /content_items_content_type_check|content_type/i.test(error?.message || '')
+);
+
+const queryContentItems = async (contentType, level = null) => {
+  let query = supabase
+    .from('content_items')
+    .select('*')
+    .eq('content_type', contentType)
+    .eq('is_published', true);
+
+  if (level) query = query.eq('level', level);
+  return query;
+};
+
+const queryLegacyTable = async (tableName, level = null) => {
+  let query = supabase.from(tableName).select('*');
+  if (level) query = query.eq('level', level);
+  return query;
+};
+
+const fetchCloudContent = async (contentType, level = null) => {
+  const legacyTable = LEGACY_TABLES[contentType];
+  const contentItemsResult = await queryContentItems(contentType, level);
+
+  if (!legacyTable) {
+    if (contentItemsResult.error) throw contentItemsResult.error;
+    return asArray(contentItemsResult.data)
+      .map((row) => unwrapRow(row, contentType, 'content_items'));
+  }
+
+  const legacyResult = await queryLegacyTable(legacyTable, level);
+  const contentItemsAvailable = !contentItemsResult.error;
+  const legacyAvailable = !legacyResult.error;
+
+  if (!contentItemsAvailable && !legacyAvailable) {
+    if (!isMissingTableError(legacyResult.error)) throw legacyResult.error;
+    throw contentItemsResult.error;
+  }
+
+  if (contentItemsResult.error && !isMissingTableError(contentItemsResult.error)) {
+    console.warn(`[ContentRepository] content_items read failed for ${contentType}; using ${legacyTable}.`, contentItemsResult.error);
+  }
+
+  if (legacyResult.error && !isMissingTableError(legacyResult.error)) {
+    console.warn(`[ContentRepository] ${legacyTable} read failed; using content_items for ${contentType}.`, legacyResult.error);
+  }
+
+  const legacyItems = legacyAvailable
+    ? asArray(legacyResult.data).map((row) => unwrapRow(row, contentType, legacyTable))
+    : [];
+  const unifiedItems = contentItemsAvailable
+    ? asArray(contentItemsResult.data).map((row) => unwrapRow(row, contentType, 'content_items'))
+    : [];
+
+  return dedupeByKey(
+    [...legacyItems, ...unifiedItems],
+    (item) => getContentDedupKey(contentType, item),
+    { prefer: 'last' }
+  );
 };
 
 const mergeContent = (contentType, extraItems = []) => {
@@ -145,6 +202,50 @@ const ensureItemId = (contentType, item, index) => ({
   id: item.id || `${contentType}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 8)}`,
 });
 
+const dispatchContentEvents = (contentType) => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event('dataImported'));
+  window.dispatchEvent(new Event(`${contentType}Updated`));
+};
+
+const buildUnifiedPayload = (contentType, items, userId) => items.map((item) => ({
+  content_type: contentType,
+  level: item.level || (contentType === 'placement_tests' ? 'mixed' : null),
+  topic: item.topic || item.category || null,
+  title: typeof item.title === 'string' ? item.title : item.title?.ar || item.title?.de || null,
+  slug: item.slug || null,
+  content: item,
+  metadata: item.metadata || {},
+  is_published: true,
+  created_by: userId,
+}));
+
+const insertPublishedItems = async (contentType, items, userId) => {
+  const unifiedResult = await supabase
+    .from('content_items')
+    .insert(buildUnifiedPayload(contentType, items, userId))
+    .select();
+
+  if (!unifiedResult.error) {
+    return { ...unifiedResult, storageTable: 'content_items' };
+  }
+
+  const legacyTable = LEGACY_TABLES[contentType];
+  const canUseLegacyTable = legacyTable
+    && (isMissingTableError(unifiedResult.error) || isUnsupportedContentTypeError(unifiedResult.error));
+
+  if (!canUseLegacyTable) return { ...unifiedResult, storageTable: 'content_items' };
+
+  const now = new Date().toISOString();
+  const legacyPayload = items.map((item) => ({
+    level: item.level || (contentType === 'placement_tests' ? 'mixed' : 'A1'),
+    content: item,
+    updated_at: now,
+  }));
+  const legacyResult = await supabase.from(legacyTable).insert(legacyPayload).select();
+  return { ...legacyResult, storageTable: legacyTable };
+};
+
 export const publishContentItems = async (contentType, items) => {
   const incoming = asArray(items).map((item, index) => ensureItemId(contentType, item, index));
   if (incoming.length === 0) return { success: true, count: 0, duplicates: 0, items: [] };
@@ -161,36 +262,20 @@ export const publishContentItems = async (contentType, items) => {
       return { success: true, count: 0, duplicates: skipped, items: [] };
     }
 
-    const tableName = EXISTING_TABLES[contentType];
-    const now = new Date().toISOString();
-    const payload = tableName
-      ? unique.map((item) => ({
-        level: item.level || (contentType === 'placement_tests' ? 'mixed' : 'A1'),
-        content: item,
-        updated_at: now,
-      }))
-      : unique.map((item) => ({
-        content_type: contentType,
-        level: item.level || null,
-        topic: item.topic || item.category || null,
-        title: typeof item.title === 'string' ? item.title : item.title?.ar || item.title?.de || null,
-        content: item,
-        metadata: item.metadata || {},
-        is_published: true,
-        created_by: session.user.id,
-      }));
-
-    const targetTable = tableName || 'content_items';
-    const { data, error } = await supabase.from(targetTable).insert(payload).select();
+    const { data, error, storageTable } = await insertPublishedItems(
+      contentType,
+      unique,
+      session.user.id
+    );
     if (error) throw error;
 
-    window.dispatchEvent(new Event('dataImported'));
-    window.dispatchEvent(new Event(`${contentType}Updated`));
+    dispatchContentEvents(contentType);
     return {
       success: true,
       count: unique.length,
       duplicates: skipped,
-      items: asArray(data).map((row) => unwrapRow(row, contentType)),
+      storageTable,
+      items: asArray(data).map((row) => unwrapRow(row, contentType, storageTable)),
     };
   } catch (error) {
     console.error(`[ContentRepository] Failed to publish ${contentType}:`, error);
@@ -199,6 +284,59 @@ export const publishContentItems = async (contentType, items) => {
 };
 
 export const publishContentItem = (contentType, item) => publishContentItems(contentType, [item]);
+
+export const getPublishedContent = (contentType, level = null) => fetchCloudContent(contentType, level);
+
+export const deletePublishedContentItem = async (contentType, itemOrId) => {
+  const item = typeof itemOrId === 'object' ? itemOrId : { supabaseId: itemOrId };
+  const id = item?.supabaseId || item?.id;
+  const storageTable = item?.storageTable || 'content_items';
+
+  if (!id) return { success: false, error: 'A database item id is required.' };
+
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session?.user) throw new Error('Admin authentication is required to delete content.');
+
+    let query = supabase.from(storageTable).delete().eq('id', id);
+    if (storageTable === 'content_items') query = query.eq('content_type', contentType);
+    const { error } = await query;
+    if (error) throw error;
+
+    dispatchContentEvents(contentType);
+    return { success: true };
+  } catch (error) {
+    console.error(`[ContentRepository] Failed to delete ${contentType}:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getLessons = async (level = null) => {
+  let cloudItems = [];
+  try {
+    cloudItems = await fetchCloudContent('lessons', level);
+  } catch (error) {
+    console.warn('[ContentRepository] Supabase lessons read failed; showing local fallback only.', error);
+  }
+
+  const localItems = readLocalFallback('lessons')
+    .filter((item) => !level || item.level === level)
+    .map((item) => ({
+      ...item,
+      source: item.source || 'local',
+      publicationStatus: item.publicationStatus || 'local-only',
+    }));
+
+  return dedupeByKey(
+    [...localItems, ...cloudItems],
+    (item) => getContentDedupKey('lessons', item),
+    { prefer: 'last' }
+  );
+};
+
+export const saveLesson = (lesson) => publishContentItem('lessons', lesson);
+export const importLessons = (lessons) => publishContentItems('lessons', lessons);
 
 export const getVocabulary = () => getContent('vocabulary');
 export const getNouns = () => getContent('nouns');

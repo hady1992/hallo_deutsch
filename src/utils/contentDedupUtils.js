@@ -99,6 +99,14 @@ export const getGrammarDedupKey = (item = {}) => {
   return title ? makeKey(normalizeLevel(item.level), title) : '';
 };
 
+export const getLessonDedupKey = (item = {}) => {
+  const title = typeof item.title === 'object'
+    ? item.title.ar || item.title.de
+    : item.title;
+  const identity = item.slug || title;
+  return identity ? makeKey(normalizeLevel(item.level), identity) : '';
+};
+
 export const getKidsVocabularyDedupKey = (item = {}) => {
   const german = item.german || item.word || item.noun || '';
   const arabic = item.arabic || item.translation || '';
@@ -116,6 +124,8 @@ export const getCustomQuizDedupKey = (item = {}) => (
 
 export const getContentDedupKey = (contentType, item) => {
   switch (contentType) {
+    case 'lessons':
+      return getLessonDedupKey(item);
     case 'nouns':
       return getNounDedupKey(item);
     case 'vocabulary':

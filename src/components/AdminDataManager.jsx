@@ -61,13 +61,13 @@ const DataTab = ({ type, fetchData, deleteData, saveData, title, isAuthenticated
     loadData();
   }, [fetchData]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (item) => {
     if (!isAuthenticated) {
         alert("You must be logged in as an admin to delete items.");
         return;
     }
     if (!confirm("Are you sure you want to delete this item?")) return;
-    const success = await deleteData(id);
+    const success = await deleteData(item);
     if (success) loadData();
   };
 
@@ -143,7 +143,7 @@ const DataTab = ({ type, fetchData, deleteData, saveData, title, isAuthenticated
               <Button 
                 variant="destructive" 
                 size="icon" 
-                onClick={() => handleDelete(item.supabaseId)}
+                onClick={() => handleDelete(item)}
                 title={isAuthenticated ? "Delete from Database" : "Login required"}
                 disabled={!isAuthenticated}
               >

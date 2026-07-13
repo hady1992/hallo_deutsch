@@ -1,11 +1,10 @@
-import { supabase } from '@/lib/customSupabaseClient';
 import { defaultData } from '@/data/defaultData';
 import {
   dedupeByKey,
   getExerciseDedupKey,
   getPlacementQuestionDedupKey,
 } from '@/utils/contentDedupUtils';
-import { publishContentItems } from '@/services/contentRepository';
+import { getPublishedContent, publishContentItems } from '@/services/contentRepository';
 
 // Storage Keys
 const LOCAL_STORAGE_KEYS = {
@@ -72,12 +71,7 @@ export const getPersistentPlacementTestQuestions = async () => {
     // 2. Get Remote Data (Supabase)
     let remoteData = [];
     try {
-        const { data, error } = await supabase
-        .from('placement_tests')
-        .select('*');
-        
-        if (error) throw error;
-        remoteData = data || [];
+        remoteData = await getPublishedContent('placement_tests');
     } catch (dbError) {
         console.warn('Supabase fetch warning (placement_tests):', dbError.message);
         // Continue with local data only
@@ -128,9 +122,7 @@ export const getPersistentExercises = async () => {
 
     let remoteData = [];
     try {
-        const { data, error } = await supabase.from('exercises').select('*');
-        if (error) throw error;
-        remoteData = data || [];
+        remoteData = await getPublishedContent('exercises');
     } catch (dbError) {
         console.warn('Supabase fetch warning (exercises):', dbError.message);
     }

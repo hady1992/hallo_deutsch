@@ -3,7 +3,9 @@ import { Helmet } from 'react-helmet';
 import LevelContent from '@/components/LevelContent';
 import { LessonSection, ExampleBox, ImportantNote, ExerciseBox } from '@/components/LessonUtilities';
 import AudioButton from '@/components/AudioButton';
-import { getImportedLessons, deleteImportedLesson } from '@/utils/storageManager';
+import { deleteImportedLesson } from '@/utils/storageManager';
+import { getLessons } from '@/services/contentRepository';
+import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 function LevelA2() {
@@ -76,16 +78,20 @@ function LevelA2() {
     // ... rest of A2 content ...
   ], []);
 
-  const loadLessons = () => {
-      const allLessons = getImportedLessons();
-      setCustomLessons(allLessons.filter(l => l.level === 'A2'));
-  };
-
   useEffect(() => {
+      let active = true;
+      const loadLessons = async () => {
+          const lessons = await getLessons('A2');
+          if (active) setCustomLessons(lessons);
+      };
       loadLessons();
-      const handleImport = () => loadLessons();
-      window.addEventListener('dataImported', handleImport);
-      return () => window.removeEventListener('dataImported', handleImport);
+      window.addEventListener('dataImported', loadLessons);
+      window.addEventListener('lessonsUpdated', loadLessons);
+      return () => {
+          active = false;
+          window.removeEventListener('dataImported', loadLessons);
+          window.removeEventListener('lessonsUpdated', loadLessons);
+      };
   }, []);
 
   const handleDeleteLesson = (id) => {
@@ -99,7 +105,11 @@ function LevelA2() {
       }
   };
 
-  const allSections = [...staticSections, ...customLessons];
+  const allSections = useMemo(() => dedupeByKey(
+      [...staticSections, ...customLessons],
+      getLessonDedupKey,
+      { prefer: 'first' }
+  ), [staticSections, customLessons]);
 
   return (
     <>

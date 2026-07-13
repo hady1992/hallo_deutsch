@@ -1,6 +1,7 @@
 export const grammarA1Full = [
   {
     id: 'a1-01',
+    level: 'A1',
     title: { de: 'Bestimmter Artikel (Der, Die, Das)', ar: 'أدوات التعريف' },
     explanation: 'في اللغة الألمانية، لكل اسم جنس نحوي (مذكر، مؤنث، محايد) وله أداة تعريف خاصة به. يجب حفظ الأداة مع كل اسم جديد.',
     examples: [
@@ -23,6 +24,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-02',
+    level: 'A1',
     title: { de: 'Unbestimmter Artikel (Ein, Eine)', ar: 'أدوات النكرة' },
     explanation: 'تستخدم أدوات النكرة عندما نتحدث عن شيء غير محدد. لا توجد أداة نكرة للجمع.',
     examples: [
@@ -45,6 +47,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-03',
+    level: 'A1',
     title: { de: 'Personalpronomen (Nominativ)', ar: 'الضمائر الشخصية (حالة الرفع)' },
     explanation: 'الضمائر الشخصية تستخدم للتعويض عن الأسماء. وهي أساس بناء الجملة.',
     examples: [
@@ -68,6 +71,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-04',
+    level: 'A1',
     title: { de: 'Konjugation Präsens (Regelmäßige Verben)', ar: 'تصريف الأفعال المنتظمة (الحاضر)' },
     explanation: 'لتصريف الفعل المنتظم، نحذف النهاية -en من المصدر ونضيف نهايات محددة حسب الضمير.',
     examples: [
@@ -92,6 +96,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-05',
+    level: 'A1',
     title: { de: 'Das Verb "sein" (To be)', ar: 'فعل الكينونة "sein"' },
     explanation: 'فعل "sein" هو أهم فعل في الألمانية وهو فعل شاذ كلياً (غير منتظم).',
     examples: [
@@ -116,6 +121,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-06',
+    level: 'A1',
     title: { de: 'Das Verb "haben" (To have)', ar: 'فعل الملكية "haben"' },
     explanation: 'فعل "haben" يستخدم للتعبير عن الملكية وهو شاذ جزئياً.',
     examples: [
@@ -140,6 +146,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-07',
+    level: 'A1',
     title: { de: 'W-Fragen', ar: 'الأسئلة الاستفهامية (W-Questions)' },
     explanation: 'الأسئلة التي تبدأ بكلمة استفهام (تبدأ بحرف W). الفعل يأتي في المركز الثاني.',
     examples: [
@@ -163,6 +170,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-08',
+    level: 'A1',
     title: { de: 'Ja/Nein Fragen', ar: 'الأسئلة بنعم أو لا' },
     explanation: 'لتكوين سؤال إجابته نعم أو لا، نضع الفعل في بداية الجملة.',
     examples: [
@@ -184,6 +192,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-09',
+    level: 'A1',
     title: { de: 'Akkusativ (Der Akkusativ)', ar: 'المفعول به (حالة النصب)' },
     explanation: 'الحالة الإعرابية التي تعبر عن المفعول به المباشر. التغيير الوحيد يحدث في أداة المذكر (der -> den).',
     examples: [
@@ -206,6 +215,7 @@ export const grammarA1Full = [
   },
   {
     id: 'a1-10',
+    level: 'A1',
     title: { de: 'Negation (nicht vs kein)', ar: 'النفي' },
     explanation: 'نستخدم "kein" لنفي الأسماء النكرة، و "nicht" لنفي الأفعال والصفات والأسماء المعرفة.',
     examples: [

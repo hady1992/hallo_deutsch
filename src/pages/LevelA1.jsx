@@ -9,7 +9,9 @@ import DaysMonthsLesson from '@/components/lessons/a1/DaysMonthsLesson';
 import PersonalPronounsLesson from '@/components/lessons/a1/PersonalPronounsLesson';
 import BasicVerbsLesson from '@/components/lessons/a1/BasicVerbsLesson';
 import SimpleSentenceLesson from '@/components/lessons/a1/SimpleSentenceLesson';
-import { getImportedLessons, deleteImportedLesson } from '@/utils/storageManager';
+import { deleteImportedLesson } from '@/utils/storageManager';
+import { getLessons } from '@/services/contentRepository';
+import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 function LevelA1() {
@@ -51,16 +53,20 @@ function LevelA1() {
     }
   ], []);
 
-  const loadLessons = () => {
-      const allLessons = getImportedLessons();
-      setCustomLessons(allLessons.filter(l => l.level === 'A1'));
-  };
-
   useEffect(() => {
+      let active = true;
+      const loadLessons = async () => {
+          const lessons = await getLessons('A1');
+          if (active) setCustomLessons(lessons);
+      };
       loadLessons();
-      const handleImport = () => loadLessons();
-      window.addEventListener('dataImported', handleImport);
-      return () => window.removeEventListener('dataImported', handleImport);
+      window.addEventListener('dataImported', loadLessons);
+      window.addEventListener('lessonsUpdated', loadLessons);
+      return () => {
+          active = false;
+          window.removeEventListener('dataImported', loadLessons);
+          window.removeEventListener('lessonsUpdated', loadLessons);
+      };
   }, []);
 
   const handleDeleteLesson = (id) => {
@@ -74,7 +80,11 @@ function LevelA1() {
       }
   };
 
-  const allSections = [...staticSections, ...customLessons];
+  const allSections = useMemo(() => dedupeByKey(
+      [...staticSections, ...customLessons],
+      getLessonDedupKey,
+      { prefer: 'first' }
+  ), [staticSections, customLessons]);
 
   return (
     <>

@@ -16,7 +16,7 @@ const DataSyncStatus = () => {
     // Check connection periodically
     const checkConnection = async () => {
         try {
-            const { error } = await supabase.from('exercises').select('id').limit(1);
+            const { error } = await supabase.from('content_items').select('id').limit(1);
             setIsConnected(!error);
         } catch {
             setIsConnected(false);

@@ -193,6 +193,9 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                         <div>
                             <h3 className="text-lg font-bold text-gray-800">{section.title}</h3>
                             {section.isCustom && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mr-2">مخصص</span>}
+                            {section.publicationStatus === 'local-only' && (
+                                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mr-2">محلي فقط</span>
+                            )}
                         </div>
                         </div>
                         {expandedSection === index ? <ChevronUp className="text-gray-400"/> : <ChevronDown className="text-gray-400"/>}
@@ -278,7 +281,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                                     </Button>
                                 </div>
 
-                                {isAdmin && section.isCustom && onDeleteLesson && (
+                                {isAdmin && section.isCustom && section.source !== 'cloud' && onDeleteLesson && (
                                     <Button
                                         onClick={(e) => {
                                             e.stopPropagation();

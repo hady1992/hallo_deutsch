@@ -94,7 +94,7 @@ export const mergeDataWithDefaults = (storedData, defaultData, uniqueField = 'id
  * Syncs specific items to a Supabase table.
  * Does not delete items from Supabase (append/upsert only).
  */
-const uploadBatchToSupabase = async (tableName, items, levelField = 'level') => {
+const uploadBatchToSupabase = async (contentType, items, levelField = 'level') => {
     if (!items || items.length === 0) return { success: true, count: 0 };
 
     try {
@@ -105,8 +105,9 @@ const uploadBatchToSupabase = async (tableName, items, levelField = 'level') => 
         // We assume 'content' -> 'id' holds the unique local ID
         // Note: This fetch can be heavy if table is huge. For this scale, it's okay.
         const { data: existingData, error: fetchError } = await supabase
-            .from(tableName)
-            .select('content');
+            .from('content_items')
+            .select('content')
+            .eq('content_type', contentType);
             
         if (fetchError) throw fetchError;
 
@@ -117,18 +118,22 @@ const uploadBatchToSupabase = async (tableName, items, levelField = 'level') => 
 
         if (newItems.length === 0) return { success: true, count: 0 };
 
-        console.log(`Syncing ${newItems.length} new items to ${tableName}...`);
+        console.log(`Syncing ${newItems.length} new ${contentType} items to content_items...`);
 
         // 3. Prepare payload
         const payload = newItems.map(item => ({
+            content_type: contentType,
             level: item[levelField] || item.level || 'A1',
             content: item,
-            updated_at: new Date().toISOString()
+            topic: item.topic || item.category || null,
+            title: typeof item.title === 'string' ? item.title : null,
+            is_published: true,
+            created_by: session.user.id,
         }));
 
         // 4. Insert
         const { error: insertError } = await supabase
-            .from(tableName)
+            .from('content_items')
             .insert(payload);
 
         if (insertError) throw insertError;
@@ -136,7 +141,7 @@ const uploadBatchToSupabase = async (tableName, items, levelField = 'level') => 
         return { success: true, count: newItems.length };
 
     } catch (error) {
-        console.error(`Supabase sync error for ${tableName}:`, error);
+        console.error(`Supabase sync error for ${contentType}:`, error);
         return { success: false, error: error.message };
     }
 };
