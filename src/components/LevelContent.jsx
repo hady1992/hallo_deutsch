@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp, CheckCircle, ArrowRight, ArrowLeft, BookOpen, Trash2, PenTool } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckCircle, ArrowRight, ArrowLeft, BookOpen, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProgressBar from '@/components/ProgressBar';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 import SafeLessonRenderer from '@/components/SafeLessonRenderer';
 
-function LevelContent({ title, description, objectives, sections, prevLevel, nextLevel, levelId, onDeleteLesson }) {
+function LevelContent({ title, description, objectives, sections, prevLevel, nextLevel, levelId }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -240,20 +240,6 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                                     </Button>
                                 </div>
 
-                                {isAdmin && section.isCustom && section.source !== 'cloud' && onDeleteLesson && (
-                                    <Button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onDeleteLesson(section.id);
-                                        }}
-                                        variant="destructive"
-                                        size="sm"
-                                        className="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 hover:border-red-300 shadow-none"
-                                    >
-                                        <Trash2 size={16} className="ml-2" />
-                                        حذف الدرس
-                                    </Button>
-                                )}
                             </div>
                             </div>
                         </motion.div>

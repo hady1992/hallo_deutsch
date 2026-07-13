@@ -3,15 +3,12 @@ import { Helmet } from 'react-helmet';
 import LevelContent from '@/components/LevelContent';
 import { LessonSection, ExampleBox, ImportantNote, ExerciseBox } from '@/components/LessonUtilities';
 import AudioButton from '@/components/AudioButton';
-import { deleteImportedLesson } from '@/utils/storageManager';
 import { getLessons } from '@/services/contentRepository';
 import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
-import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 
 function LevelA2() {
-  const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = isAuthorizedAdminEmail(user?.email);
   const [customLessons, setCustomLessons] = useState([]);
@@ -98,17 +95,6 @@ function LevelA2() {
       };
   }, [isAdmin]);
 
-  const handleDeleteLesson = (id) => {
-      if(window.confirm("هل أنت متأكد من حذف هذا الدرس؟")) {
-          deleteImportedLesson(id);
-          toast({
-              title: "تم الحذف",
-              description: "تم حذف الدرس بنجاح.",
-              className: "bg-red-50 border-red-200 text-red-800"
-          });
-      }
-  };
-
   const allSections = useMemo(() => dedupeByKey(
       [...staticSections, ...customLessons],
       getLessonDedupKey,
@@ -135,7 +121,6 @@ function LevelA2() {
         sections={allSections}
         prevLevel={{ label: "المستوى الأول A1", path: "/level/a1" }}
         nextLevel={{ label: "المستوى الثالث B1", path: "/level/b1" }}
-        onDeleteLesson={handleDeleteLesson}
       />
     </>
   );

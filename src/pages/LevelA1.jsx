@@ -9,15 +9,12 @@ import DaysMonthsLesson from '@/components/lessons/a1/DaysMonthsLesson';
 import PersonalPronounsLesson from '@/components/lessons/a1/PersonalPronounsLesson';
 import BasicVerbsLesson from '@/components/lessons/a1/BasicVerbsLesson';
 import SimpleSentenceLesson from '@/components/lessons/a1/SimpleSentenceLesson';
-import { deleteImportedLesson } from '@/utils/storageManager';
 import { getLessons } from '@/services/contentRepository';
 import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
-import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 
 function LevelA1() {
-  const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = isAuthorizedAdminEmail(user?.email);
   const [customLessons, setCustomLessons] = useState([]);
@@ -73,17 +70,6 @@ function LevelA1() {
       };
   }, [isAdmin]);
 
-  const handleDeleteLesson = (id) => {
-      if(window.confirm("هل أنت متأكد من حذف هذا الدرس؟")) {
-          deleteImportedLesson(id);
-          toast({
-              title: "تم الحذف",
-              description: "تم حذف الدرس بنجاح.",
-              className: "bg-red-50 border-red-200 text-red-800"
-          });
-      }
-  };
-
   const allSections = useMemo(() => dedupeByKey(
       [...staticSections, ...customLessons],
       getLessonDedupKey,
@@ -110,7 +96,6 @@ function LevelA1() {
         sections={allSections}
         prevLevel={null}
         nextLevel={{ label: "المستوى الثاني A2", path: "/level/a2" }}
-        onDeleteLesson={handleDeleteLesson}
       />
     </>
   );
