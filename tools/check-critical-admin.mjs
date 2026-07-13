@@ -8,6 +8,8 @@ const readProjectFile = (relativePath) => readFileSync(
 
 const importer = readProjectFile('src/components/DataImportUtility.jsx');
 const manager = readProjectFile('src/components/AdminDataManager.jsx');
+const adminPanel = readProjectFile('src/pages/AdminPanel.jsx');
+const lessonUploader = readProjectFile('src/components/LessonUploader.jsx');
 
 const requireText = (source, text, message) => {
   if (!source.includes(text)) throw new Error(message);
@@ -26,5 +28,13 @@ for (const callback of ['fetchExercises', 'fetchVocabulary', 'fetchExams', 'fetc
   requireText(manager, `fetchData={${callback}}`, `${callback} must be passed as a stable callback.`);
   rejectText(manager, `fetchData={() => ${callback}()}`, `${callback} inline wrapper can restart the admin fetch loop.`);
 }
+
+requireText(adminPanel, "id: 'lessons'", 'The admin lessons section is missing.');
+requireText(adminPanel, '<LessonUploader', 'LessonUploader is not connected to the admin panel.');
+requireText(adminPanel, 'templateFormat="json"', 'The admin lesson uploader must use a JSON template.');
+requireText(adminPanel, 'ملفات الدروس تُرفع من هنا فقط، وليس من قسم الأسماء أو المفردات.', 'Lesson upload guidance is missing.');
+requireText(lessonUploader, "getPublishedContent('lessons'", 'Published lessons list is not connected to content_items.');
+requireText(lessonUploader, 'data-testid="lesson-import-report"', 'Lesson import report is missing.');
+requireText(lessonUploader, 'محلي فقط — لن يظهر للزوار', 'Cloud failure status is missing from LessonUploader.');
 
 console.log('Critical admin and import checks passed.');

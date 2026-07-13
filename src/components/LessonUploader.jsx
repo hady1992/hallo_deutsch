@@ -1,234 +1,334 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AlertTriangle, BookOpen, Check, FileDown, FilePlus, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Upload, FileDown, Check, AlertTriangle, Loader2, FilePlus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { getImportedLessons, saveImportedLessons } from '@/utils/storageManager';
-import { importLessons } from '@/services/contentRepository';
+import { getPublishedContent, importLessons } from '@/services/contentRepository';
 import { dedupeByKey, getLessonDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
-const LessonUploader = ({ levelId }) => {
+const parseList = (value) => {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value || '')
+    .split('|')
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const parseLessonCSV = (text) => {
+  const rows = [];
+  let row = [];
+  let value = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const nextChar = text[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      row.push(value.trim());
+      value = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && nextChar === '\n') index += 1;
+      row.push(value.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      value = '';
+    } else {
+      value += char;
+    }
+  }
+
+  row.push(value.trim());
+  if (row.some(Boolean)) rows.push(row);
+  if (inQuotes) throw new Error('تنسيق CSV غير صحيح: توجد علامة اقتباس غير مغلقة.');
+  if (rows.length < 2) throw new Error('الملف فارغ أو لا يحتوي على بيانات.');
+
+  const headers = rows[0].map((header) => header.replace(/^\uFEFF/, '').trim().toLowerCase());
+  return rows.slice(1).map((values) => Object.fromEntries(
+    headers.map((header, index) => [header, values[index] || ''])
+  ));
+};
+
+const normalizeLessonItems = (items, levelId) => {
+  const lessons = [];
+  let errors = 0;
+
+  items.forEach((rawItem, index) => {
+    const item = rawItem && typeof rawItem === 'object' ? rawItem : {};
+    const title = typeof item.title === 'object'
+      ? item.title.ar || item.title.de || ''
+      : String(item.title || '').trim();
+    const explanation = String(item.explanation || item.content || '').trim();
+
+    if (!title || !explanation) {
+      errors += 1;
+      return;
+    }
+
+    lessons.push({
+      ...item,
+      id: item.id || `lesson_${Date.now()}_${index}`,
+      title,
+      explanation,
+      level: levelId || item.level || 'A1',
+      duration: item.duration || 'غير محدد',
+      objectives: parseList(item.objectives),
+      resources: parseList(item.resources),
+      isCustom: true,
+    });
+  });
+
+  return { lessons, errors };
+};
+
+const LessonUploader = ({
+  levelId,
+  templateFormat = 'csv',
+  acceptedFormats,
+  uploadLabel,
+  showPublishedLessons = false,
+}) => {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [importStats, setImportStats] = useState(null);
+  const [publishedLessons, setPublishedLessons] = useState([]);
+  const [isLoadingPublished, setIsLoadingPublished] = useState(false);
+  const isJsonMode = templateFormat === 'json';
+  const accept = acceptedFormats || (isJsonMode ? '.json' : '.csv');
 
-  const parseList = (value) => String(value || '')
-    .split('|')
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const loadPublishedLessons = useCallback(async () => {
+    if (!showPublishedLessons) return;
+    setIsLoadingPublished(true);
+    try {
+      const lessons = await getPublishedContent('lessons', levelId || null);
+      setPublishedLessons(lessons);
+    } catch (error) {
+      console.error('[LessonUploader] Failed to load published lessons:', error);
+      setPublishedLessons([]);
+    } finally {
+      setIsLoadingPublished(false);
+    }
+  }, [levelId, showPublishedLessons]);
+
+  useEffect(() => {
+    loadPublishedLessons();
+    window.addEventListener('lessonsUpdated', loadPublishedLessons);
+    return () => window.removeEventListener('lessonsUpdated', loadPublishedLessons);
+  }, [loadPublishedLessons]);
 
   const downloadTemplate = () => {
-    const csvContent = `title,content,duration,objectives,resources
-"درس تجريبي: التسوق","شرح كيفية التسوق في السوبر ماركت والعبارات المستخدمة.",30,"تعلم مفردات الطعام|القدرة على السؤال عن السعر","كتاب A1 صفحة 20|فيديو تعليمي"
-"المحادثة في المطار","كيفية التعامل مع إجراءات المطار باللغة الألمانية.",45,"مصطلحات السفر|الجوازات والتذاكر","تسجيل صوتي مرفق"`;
+    const jsonTemplate = JSON.stringify([{
+      title: 'درس تجريبي: التسوق',
+      content: 'شرح مفردات وعبارات التسوق الأساسية باللغة الألمانية.',
+      level: levelId || 'A1',
+      duration: 30,
+      objectives: ['تعلم مفردات الطعام', 'السؤال عن السعر'],
+      resources: ['كتاب المستوى', 'تسجيل صوتي'],
+    }], null, 2);
+    const csvTemplate = `title,content,duration,objectives,resources
+"درس تجريبي: التسوق","شرح مفردات وعبارات التسوق الأساسية باللغة الألمانية.",30,"تعلم مفردات الطعام|السؤال عن السعر","كتاب المستوى|تسجيل صوتي"`;
+    const content = isJsonMode ? jsonTemplate : csvTemplate;
+    const extension = isJsonMode ? 'json' : 'csv';
+    const mimeType = isJsonMode ? 'application/json' : 'text/csv;charset=utf-8;';
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `lesson_template_${levelId}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    link.href = url;
+    link.download = `lesson_template_${levelId || 'A1'}.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     toast({
-        title: "تم التحميل",
-        description: "تم تحميل قالب الدروس بنجاح.",
-        className: "bg-green-50 border-green-200 text-green-800"
+      title: 'تم التحميل',
+      description: `تم تحميل قالب الدرس بصيغة ${extension.toUpperCase()}.`,
+      className: 'bg-green-50 border-green-200 text-green-800',
     });
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      processFile(file);
-    }
-    e.target.value = ''; // Reset
-  };
+  const handleFileSelect = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
 
-  const processFile = async (file) => {
     setIsUploading(true);
     setImportStats(null);
+
     try {
-        const text = await file.text();
-        const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim());
-        
-        if (lines.length < 2) throw new Error("الملف فارغ أو لا يحتوي على بيانات");
+      const text = await file.text();
+      const isJsonFile = file.name.toLowerCase().endsWith('.json');
+      let rawItems;
 
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-        const requiredHeaders = ['title', 'content'];
-        const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+      if (isJsonFile) {
+        const parsed = JSON.parse(text);
+        rawItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.lessons) ? parsed.lessons : [parsed]);
+      } else {
+        rawItems = parseLessonCSV(text);
+      }
 
-        if (missingHeaders.length > 0) {
-            throw new Error(`الأعمدة التالية مفقودة: ${missingHeaders.join(', ')}`);
-        }
+      const { lessons, errors } = normalizeLessonItems(rawItems, levelId);
+      if (lessons.length === 0) throw new Error('لم يتم العثور على دروس صالحة. يجب توفير title وcontent.');
 
-        const newLessons = [];
-        let errors = 0;
-
-        for (let i = 1; i < lines.length; i++) {
-            try {
-                // CSV Parsing Logic
-                const row = [];
-                let inQuote = false;
-                let val = '';
-                for (let char of lines[i]) {
-                    if (char === '"') inQuote = !inQuote;
-                    else if (char === ',' && !inQuote) { row.push(val.trim().replace(/^"|"$/g, '')); val = ''; }
-                    else val += char;
-                }
-                row.push(val.trim().replace(/^"|"$/g, ''));
-
-                const obj = {};
-                headers.forEach((h, idx) => obj[h] = row[idx]);
-
-                if (!obj.title || !obj.content) {
-                    errors++;
-                    continue;
-                }
-
-                newLessons.push({
-                    id: `lesson_${Date.now()}_${i}`,
-                    title: obj.title,
-                    explanation: obj.content, // Map content to explanation
-                    level: levelId,
-                    duration: obj.duration || 'غير محدد',
-                    objectives: parseList(obj.objectives),
-                    resources: parseList(obj.resources),
-                    isCustom: true,
-                });
-            } catch (err) {
-                console.error(`Error parsing row ${i}:`, err);
-                errors++;
-            }
-        }
-
-        if (newLessons.length === 0) throw new Error("لم يتم العثور على دروس صالحة");
-
-        const publishResult = await importLessons(newLessons);
-
-        if (publishResult.success) {
-          const publishedKeys = new Set(newLessons.map(getLessonDedupKey).filter(Boolean));
-          const localLessons = getImportedLessons();
-          const remainingLocal = localLessons.filter((lesson) => !publishedKeys.has(getLessonDedupKey(lesson)));
-          if (remainingLocal.length !== localLessons.length) saveImportedLessons(remainingLocal);
-
-          setImportStats({
-            count: publishResult.count,
-            duplicates: publishResult.duplicates,
-            errors,
-            publication: 'published',
-          });
-          toast({
-              title: "تم النشر للزوار",
-              description: `تم إضافة ${publishResult.count} درس، وتم تجاهل مكرر: ${publishResult.duplicates}، أخطاء: ${errors}.`,
-              className: "bg-green-50 border-green-200 text-green-800"
-          });
-          return;
-        }
-
-        const currentLessons = getImportedLessons();
-        const { unique: localOnlyLessons, skipped: localDuplicates } = splitNewUniqueItems(
-          newLessons,
-          currentLessons,
-          getLessonDedupKey
-        );
-        const fallbackLessons = localOnlyLessons.map((lesson) => ({
-          ...lesson,
-          source: 'local',
-          publicationStatus: 'local-only',
-        }));
-        const merged = dedupeByKey(
-          [...currentLessons, ...fallbackLessons],
-          getLessonDedupKey,
-          { prefer: 'last' }
-        );
-        const savedLocally = saveImportedLessons(merged);
-        if (!savedLocally) throw new Error("مساحة التخزين ممتلئة");
+      const publishResult = await importLessons(lessons);
+      if (publishResult.success) {
+        const publishedKeys = new Set(lessons.map(getLessonDedupKey).filter(Boolean));
+        const localLessons = getImportedLessons();
+        const remainingLocal = localLessons.filter((lesson) => !publishedKeys.has(getLessonDedupKey(lesson)));
+        if (remainingLocal.length !== localLessons.length) saveImportedLessons(remainingLocal);
 
         setImportStats({
-          count: fallbackLessons.length,
-          duplicates: localDuplicates,
+          count: publishResult.count,
+          duplicates: publishResult.duplicates,
           errors,
-          publication: 'local-only',
+          publication: 'published',
         });
+        await loadPublishedLessons();
         toast({
-          title: "حفظ محلي فقط",
-          description: "محلي فقط — لن يظهر للزوار",
-          variant: "destructive"
+          title: 'تم النشر للزوار',
+          description: `تم إضافة: ${publishResult.count}، مكرر: ${publishResult.duplicates}، أخطاء: ${errors}.`,
+          className: 'bg-green-50 border-green-200 text-green-800',
         });
+        return;
+      }
 
+      const currentLessons = getImportedLessons();
+      const { unique: localOnlyLessons, skipped: localDuplicates } = splitNewUniqueItems(
+        lessons,
+        currentLessons,
+        getLessonDedupKey
+      );
+      const fallbackLessons = localOnlyLessons.map((lesson) => ({
+        ...lesson,
+        source: 'local',
+        publicationStatus: 'local-only',
+      }));
+      const merged = dedupeByKey(
+        [...currentLessons, ...fallbackLessons],
+        getLessonDedupKey,
+        { prefer: 'last' }
+      );
+      if (!saveImportedLessons(merged)) throw new Error('تعذر الحفظ المحلي.');
+
+      setImportStats({
+        count: fallbackLessons.length,
+        duplicates: localDuplicates,
+        errors,
+        publication: 'local-only',
+      });
+      toast({
+        title: 'حفظ محلي فقط',
+        description: 'محلي فقط — لن يظهر للزوار',
+        variant: 'destructive',
+      });
     } catch (error) {
-        toast({
-            title: "خطأ في الاستيراد",
-            description: error.message,
-            variant: "destructive"
-        });
+      console.error('[LessonUploader] Import failed:', error);
+      setImportStats({ count: 0, duplicates: 0, errors: 1, publication: 'invalid' });
+      toast({
+        title: 'خطأ في استيراد الدرس',
+        description: error instanceof SyntaxError ? 'ملف JSON غير صالح.' : error.message,
+        variant: 'destructive',
+      });
     } finally {
-        setIsUploading(false);
+      setIsUploading(false);
     }
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 mb-8 shadow-sm">
-        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                    <FilePlus className="text-blue-600" size={24} />
-                </div>
-                <div>
-                    <h3 className="font-bold text-slate-800">إضافة دروس جديدة</h3>
-                    <p className="text-xs text-slate-500">يمكنك رفع ملف CSV لإضافة دروس إضافية لهذا المستوى</p>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-                <input 
-                    type="file" 
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    accept=".csv"
-                    className="hidden"
-                />
-                
-                <Button 
-                    onClick={downloadTemplate}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 sm:flex-none gap-2"
-                >
-                    <FileDown size={16} />
-                    تحميل القالب
-                </Button>
-
-                <Button 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white gap-2"
-                >
-                    {isUploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
-                    رفع ملف CSV
-                </Button>
-            </div>
-
-            {importStats && (
-              <div className={`mt-4 flex w-full flex-wrap items-center gap-4 rounded-lg border p-3 text-sm ${
-                importStats.publication === 'published'
-                  ? 'border-green-200 bg-green-50 text-green-800'
-                  : 'border-amber-200 bg-amber-50 text-amber-900'
-              }`}>
-                <span className="flex items-center gap-1 font-bold">
-                  {importStats.publication === 'published' ? <Check size={16} /> : <AlertTriangle size={16} />}
-                  {importStats.publication === 'published' ? 'تم النشر للزوار' : 'محلي فقط — لن يظهر للزوار'}
-                </span>
-                <span>تم إضافة: {importStats.count}</span>
-                <span>تم تجاهل مكرر: {importStats.duplicates}</span>
-                <span>أخطاء: {importStats.errors}</span>
-              </div>
-            )}
+    <div className="mb-8 rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="lesson-uploader">
+      <div className="flex flex-col flex-wrap items-center justify-between gap-4 sm:flex-row">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-blue-50 p-2">
+            <FilePlus className="text-blue-600" size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">إضافة دروس جديدة</h3>
+            <p className="text-xs text-slate-500">ارفع ملف {isJsonMode ? 'JSON' : 'CSV'} لإضافة دروس إلى المستوى {levelId}.</p>
+          </div>
         </div>
+
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept={accept}
+            className="hidden"
+          />
+          <Button type="button" onClick={downloadTemplate} variant="outline" size="sm" className="flex-1 gap-2 sm:flex-none">
+            <FileDown size={16} />
+            تحميل قالب درس {isJsonMode ? 'JSON' : 'CSV'}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex-1 gap-2 bg-blue-600 text-white hover:bg-blue-700 sm:flex-none"
+            data-testid="lesson-upload-action"
+          >
+            {isUploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+            {isUploading ? 'جاري الاستيراد...' : (uploadLabel || `رفع ملف ${isJsonMode ? 'JSON' : 'CSV'}`)}
+          </Button>
+        </div>
+
+        {importStats && (
+          <div className={`mt-2 grid w-full gap-2 rounded-lg border p-3 text-sm sm:grid-cols-4 ${
+            importStats.publication === 'published'
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : 'border-amber-200 bg-amber-50 text-amber-900'
+          }`} data-testid="lesson-import-report">
+            <span className="flex items-center gap-1 font-bold">
+              {importStats.publication === 'published' ? <Check size={16} /> : <AlertTriangle size={16} />}
+              {importStats.publication === 'published' ? 'تم النشر للزوار' : 'محلي فقط — لن يظهر للزوار'}
+            </span>
+            <span>تم إضافة: {importStats.count}</span>
+            <span>مكرر: {importStats.duplicates}</span>
+            <span>أخطاء: {importStats.errors}</span>
+          </div>
+        )}
+      </div>
+
+      {showPublishedLessons && (
+        <div className="mt-6 border-t border-slate-200 pt-5" data-testid="published-lessons-list">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h4 className="flex items-center gap-2 font-black text-slate-800">
+              <BookOpen size={18} className="text-blue-600" />
+              قائمة الدروس المنشورة
+            </h4>
+            <span className="text-xs font-bold text-slate-500">{publishedLessons.length} درس</span>
+          </div>
+          {isLoadingPublished ? (
+            <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
+              <Loader2 className="animate-spin" size={16} /> جاري تحميل الدروس...
+            </div>
+          ) : publishedLessons.length > 0 ? (
+            <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+              {publishedLessons.map((lesson) => (
+                <div key={lesson.supabaseId || lesson.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-slate-800">{lesson.title}</p>
+                    <p className="text-xs text-slate-500">المستوى {lesson.level || levelId}</p>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700">منشور</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-lg border border-dashed border-slate-200 py-5 text-center text-sm font-bold text-slate-400">
+              لا توجد دروس منشورة لهذا المستوى بعد.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

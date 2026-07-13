@@ -4,6 +4,7 @@ import {
   Archive,
   Baby,
   BookOpen,
+  BookPlus,
   ChevronDown,
   Database,
   Dumbbell,
@@ -31,6 +32,7 @@ import KidsVocabularyImporter from '@/components/KidsVocabularyImporter';
 import KidsConversationAdder from '@/components/KidsConversationAdder';
 import CustomQuizManager from '@/components/CustomQuizManager';
 import KidsFileUploader from '@/components/KidsFileUploader';
+import LessonUploader from '@/components/LessonUploader';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import {
   getKidsExercises,
@@ -57,6 +59,13 @@ const ADMIN_SECTIONS = [
     description: 'استيراد JSON/CSV والقوالب ونتائج الرفع.',
     icon: FileUp,
     color: 'bg-green-50 text-green-700 border-green-100',
+  },
+  {
+    id: 'lessons',
+    title: 'إدارة الدروس',
+    description: 'رفع دروس JSON ومراجعة الدروس المنشورة.',
+    icon: BookPlus,
+    color: 'bg-cyan-50 text-cyan-700 border-cyan-100',
   },
   {
     id: 'kids',
@@ -116,11 +125,13 @@ const AdminPanel = () => {
   const [openSections, setOpenSections] = useState({
     content: false,
     upload: false,
+    lessons: true,
     kids: true,
     tests: false,
     system: false,
   });
   const [showLegacyGrammarTool, setShowLegacyGrammarTool] = useState(false);
+  const [lessonLevel, setLessonLevel] = useState('A1');
 
   const toggleSection = (sectionId) => {
     setOpenSections((current) => ({
@@ -230,7 +241,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="mb-6 grid gap-3 md:grid-cols-5">
+        <div className="mb-6 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
           {ADMIN_SECTIONS.map((section) => {
             const Icon = section.icon;
             return (
@@ -318,6 +329,36 @@ const AdminPanel = () => {
 
           <AdminSection
             section={ADMIN_SECTIONS[2]}
+            isOpen={openSections.lessons}
+            onToggle={() => toggleSection('lessons')}
+          >
+            <div className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-black text-cyan-900">
+              ملفات الدروس تُرفع من هنا فقط، وليس من قسم الأسماء أو المفردات.
+            </div>
+            <div className="mb-5 flex flex-col gap-2 sm:max-w-xs">
+              <label htmlFor="admin-lesson-level" className="text-sm font-black text-slate-700">مستوى الدرس</label>
+              <select
+                id="admin-lesson-level"
+                value={lessonLevel}
+                onChange={(event) => setLessonLevel(event.target.value)}
+                className="h-11 rounded-md border border-slate-300 bg-white px-3 font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {['A1', 'A2', 'B1', 'B2'].map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
+            </div>
+            <LessonUploader
+              levelId={lessonLevel}
+              templateFormat="json"
+              acceptedFormats=".json"
+              uploadLabel="رفع درس JSON"
+              showPublishedLessons
+            />
+          </AdminSection>
+
+          <AdminSection
+            section={ADMIN_SECTIONS[3]}
             isOpen={openSections.kids}
             onToggle={() => toggleSection('kids')}
           >
@@ -388,7 +429,7 @@ const AdminPanel = () => {
           </AdminSection>
 
           <AdminSection
-            section={ADMIN_SECTIONS[3]}
+            section={ADMIN_SECTIONS[4]}
             isOpen={openSections.tests}
             onToggle={() => toggleSection('tests')}
           >
@@ -425,7 +466,7 @@ const AdminPanel = () => {
           </AdminSection>
 
           <AdminSection
-            section={ADMIN_SECTIONS[4]}
+            section={ADMIN_SECTIONS[5]}
             isOpen={openSections.system}
             onToggle={() => toggleSection('system')}
           >
