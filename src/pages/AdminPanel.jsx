@@ -26,6 +26,7 @@ import AdminDataManager from '@/components/AdminDataManager';
 import DataSyncStatus from '@/components/DataSyncStatus';
 import StorageDebugPanel from '@/components/StorageDebugPanel';
 import AdminGate from '@/components/AdminGate';
+import AdminErrorBoundary from '@/components/AdminErrorBoundary';
 import KidsVocabularyImporter from '@/components/KidsVocabularyImporter';
 import KidsConversationAdder from '@/components/KidsConversationAdder';
 import CustomQuizManager from '@/components/CustomQuizManager';
@@ -203,6 +204,7 @@ const AdminPanel = () => {
 
   return (
     <AdminGate>
+    <AdminErrorBoundary>
     <div className="min-h-screen bg-slate-50 pt-24 pb-12" dir="rtl">
       <Helmet>
         <title>{'Admin Panel | Hallo Deutsch'}</title>
@@ -339,7 +341,9 @@ const AdminPanel = () => {
               </div>
 
               <TabsContent value="kids-words" className="mt-0">
-                <KidsVocabularyImporter refreshData={refreshKidsData} />
+                <AdminErrorBoundary>
+                  <KidsVocabularyImporter refreshData={refreshKidsData} />
+                </AdminErrorBoundary>
               </TabsContent>
 
               <TabsContent value="kids-conversations" className="mt-0">
@@ -436,6 +440,7 @@ const AdminPanel = () => {
         </div>
       </div>
     </div>
+    </AdminErrorBoundary>
     </AdminGate>
   );
 };

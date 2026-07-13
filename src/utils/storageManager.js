@@ -42,6 +42,40 @@ const dispatchDataEvents = (specificEventName) => {
     }
 };
 
+const createStableKidsVocabularyId = (item) => {
+    const seed = [
+        item?.category || item?.topic || 'general',
+        item?.german || item?.word || item?.noun || '',
+        item?.arabic || item?.translation || '',
+    ].join('|').normalize('NFKC').trim().toLowerCase();
+    let hash = 0;
+
+    for (let index = 0; index < seed.length; index += 1) {
+        hash = ((hash << 5) - hash + seed.charCodeAt(index)) | 0;
+    }
+
+    return `kids_recovered_${Math.abs(hash).toString(36)}`;
+};
+
+const normalizeKidsVocabulary = (data) => (
+    (Array.isArray(data) ? data : [])
+        .filter((item) => item && typeof item === 'object' && !Array.isArray(item))
+        .map((item) => {
+            const hasId = item.id !== undefined
+                && item.id !== null
+                && String(item.id).trim() !== '';
+
+            if (hasId) return item;
+
+            return {
+                ...item,
+                id: createStableKidsVocabularyId(item),
+                isImported: true,
+                source: item.source || 'legacy-import',
+            };
+        })
+);
+
 // Helper: Merge Data
 export const mergeDataWithDefaults = (storedData, defaultData, uniqueField = 'id') => {
     const safeStored = Array.isArray(storedData) ? storedData : [];
@@ -413,8 +447,26 @@ export const deleteImportedLesson = (id) => {
 };
 
 // Kids Data
-export const getKidsVocabulary = () => { try { return dedupeByKey(JSON.parse(localStorage.getItem(KIDS_VOCABULARY_KEY) || '[]'), getVocabularyDedupKey); } catch { return []; } };
-export const saveKidsVocabulary = (data) => { localStorage.setItem(KIDS_VOCABULARY_KEY, JSON.stringify(dedupeByKey(data, getVocabularyDedupKey))); dispatchDataEvents('kidsVocabularyUpdated'); return true; };
+export const getKidsVocabulary = () => {
+    try {
+        const storedData = JSON.parse(localStorage.getItem(KIDS_VOCABULARY_KEY) || '[]');
+        const normalizedData = dedupeByKey(normalizeKidsVocabulary(storedData), getVocabularyDedupKey);
+
+        if (JSON.stringify(storedData) !== JSON.stringify(normalizedData)) {
+            localStorage.setItem(KIDS_VOCABULARY_KEY, JSON.stringify(normalizedData));
+        }
+
+        return normalizedData;
+    } catch {
+        return [];
+    }
+};
+export const saveKidsVocabulary = (data) => {
+    const normalizedData = dedupeByKey(normalizeKidsVocabulary(data), getVocabularyDedupKey);
+    localStorage.setItem(KIDS_VOCABULARY_KEY, JSON.stringify(normalizedData));
+    dispatchDataEvents('kidsVocabularyUpdated');
+    return true;
+};
 
 export const getKidsVerbs = () => { try { return JSON.parse(localStorage.getItem(KIDS_VERBS_KEY) || '[]'); } catch { return []; } };
 export const saveKidsVerbs = (data) => { localStorage.setItem(KIDS_VERBS_KEY, JSON.stringify(data)); dispatchDataEvents('kidsVerbsUpdated'); return true; };

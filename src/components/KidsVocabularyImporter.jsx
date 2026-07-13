@@ -12,8 +12,22 @@ import { kidsVocabularyData } from '@/data/kidsVocabularyData';
 import { getKidsVocabularyDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 import { publishContentItems } from '@/services/contentRepository';
 
+const isImportedVocabularyItem = (item) => {
+  if (!item || typeof item !== 'object') return false;
+
+  const id = String(item.id ?? '').trim();
+  const hasImportMarker = item.isImported === true
+    || item.source === 'admin-import'
+    || item.source === 'legacy-import'
+    || Boolean(item.uploadedAt);
+
+  return hasImportMarker || /^\d{10,}$/.test(id);
+};
+
 const KidsVocabularyImporter = ({ refreshData }) => {
-  const [importedItems, setImportedItems] = useState(getKidsVocabulary().filter(i => i.id.toString().length > 10)); // Assuming generated IDs are long timestamps
+  const [importedItems, setImportedItems] = useState(() => (
+    getKidsVocabulary().filter(isImportedVocabularyItem)
+  ));
   const { toast } = useToast();
 
   const handleUpload = async (data, category) => {
@@ -36,9 +50,13 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     }
 
     const currentVocab = getKidsVocabulary();
+    const uploadedAt = new Date().toISOString();
     const preparedItems = processedData.map((item, idx) => ({
       ...item,
-      id: Date.now() + idx
+      id: Date.now() + idx,
+      isImported: true,
+      source: 'admin-import',
+      uploadedAt,
     }));
     const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(
       preparedItems,
@@ -93,9 +111,8 @@ const KidsVocabularyImporter = ({ refreshData }) => {
   const clearAllImported = () => {
     if(!window.confirm('هل أنت متأكد من حذف جميع الكلمات المستوردة؟')) return;
     
-    // Filter out only static data (simple heuristic: static IDs are short like 'an1', dynamic are long timestamps)
     const allVocab = getKidsVocabulary();
-    const staticVocab = allVocab.filter(i => i.id.toString().length < 8);
+    const staticVocab = allVocab.filter((item) => !isImportedVocabularyItem(item));
     
     saveKidsVocabulary(staticVocab);
     setImportedItems([]);
