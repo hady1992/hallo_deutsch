@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Layout from '@/components/Layout';
@@ -17,6 +17,7 @@ import Kids from '@/pages/Kids';
 import PlacementMigration from '@/pages/PlacementMigration';
 import AdminGate from '@/components/AdminGate';
 import AdminErrorBoundary from '@/components/AdminErrorBoundary';
+import AdminPanel from '@/pages/AdminPanel';
 import { Toaster } from '@/components/ui/toaster';
 import VerbConjugationExplorer from '@/components/VerbConjugationExplorer';
 import GrammarRulesDatabase from '@/components/GrammarRulesDatabase';
@@ -24,18 +25,15 @@ import { AuthProvider } from '@/contexts/SupabaseAuthContext';
 import { initializeDefaultData } from '@/utils/dataInitializer';
 import { syncLocalStorageToSupabase } from '@/utils/storageManager';
 
-const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
-
-const AdminRouteLoading = () => (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50" aria-label="جاري تحميل لوحة التحكم">
-    <div className="h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-slate-700" />
-  </div>
-);
-
 function App() {
   
   // App Initialization
   useEffect(() => {
+    document.documentElement.dataset.appReady = 'true';
+    if (window.__halloDeutschBootTimer) {
+      window.clearTimeout(window.__halloDeutschBootTimer);
+    }
+
     const init = async () => {
         try {
             // 1. Initialize Defaults (Local Storage)
@@ -82,9 +80,7 @@ function App() {
             {/* Admin Routes */}
             <Route path="/admin" element={
                 <AdminErrorBoundary>
-                    <Suspense fallback={<AdminRouteLoading />}>
-                        <AdminPanel />
-                    </Suspense>
+                    <AdminPanel />
                 </AdminErrorBoundary>
             } />
             <Route path="/migration" element={<AdminGate><PlacementMigration /></AdminGate>} />

@@ -304,6 +304,14 @@ export default defineConfig({
 	},
 	build: {
 		rollupOptions: {
+			output: {
+				entryFileNames: 'assets/app.js',
+				chunkFileNames: 'assets/[name].js',
+				assetFileNames: (assetInfo) =>
+					assetInfo.name?.endsWith('.css')
+						? 'assets/app.css'
+						: 'assets/[name][extname]',
+			},
 			external: [
 				'@babel/parser',
 				'@babel/traverse',

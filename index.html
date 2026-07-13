@@ -9,6 +9,23 @@
 	</head>
 	<body>
 		<div id="root"></div>
+		<script>
+			window.__halloDeutschBootTimer = window.setTimeout(function () {
+				var root = document.getElementById('root');
+				if (!root || document.documentElement.dataset.appReady === 'true' || root.childElementCount > 0) {
+					return;
+				}
+
+				root.innerHTML = '<main dir="rtl" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fafc;font-family:Arial,sans-serif;color:#172033"><section style="max-width:520px;text-align:center"><h1 style="font-size:24px;margin:0 0 12px">تعذر تحميل الصفحة</h1><p style="line-height:1.8;margin:0 0 20px">تم تحديث الموقع، لكن المتصفح ما زال يستخدم نسخة قديمة. أعد التحميل للحصول على النسخة الحالية.</p><button id="app-reload-button" type="button" style="border:0;border-radius:6px;background:#1d4ed8;color:white;padding:12px 22px;font-size:16px;cursor:pointer">إعادة تحميل الموقع</button></section></main>';
+
+				document.getElementById('app-reload-button').addEventListener('click', function () {
+					var url = new URL(window.location.href);
+					url.searchParams.set('_reload', Date.now().toString());
+					window.location.replace(url.toString());
+				});
+			}, 6000);
+		</script>
 		<script type="module" src="/src/main.jsx"></script>
+		<noscript>يجب تفعيل JavaScript لتشغيل Hallo Deutsch.</noscript>
 	</body>
 </html>

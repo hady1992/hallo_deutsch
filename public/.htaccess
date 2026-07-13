@@ -16,16 +16,9 @@
 <IfModule mod_headers.c>
   Header set X-Powered-By "Hostinger Horizons"
 
-  # HTML and SPA routes must always revalidate so deployments cannot keep an
-  # old index that points to deleted asset hashes.
+  # The entry files use stable names. Revalidate HTML and assets on every load
+  # so a deployment cannot combine files from two different versions.
   Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
   Header always set Pragma "no-cache"
   Header always set Expires "0"
-
-  # Vite assets include a content hash and are safe to cache permanently.
-  <If "%{REQUEST_URI} =~ m#^/assets/.*$#">
-    Header always set Cache-Control "public, max-age=31536000, immutable"
-    Header always unset Pragma
-    Header always unset Expires
-  </If>
 </IfModule>
