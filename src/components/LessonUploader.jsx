@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, BookOpen, Check, FileDown, FilePlus, Loader2, Upload } from 'lucide-react';
+import { AlertTriangle, BookOpen, Check, FileDown, FilePlus, Loader2, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { getImportedLessons, saveImportedLessons } from '@/utils/storageManager';
-import { getPublishedContent, importLessons } from '@/services/contentRepository';
+import { deleteImportedLesson, getImportedLessons, saveImportedLessons } from '@/utils/storageManager';
+import { getPublishedContent, importLessons, unpublishLesson } from '@/services/contentRepository';
 import { dedupeByKey, getLessonDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 const parseList = (value) => {
@@ -100,13 +100,23 @@ const LessonUploader = ({
   const [isUploading, setIsUploading] = useState(false);
   const [importStats, setImportStats] = useState(null);
   const [publishedLessons, setPublishedLessons] = useState([]);
+  const [localLessons, setLocalLessons] = useState([]);
   const [isLoadingPublished, setIsLoadingPublished] = useState(false);
+  const [deletingLessonId, setDeletingLessonId] = useState(null);
   const isJsonMode = templateFormat === 'json';
   const accept = acceptedFormats || (isJsonMode ? '.json' : '.csv');
 
   const loadPublishedLessons = useCallback(async () => {
     if (!showPublishedLessons) return;
     setIsLoadingPublished(true);
+    const storedLessons = getImportedLessons()
+      .filter((lesson) => !levelId || lesson.level === levelId)
+      .map((lesson) => ({
+        ...lesson,
+        source: 'local',
+        publicationStatus: 'local-only',
+      }));
+    setLocalLessons(storedLessons);
     try {
       const lessons = await getPublishedContent('lessons', levelId || null);
       setPublishedLessons(lessons);
@@ -117,6 +127,43 @@ const LessonUploader = ({
       setIsLoadingPublished(false);
     }
   }, [levelId, showPublishedLessons]);
+
+  const handleDeleteLesson = async (lesson) => {
+    const isCloudLesson = lesson.source === 'cloud' || Boolean(lesson.supabaseId);
+    const confirmation = isCloudLesson
+      ? 'هل أنت متأكد من حذف هذا الدرس؟ لن يظهر للزوار بعد الحذف.'
+      : 'هل أنت متأكد من حذف هذا الدرس المحلي؟';
+    if (!window.confirm(confirmation)) return;
+
+    const lessonId = lesson.supabaseId || lesson.id;
+    setDeletingLessonId(lessonId);
+    try {
+      if (isCloudLesson) {
+        const result = await unpublishLesson(lesson);
+        if (!result.success) throw new Error(result.error || 'تعذر إلغاء نشر الدرس.');
+        toast({
+          title: 'تم إلغاء نشر الدرس بنجاح',
+          className: 'bg-green-50 border-green-200 text-green-800',
+        });
+      } else {
+        if (!deleteImportedLesson(lesson.id)) throw new Error('تعذر حذف الدرس المحلي.');
+        toast({
+          title: 'تم حذف الدرس المحلي',
+          className: 'bg-green-50 border-green-200 text-green-800',
+        });
+      }
+
+      await loadPublishedLessons();
+    } catch (error) {
+      console.error('[LessonUploader] Failed to remove lesson:', error);
+      toast({
+        title: `فشل حذف الدرس: ${error.message}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingLessonId(null);
+    }
+  };
 
   useEffect(() => {
     loadPublishedLessons();
@@ -302,29 +349,54 @@ const LessonUploader = ({
           <div className="mb-3 flex items-center justify-between gap-3">
             <h4 className="flex items-center gap-2 font-black text-slate-800">
               <BookOpen size={18} className="text-blue-600" />
-              قائمة الدروس المنشورة
+              قائمة الدروس
             </h4>
-            <span className="text-xs font-bold text-slate-500">{publishedLessons.length} درس</span>
+            <span className="text-xs font-bold text-slate-500">{publishedLessons.length + localLessons.length} درس</span>
           </div>
           {isLoadingPublished ? (
             <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
               <Loader2 className="animate-spin" size={16} /> جاري تحميل الدروس...
             </div>
-          ) : publishedLessons.length > 0 ? (
+          ) : publishedLessons.length + localLessons.length > 0 ? (
             <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
-              {publishedLessons.map((lesson) => (
-                <div key={lesson.supabaseId || lesson.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              {[...publishedLessons, ...localLessons].map((lesson) => {
+                const isCloudLesson = lesson.source === 'cloud' || Boolean(lesson.supabaseId);
+                const lessonId = lesson.supabaseId || lesson.id;
+                return (
+                <div key={lesson.supabaseId || lesson.id} className="flex flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center">
                   <div className="min-w-0">
                     <p className="truncate font-bold text-slate-800">{lesson.title}</p>
                     <p className="text-xs text-slate-500">المستوى {lesson.level || levelId}</p>
                   </div>
-                  <span className="shrink-0 rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700">منشور</span>
+                  <div className="flex flex-wrap items-center justify-between gap-2 sm:shrink-0 sm:justify-end">
+                    <span className={`rounded-md px-2 py-1 text-xs font-bold ${
+                      isCloudLesson
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-amber-50 text-amber-800'
+                    }`}>
+                      {isCloudLesson ? 'منشور' : 'محلي فقط — لن يظهر للزوار'}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={deletingLessonId === lessonId}
+                      onClick={() => handleDeleteLesson(lesson)}
+                      className="gap-1 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                    >
+                      {deletingLessonId === lessonId
+                        ? <Loader2 className="animate-spin" size={15} />
+                        : <Trash2 size={15} />}
+                      حذف
+                    </Button>
+                  </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="rounded-lg border border-dashed border-slate-200 py-5 text-center text-sm font-bold text-slate-400">
-              لا توجد دروس منشورة لهذا المستوى بعد.
+              لا توجد دروس منشورة أو محلية لهذا المستوى بعد.
             </p>
           )}
         </div>

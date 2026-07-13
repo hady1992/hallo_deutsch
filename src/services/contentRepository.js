@@ -345,6 +345,32 @@ export const getLessons = async (level = null, options = {}) => {
 export const saveLesson = (lesson) => publishContentItem('lessons', lesson);
 export const importLessons = (lessons) => publishContentItems('lessons', lessons);
 
+export const unpublishLesson = async (itemOrId) => {
+  const item = typeof itemOrId === 'object' ? itemOrId : { supabaseId: itemOrId };
+  const id = item?.supabaseId || (item?.storageTable === 'content_items' ? item.id : null);
+
+  if (!id) return { success: false, error: 'A Supabase lesson id is required.' };
+
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session?.user) throw new Error('Admin authentication is required to unpublish lessons.');
+
+    const { error } = await supabase
+      .from('content_items')
+      .update({ is_published: false })
+      .eq('id', id)
+      .eq('content_type', 'lessons');
+    if (error) throw error;
+
+    dispatchContentEvents('lessons');
+    return { success: true };
+  } catch (error) {
+    console.error('[ContentRepository] Failed to unpublish lesson:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const getVocabulary = () => getContent('vocabulary');
 export const getNouns = () => getContent('nouns');
 export const getVerbs = () => getContent('verbs');

@@ -10,6 +10,7 @@ const importer = readProjectFile('src/components/DataImportUtility.jsx');
 const manager = readProjectFile('src/components/AdminDataManager.jsx');
 const adminPanel = readProjectFile('src/pages/AdminPanel.jsx');
 const lessonUploader = readProjectFile('src/components/LessonUploader.jsx');
+const contentRepository = readProjectFile('src/services/contentRepository.js');
 
 const requireText = (source, text, message) => {
   if (!source.includes(text)) throw new Error(message);
@@ -36,5 +37,10 @@ requireText(adminPanel, 'ملفات الدروس تُرفع من هنا فقط،
 requireText(lessonUploader, "getPublishedContent('lessons'", 'Published lessons list is not connected to content_items.');
 requireText(lessonUploader, 'data-testid="lesson-import-report"', 'Lesson import report is missing.');
 requireText(lessonUploader, 'محلي فقط — لن يظهر للزوار', 'Cloud failure status is missing from LessonUploader.');
+requireText(lessonUploader, 'unpublishLesson(lesson)', 'Supabase lesson unpublish action is missing.');
+requireText(lessonUploader, 'deleteImportedLesson(lesson.id)', 'Local lesson delete action is missing.');
+requireText(lessonUploader, 'هل أنت متأكد من حذف هذا الدرس؟ لن يظهر للزوار بعد الحذف.', 'Lesson unpublish confirmation is missing.');
+requireText(contentRepository, ".update({ is_published: false })", 'Lessons must use soft delete through is_published=false.');
+requireText(contentRepository, "dispatchContentEvents('lessons')", 'Lesson unpublish must refresh public lesson views and counts.');
 
 console.log('Critical admin and import checks passed.');
