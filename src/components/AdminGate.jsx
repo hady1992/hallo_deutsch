@@ -43,7 +43,11 @@ const AdminGate = ({ children }) => {
     // عناصر الواجهة الأخرى التي تعتمد عليه (مثل تبويبات الإدارة داخل صفحة الأطفال
     // وزر لوحة التحكم في القائمة العلوية) بالعمل، لكن الآن بناءً على دخول حقيقي
     // وليس قيمة يمكن لأي زائر كتابتها يدويًا.
-    localStorage.setItem('isAdmin', isAuthorizedAdmin ? 'true' : 'false');
+    try {
+      localStorage.setItem('isAdmin', isAuthorizedAdmin ? 'true' : 'false');
+    } catch (storageError) {
+      console.warn('Could not update the legacy admin compatibility flag:', storageError);
+    }
   }, [isAuthorizedAdmin]);
 
   const handleSubmit = async (e) => {

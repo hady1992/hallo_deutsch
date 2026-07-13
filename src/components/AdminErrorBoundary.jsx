@@ -30,10 +30,15 @@ class AdminErrorBoundary extends React.Component {
         <p className="mt-2 text-sm font-bold leading-6 text-slate-600">
           حدث خطأ أثناء قراءة بيانات محفوظة قديمة. بقيت بقية بياناتك محفوظة ويمكنك المحاولة مجددًا.
         </p>
-        <Button type="button" onClick={this.handleRetry} className="mt-5 gap-2">
-          <RefreshCw size={16} />
-          إعادة المحاولة
-        </Button>
+        <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+          <Button type="button" onClick={this.handleRetry} className="gap-2">
+            <RefreshCw size={16} />
+            إعادة المحاولة
+          </Button>
+          <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+            إعادة تحميل الصفحة
+          </Button>
+        </div>
       </div>
     );
   }

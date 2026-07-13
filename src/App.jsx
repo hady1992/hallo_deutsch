@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Layout from '@/components/Layout';
@@ -13,16 +13,24 @@ import Grammar from '@/pages/Grammar';
 import Exercises from '@/pages/Exercises';
 import Exams from '@/pages/Exams';
 import PlacementTest from '@/pages/PlacementTest';
-import AdminPanel from '@/pages/AdminPanel';
 import Kids from '@/pages/Kids'; 
 import PlacementMigration from '@/pages/PlacementMigration';
 import AdminGate from '@/components/AdminGate';
+import AdminErrorBoundary from '@/components/AdminErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import VerbConjugationExplorer from '@/components/VerbConjugationExplorer';
 import GrammarRulesDatabase from '@/components/GrammarRulesDatabase';
 import { AuthProvider } from '@/contexts/SupabaseAuthContext';
 import { initializeDefaultData } from '@/utils/dataInitializer';
 import { syncLocalStorageToSupabase } from '@/utils/storageManager';
+
+const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
+
+const AdminRouteLoading = () => (
+  <div className="flex min-h-screen items-center justify-center bg-slate-50" aria-label="جاري تحميل لوحة التحكم">
+    <div className="h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-slate-700" />
+  </div>
+);
 
 function App() {
   
@@ -72,7 +80,13 @@ function App() {
             <Route path="/kids" element={<Kids />} />
 
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/admin" element={
+                <AdminErrorBoundary>
+                    <Suspense fallback={<AdminRouteLoading />}>
+                        <AdminPanel />
+                    </Suspense>
+                </AdminErrorBoundary>
+            } />
             <Route path="/migration" element={<AdminGate><PlacementMigration /></AdminGate>} />
             
             {/* Feature Routes */}

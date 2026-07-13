@@ -204,7 +204,6 @@ const AdminPanel = () => {
 
   return (
     <AdminGate>
-    <AdminErrorBoundary>
     <div className="min-h-screen bg-slate-50 pt-24 pb-12" dir="rtl">
       <Helmet>
         <title>{'Admin Panel | Hallo Deutsch'}</title>
@@ -440,7 +439,6 @@ const AdminPanel = () => {
         </div>
       </div>
     </div>
-    </AdminErrorBoundary>
     </AdminGate>
   );
 };
