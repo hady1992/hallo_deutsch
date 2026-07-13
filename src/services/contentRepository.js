@@ -48,6 +48,8 @@ const LEGACY_TABLES = {
   exams: 'exams',
 };
 
+const missingLegacyTables = new Set();
+
 const STATIC_CONTENT = {
   lessons: [],
   vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
@@ -142,13 +144,14 @@ const fetchCloudContent = async (contentType, level = null) => {
   const legacyTable = LEGACY_TABLES[contentType];
   const contentItemsResult = await queryContentItems(contentType, level);
 
-  if (!legacyTable) {
+  if (!legacyTable || missingLegacyTables.has(legacyTable)) {
     if (contentItemsResult.error) throw contentItemsResult.error;
     return asArray(contentItemsResult.data)
       .map((row) => unwrapRow(row, contentType, 'content_items'));
   }
 
   const legacyResult = await queryLegacyTable(legacyTable, level);
+  if (isMissingTableError(legacyResult.error)) missingLegacyTables.add(legacyTable);
   const contentItemsAvailable = !contentItemsResult.error;
   const legacyAvailable = !legacyResult.error;
 

@@ -203,7 +203,7 @@ const AdminDataManager = () => {
             <DataTab 
                 type="exercise"
                 title="Cloud Exercises"
-                fetchData={() => fetchExercises()} 
+                fetchData={fetchExercises}
                 saveData={saveExercise} 
                 deleteData={deleteExercise} 
                 isAuthenticated={isAuthenticated}
@@ -214,7 +214,7 @@ const AdminDataManager = () => {
              <DataTab 
                 type="vocabulary"
                 title="Cloud Vocabulary"
-                fetchData={() => fetchVocabulary()} 
+                fetchData={fetchVocabulary}
                 saveData={saveVocabulary} 
                 deleteData={deleteVocabulary} 
                 isAuthenticated={isAuthenticated}
@@ -225,7 +225,7 @@ const AdminDataManager = () => {
              <DataTab 
                 type="exam"
                 title="Cloud Exams"
-                fetchData={() => fetchExams()} 
+                fetchData={fetchExams}
                 saveData={saveExam} 
                 deleteData={deleteExam} 
                 isAuthenticated={isAuthenticated}
@@ -236,7 +236,7 @@ const AdminDataManager = () => {
              <DataTab 
                 type="placement"
                 title="Placement Test Questions"
-                fetchData={() => fetchPlacementTests()} 
+                fetchData={fetchPlacementTests}
                 saveData={savePlacementTest} 
                 deleteData={deletePlacementTest} 
                 isAuthenticated={isAuthenticated}
