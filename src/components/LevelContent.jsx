@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp, CheckCircle, ArrowRight, ArrowLeft, BookOpen, Clock, Trash2, FileText, List, PenTool, LayoutList } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckCircle, ArrowRight, ArrowLeft, BookOpen, Trash2, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProgressBar from '@/components/ProgressBar';
 import { useToast } from '@/components/ui/use-toast';
@@ -12,6 +12,7 @@ import QuestionImporter from '@/components/QuestionImporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { isAuthorizedAdminEmail } from '@/components/AdminGate';
+import SafeLessonRenderer from '@/components/SafeLessonRenderer';
 
 function LevelContent({ title, description, objectives, sections, prevLevel, nextLevel, levelId, onDeleteLesson }) {
   const navigate = useNavigate();
@@ -194,7 +195,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                             <h3 className="text-lg font-bold text-gray-800">{section.title}</h3>
                             {section.isCustom && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mr-2">مخصص</span>}
                             {section.publicationStatus === 'local-only' && (
-                                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mr-2">محلي فقط</span>
+                                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mr-2">محلي فقط — لن يظهر للزوار</span>
                             )}
                         </div>
                         </div>
@@ -211,52 +212,10 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                         >
                             <div className="p-6 bg-gray-50/50">
                             {/* Check if section has a specific component content, otherwise use text */}
-                            {section.content ? (
+                            {React.isValidElement(section.content) ? (
                                 section.content
                             ) : (
-                                <>
-                                <div className="prose max-w-none text-gray-700 mb-6 leading-relaxed whitespace-pre-line">
-                                    {section.explanation}
-                                </div>
-
-                                {/* Render imported extra fields if they exist */}
-                                {(section.duration || section.objectives?.length > 0 || section.resources?.length > 0) && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-                                        {section.duration && (
-                                            <div className="flex items-center gap-2 bg-white p-3 rounded border border-gray-100">
-                                                <Clock size={16} className="text-blue-500"/>
-                                                <span className="text-gray-600">المدة: {section.duration} دقيقة</span>
-                                            </div>
-                                        )}
-                                        {section.objectives && section.objectives.length > 0 && (
-                                            <div className="bg-white p-3 rounded border border-gray-100 col-span-1 md:col-span-2">
-                                                <h5 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
-                                                    <List size={16} className="text-green-500"/> الأهداف:
-                                                </h5>
-                                                <ul className="list-disc list-inside text-gray-600 space-y-1">
-                                                    {Array.isArray(section.objectives) ? section.objectives.map((obj, i) => (
-                                                        <li key={i}>{obj}</li>
-                                                    )) : <li>{section.objectives}</li>}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {section.examples && section.examples.length > 0 && (
-                                    <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 shadow-sm">
-                                    <h4 className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">أمثلة توضيحية:</h4>
-                                    <div className="space-y-3">
-                                        {section.examples.map((ex, idx) => (
-                                        <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 hover:bg-blue-50 rounded transition-colors">
-                                            <span className="font-semibold text-blue-700 text-left w-full sm:w-1/2" dir="ltr">{ex.german}</span>
-                                            <span className="text-gray-600 text-sm w-full sm:w-1/2 mt-1 sm:mt-0">{ex.arabic}</span>
-                                        </div>
-                                        ))}
-                                    </div>
-                                    </div>
-                                )}
-                                </>
+                                <SafeLessonRenderer lesson={section} />
                             )}
 
                             <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200 justify-between items-center">

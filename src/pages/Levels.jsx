@@ -1,15 +1,53 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import LevelCard from '@/components/LevelCard';
+import { getLessons } from '@/services/contentRepository';
+import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
+import { getStaticLessonEntries, STATIC_LESSON_CATALOG } from '@/data/staticLessonCatalog';
 
 function Levels() {
+  const fallbackCounts = useMemo(() => Object.fromEntries(
+    Object.entries(STATIC_LESSON_CATALOG).map(([level, lessons]) => [level, lessons.length])
+  ), []);
+  const [lessonCounts, setLessonCounts] = useState(fallbackCounts);
+
+  useEffect(() => {
+    let active = true;
+    const loadLessonCounts = async () => {
+      const levelNames = Object.keys(STATIC_LESSON_CATALOG);
+      const results = await Promise.all(levelNames.map(async (level) => {
+        try {
+          const publishedLessons = await getLessons(level);
+          const lessons = dedupeByKey(
+            [...getStaticLessonEntries(level), ...publishedLessons],
+            getLessonDedupKey,
+            { prefer: 'last' }
+          );
+          return [level, lessons.length];
+        } catch (error) {
+          console.warn(`[Levels] Failed to load ${level} lesson count:`, error);
+          return [level, fallbackCounts[level]];
+        }
+      }));
+
+      if (active) setLessonCounts(Object.fromEntries(results));
+    };
+
+    loadLessonCounts();
+    window.addEventListener('lessonsUpdated', loadLessonCounts);
+    return () => {
+      active = false;
+      window.removeEventListener('lessonsUpdated', loadLessonCounts);
+    };
+  }, [fallbackCounts]);
+
   const levels = [
     {
       level: 'A1',
       name: 'المستوى الأول',
       description: 'مستوى المبتدئين - تعلم الأساسيات والتعبيرات البسيطة',
-      statusText: '8 دروس متاحة',
+      statusText: `${lessonCounts.A1 ?? fallbackCounts.A1} دروس متاحة`,
       color: 'from-green-400 to-green-600',
       path: '/level/a1'
     },
@@ -17,7 +55,7 @@ function Levels() {
       level: 'A2',
       name: 'المستوى الثاني',
       description: 'مستوى ما قبل المتوسط - بناء المهارات الأساسية',
-      statusText: 'درس واحد متاح - قيد التطوير',
+      statusText: `${lessonCounts.A2 ?? fallbackCounts.A2} دروس متاحة`,
       color: 'from-blue-400 to-blue-600',
       path: '/level/a2'
     },
@@ -25,7 +63,7 @@ function Levels() {
       level: 'B1',
       name: 'المستوى الثالث',
       description: 'المستوى المتوسط - تطوير القدرة على التواصل',
-      statusText: 'درس واحد متاح - قيد التطوير',
+      statusText: `${lessonCounts.B1 ?? fallbackCounts.B1} دروس متاحة`,
       color: 'from-orange-400 to-orange-600',
       path: '/level/b1'
     },
@@ -33,7 +71,7 @@ function Levels() {
       level: 'B2',
       name: 'المستوى الرابع',
       description: 'المستوى فوق المتوسط - إتقان اللغة بشكل متقدم',
-      statusText: 'درس واحد متاح - قيد التطوير',
+      statusText: `${lessonCounts.B2 ?? fallbackCounts.B2} دروس متاحة`,
       color: 'from-red-400 to-red-600',
       path: '/level/b2'
     }

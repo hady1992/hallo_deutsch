@@ -13,9 +13,13 @@ import { deleteImportedLesson } from '@/utils/storageManager';
 import { getLessons } from '@/services/contentRepository';
 import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 
 function LevelA1() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isAdmin = isAuthorizedAdminEmail(user?.email);
   const [customLessons, setCustomLessons] = useState([]);
   
   const staticSections = useMemo(() => [
@@ -56,7 +60,7 @@ function LevelA1() {
   useEffect(() => {
       let active = true;
       const loadLessons = async () => {
-          const lessons = await getLessons('A1');
+          const lessons = await getLessons('A1', { includeLocal: isAdmin });
           if (active) setCustomLessons(lessons);
       };
       loadLessons();
@@ -67,7 +71,7 @@ function LevelA1() {
           window.removeEventListener('dataImported', loadLessons);
           window.removeEventListener('lessonsUpdated', loadLessons);
       };
-  }, []);
+  }, [isAdmin]);
 
   const handleDeleteLesson = (id) => {
       if(window.confirm("هل أنت متأكد من حذف هذا الدرس؟")) {

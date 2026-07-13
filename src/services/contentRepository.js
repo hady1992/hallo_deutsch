@@ -40,6 +40,7 @@ import {
   getContentDedupKey,
   splitNewUniqueItems,
 } from '@/utils/contentDedupUtils';
+import { normalizeLessonForDisplay } from '@/utils/lessonNormalizer';
 
 const LEGACY_TABLES = {
   vocabulary: 'vocabulary',
@@ -315,7 +316,8 @@ export const deletePublishedContentItem = async (contentType, itemOrId) => {
   }
 };
 
-export const getLessons = async (level = null) => {
+export const getLessons = async (level = null, options = {}) => {
+  const { includeLocal = false } = options;
   let cloudItems = [];
   try {
     cloudItems = await fetchCloudContent('lessons', level);
@@ -323,19 +325,21 @@ export const getLessons = async (level = null) => {
     console.warn('[ContentRepository] Supabase lessons read failed; showing local fallback only.', error);
   }
 
-  const localItems = readLocalFallback('lessons')
-    .filter((item) => !level || item.level === level)
-    .map((item) => ({
-      ...item,
-      source: item.source || 'local',
-      publicationStatus: item.publicationStatus || 'local-only',
-    }));
+  const localItems = includeLocal
+    ? readLocalFallback('lessons')
+      .filter((item) => !level || item.level === level)
+      .map((item) => ({
+        ...item,
+        source: item.source || 'local',
+        publicationStatus: item.publicationStatus || 'local-only',
+      }))
+    : [];
 
   return dedupeByKey(
     [...localItems, ...cloudItems],
     (item) => getContentDedupKey('lessons', item),
     { prefer: 'last' }
-  );
+  ).map(normalizeLessonForDisplay);
 };
 
 export const saveLesson = (lesson) => publishContentItem('lessons', lesson);
