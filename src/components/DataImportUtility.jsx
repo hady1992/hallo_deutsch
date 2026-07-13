@@ -10,7 +10,7 @@ import { vocabularyA1 } from '@/data/vocabularyA1';
 import { vocabularyA2 } from '@/data/vocabularyA2';
 import { vocabularyB1 } from '@/data/vocabularyB1';
 import { vocabularyB2 } from '@/data/vocabularyB2';
-import { getContentDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { dedupeByKey, getContentDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 import { publishContentItems } from '@/services/contentRepository';
 
 const DEFAULT_REFERENCES = {
@@ -18,6 +18,69 @@ const DEFAULT_REFERENCES = {
   vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
   verbs: [],
   grammar: [],
+};
+
+export const parseImportCSV = (text) => {
+  const rows = [];
+  let row = [];
+  let currentValue = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const nextChar = text[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        currentValue += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      row.push(currentValue.trim());
+      currentValue = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && nextChar === '\n') index += 1;
+      row.push(currentValue.trim());
+      if (row.some((value) => value !== '')) rows.push(row);
+      row = [];
+      currentValue = '';
+    } else {
+      currentValue += char;
+    }
+  }
+
+  row.push(currentValue.trim());
+  if (row.some((value) => value !== '')) rows.push(row);
+  if (inQuotes) throw new Error('تنسيق CSV غير صحيح: توجد علامة اقتباس غير مغلقة.');
+  if (rows.length < 2) throw new Error('الملف لا يحتوي على بيانات كافية (صفوف).');
+
+  const headers = rows[0].map((header) => String(header).replace(/^\uFEFF/, '').trim());
+  if (headers.length < 2) throw new Error('تنسيق CSV غير صحيح. تأكد من استخدام الفواصل.');
+
+  return rows.slice(1).map((values) => {
+    const item = {};
+
+    headers.forEach((header, index) => {
+      if (!header || values[index] === undefined) return;
+
+      const parts = header.split('.');
+      let current = item;
+
+      for (let partIndex = 0; partIndex < parts.length - 1; partIndex += 1) {
+        const part = parts[partIndex];
+        const nextPart = parts[partIndex + 1];
+        const isArray = /^\d+$/.test(nextPart);
+        if (!current[part]) current[part] = isArray ? [] : {};
+        current = current[part];
+      }
+
+      current[parts[parts.length - 1]] = values[index];
+    });
+
+    return item;
+  });
 };
 
 const DataImportUtility = ({ contentType = 'verbs', className }) => {
@@ -39,6 +102,8 @@ const DataImportUtility = ({ contentType = 'verbs', className }) => {
   };
 
   const handleButtonClick = () => {
+    if (isProcessing) return;
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''; 
       fileInputRef.current.click();
@@ -99,62 +164,6 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
     }
   };
 
-  const parseCSV = (text) => {
-    const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim());
-    if (lines.length < 2) throw new Error("الملف لا يحتوي على بيانات كافية (صفوف).");
-    
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-    if (headers.length < 2) throw new Error("تنسيق CSV غير صحيح. تأكد من استخدام الفواصل.");
-
-    return lines.slice(1).map((line, lineIdx) => {
-      const values = [];
-      let inQuote = false;
-      let currentValue = '';
-      
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"' && (i === 0 || line[i-1] === ',' || line[i-1] === ' ' || line[i-1] === '\n')) { // Start or end of a quoted field
-          inQuote = !inQuote;
-          if (!inQuote && line[i+1] === '"') { // Handle escaped quotes inside field
-            currentValue += '"';
-            i++;
-          }
-        } else if (char === ',' && !inQuote) {
-          values.push(currentValue.trim().replace(/^"|"$/g, ''));
-          currentValue = '';
-        } else {
-          currentValue += char;
-        }
-      }
-      values.push(currentValue.trim().replace(/^"|"$/g, '')); // Add last value
-
-      const obj = {};
-      headers.forEach((header, index) => {
-        if (values[index] !== undefined) {
-             const val = values[index];
-             if (header.includes('.')) {
-                 const parts = header.split('.');
-                 let current = obj;
-                 for(let k=0; k<parts.length-1; k++) {
-                     const nextPart = parts[k+1];
-                     // Only array if next part is strictly a number
-                     const isArray = !isNaN(nextPart) && !isNaN(parseFloat(nextPart));
-                     
-                     if (!current[parts[k]]) {
-                        current[parts[k]] = isArray ? [] : {};
-                     }
-                     current = current[parts[k]];
-                 }
-                 current[parts[parts.length-1]] = val;
-             } else {
-                 obj[header] = val;
-             }
-        }
-      });
-      return obj;
-    });
-  };
-
   const validateVerbData = (data) => {
     const validItems = [];
     const errors = [];
@@ -209,25 +218,36 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         const itemErrors = [];
         const uniqueId = `custom_n_${Date.now()}_${index}`;
 
-        if (!item.german) itemErrors.push("الحقل 'german' مفقود");
-        if (!item.translation) itemErrors.push("الحقل 'translation' مفقود");
-        if (!item.noun) itemErrors.push("الحقل 'noun' مفقود");
-        if (!item.gender) itemErrors.push("الحقل 'gender' مفقود");
-        if (!item.article) itemErrors.push("الحقل 'article' مفقود");
+        const german = String(item.german || '').trim();
+        const translation = String(item.translation || '').trim();
+        const article = String(item.article || '').trim().toLowerCase();
+        const noun = String(item.noun || '').trim();
+        const gender = String(item.gender || '').trim().toLowerCase();
+
+        if (!german) itemErrors.push("الحقل 'german' مفقود");
+        if (!translation) itemErrors.push("الحقل 'translation' مفقود");
+        if (!noun) itemErrors.push("الحقل 'noun' مفقود");
+        if (!gender) itemErrors.push("الحقل 'gender' مفقود");
+        if (!article) itemErrors.push("الحقل 'article' مفقود");
         
         const validArticles = ['der', 'die', 'das'];
-        if (item.article && !validArticles.includes(item.article.toLowerCase())) {
-             itemErrors.push(`أداة التعريف '${item.article}' غير صحيحة. يجب أن تكون der, die, أو das.`);
+        if (article && !validArticles.includes(article)) {
+             itemErrors.push(`أداة التعريف '${article}' غير صحيحة. يجب أن تكون der, die, أو das.`);
         }
         
         if (itemErrors.length === 0) {
             validItems.push({
                 ...item,
                 id: item.id || uniqueId,
-                article: item.article || (item.gender === 'masculine' ? 'der' : item.gender === 'feminine' ? 'die' : 'das'),
-                plural: item.plural || '-',
-                example: item.example || '',
-                exampleArabic: item.exampleArabic || ''
+                german,
+                translation,
+                article,
+                noun,
+                gender,
+                plural: String(item.plural || '-').trim(),
+                example: String(item.example || '').trim(),
+                exampleArabic: String(item.exampleArabic || '').trim(),
+                level: item.level || 'A1',
             });
         } else {
             errors.push({ row: rowNum, messages: itemErrors });
@@ -316,6 +336,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
     if (!file) return;
 
     setIsProcessing(true);
+    setImportStats(null);
     setValidationErrors([]);
 
     try {
@@ -330,7 +351,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         });
 
         if (file.name.toLowerCase().endsWith('.csv')) {
-            content = parseCSV(text);
+            content = parseImportCSV(text);
         } else {
             try {
                 content = JSON.parse(text);
@@ -369,16 +390,32 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         }
 
         if (validItems.length > 0) {
-            const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            const referenceData = [
-              ...(DEFAULT_REFERENCES[contentType] || []),
-              ...existingData,
-            ];
+            let existingData = [];
+            try {
+              const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+              existingData = Array.isArray(storedData) ? storedData : [];
+            } catch {
+              existingData = [];
+            }
+
             const dedupKey = (item) => getContentDedupKey(contentType, item);
-            const { unique: newItems, skipped: duplicates } = splitNewUniqueItems(validItems, referenceData, dedupKey);
+            const { unique: newItems, skipped: localDuplicates } = splitNewUniqueItems(
+              validItems,
+              DEFAULT_REFERENCES[contentType] || [],
+              dedupKey
+            );
             const publishResult = await publishContentItems(contentType, newItems);
 
             if (!publishResult.success) {
+              setImportStats({
+                count: 0,
+                duplicates: localDuplicates,
+                total: content.length,
+                errors: errors.length,
+                publication: 'failed',
+                publicationMessage: 'فشل الحفظ السحابي، لن يظهر المحتوى للزوار',
+              });
+              clearSelectedFile();
               toast({
                 title: "فشل النشر",
                 description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
@@ -388,36 +425,37 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
             }
 
             // Local storage is an offline backup only after cloud publication succeeds.
-            const mergedData = [...existingData, ...newItems];
+            const mergedData = dedupeByKey([...existingData, ...newItems], dedupKey, { prefer: 'last' });
             localStorage.setItem(storageKey, JSON.stringify(mergedData));
 
             setImportStats({
-                count: newItems.length,
-                duplicates,
+                count: publishResult.count,
+                duplicates: localDuplicates + publishResult.duplicates,
                 total: content.length,
-                errors: errors.length
+                errors: errors.length,
+                publication: 'published',
+                publicationMessage: 'تم النشر للزوار',
             });
+            clearSelectedFile();
+            window.dispatchEvent(new Event('dataImported'));
 
-            if (errors.length === 0) {
-                toast({
-                    title: "تم النشر للزوار",
-                    description: `تمت إضافة ${publishResult.count}، وتم تجاهل مكرر: ${duplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
-                    className: "bg-green-50 border-green-200 text-green-800"
-                });
-                 setTimeout(() => {
-                    setFile(null);
-                    setImportStats(null);
-                    setValidationErrors([]);
-                    window.dispatchEvent(new Event('dataImported'));
-                }, 2000);
-            } else {
-                 toast({
-                     title: "تم النشر للزوار",
-                    description: `تمت إضافة ${publishResult.count}، وتم تجاهل مكرر: ${duplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
-                     variant: "warning"
-                });
-            }
+            toast({
+                title: "تم النشر للزوار",
+                description: `تم إضافة: ${publishResult.count}، تم تجاهل مكرر: ${localDuplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
+                className: errors.length === 0
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-yellow-50 border-yellow-200 text-yellow-800"
+            });
         } else {
+             setImportStats({
+                count: 0,
+                duplicates: 0,
+                total: content.length,
+                errors: errors.length,
+                publication: 'invalid',
+                publicationMessage: 'لم يبدأ النشر بسبب أخطاء الملف',
+             });
+             clearSelectedFile();
              toast({
                 title: "فشل الاستيراد",
                 description: "لم يتم قبول أي عناصر. يرجى مراجعة الأخطاء.",
@@ -427,6 +465,15 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
       } catch (error) {
         console.error(error);
+        setImportStats({
+          count: 0,
+          duplicates: 0,
+          total: 0,
+          errors: 1,
+          publication: 'invalid',
+          publicationMessage: 'لم يبدأ النشر بسبب خطأ في الملف',
+        });
+        clearSelectedFile();
         toast({
           title: "خطأ في الملف",
           description: error.message && /[\u0600-\u06FF]/.test(error.message) ? error.message : 'صيغة الملف غير صحيحة.',
@@ -437,11 +484,15 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
       }
   };
 
-  const handleCancel = () => {
+  const clearSelectedFile = () => {
     setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleCancel = () => {
+    clearSelectedFile();
     setImportStats(null);
     setValidationErrors([]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -485,68 +536,92 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden mt-4"
+            className="mt-4"
           >
              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 {/* File Info */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3">
+                <div className="mb-4 flex min-w-0 items-center gap-3">
                         <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
                             <FileText size={24} />
                         </div>
-                        <div>
-                            <p className="font-bold text-slate-800 text-sm">{file.name}</p>
+                        <div className="min-w-0">
+                            <p className="break-all font-bold text-slate-800 text-sm">{file.name}</p>
                             <p className="text-xs text-slate-500">{(file.size / 1024).toFixed(1)} KB</p>
                         </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                        {!importStats || validationErrors.length > 0 ? (
-                            <>
-                                <Button onClick={processImport} disabled={isProcessing} className="bg-blue-600">
-                                    {isProcessing ? <Loader2 className="animate-spin" /> : 'استيراد وتحويل'}
-                                </Button>
-                                <Button variant="outline" onClick={handleCancel} disabled={isProcessing}>
-                                    إلغاء
-                                </Button>
-                            </>
-                        ) : (
-                             <div className="text-green-700 bg-green-50 px-4 py-2 rounded-lg font-medium flex items-center gap-2">
-                                <Check size={18} /> تم بنجاح
-                             </div>
-                        )}
-                    </div>
                 </div>
 
-                {/* Validation Errors Box */}
-                {importStats && (
-                    <div className="mb-4 grid gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm font-bold text-slate-700 sm:grid-cols-3">
-                        <span className="rounded-md bg-green-100 px-3 py-2 text-green-700">تمت إضافة: {importStats.count}</span>
-                        <span className="rounded-md bg-yellow-100 px-3 py-2 text-yellow-800">تم تجاهل مكرر: {importStats.duplicates || 0}</span>
-                        <span className="rounded-md bg-red-100 px-3 py-2 text-red-700">أخطاء: {importStats.errors}</span>
-                    </div>
-                )}
-
-                {validationErrors.length > 0 && (
-                    <div className="bg-red-50 border border-red-100 rounded-lg p-4 max-h-60 overflow-y-auto">
-                        <div className="flex items-center gap-2 text-red-700 font-bold mb-2 sticky top-0 bg-red-50 pb-2">
-                            <AlertTriangle size={18} />
-                            <span>تم العثور على أخطاء ({validationErrors.length})</span>
-                        </div>
-                        <ul className="space-y-2">
-                            {validationErrors.map((err, idx) => (
-                                <li key={idx} className="text-xs text-red-600 bg-white p-2 rounded border border-red-100">
-                                    <span className="font-bold block text-red-800">صفحة (Row) {err.row}:</span>
-                                    {err.messages.join(', ')}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                <div className="grid gap-2 sm:grid-cols-2">
+                    <Button onClick={processImport} disabled={isProcessing} className="w-full gap-2 bg-blue-600 hover:bg-blue-700">
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="animate-spin" size={18} />
+                            جاري الاستيراد...
+                          </>
+                        ) : (
+                          <>
+                            <FileUp size={18} />
+                            استيراد الآن
+                          </>
+                        )}
+                    </Button>
+                    <Button variant="outline" onClick={handleCancel} disabled={isProcessing} className="w-full">
+                        إلغاء
+                    </Button>
+                </div>
              </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {importStats && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div className="mb-3 flex items-center gap-2 font-black text-slate-800">
+              {importStats.publication === 'published' ? (
+                <Check className="text-green-600" size={20} />
+              ) : (
+                <AlertTriangle className="text-red-600" size={20} />
+              )}
+              تقرير الاستيراد
+            </div>
+            <div className="grid gap-2 text-sm font-bold sm:grid-cols-3">
+              <span className="rounded-md bg-green-100 px-3 py-2 text-green-700">تم إضافة: {importStats.count}</span>
+              <span className="rounded-md bg-yellow-100 px-3 py-2 text-yellow-800">تم تجاهل مكرر: {importStats.duplicates || 0}</span>
+              <span className="rounded-md bg-red-100 px-3 py-2 text-red-700">أخطاء: {importStats.errors}</span>
+            </div>
+            <div className={cn(
+              'mt-3 rounded-md px-3 py-2 text-sm font-black',
+              importStats.publication === 'published'
+                ? 'bg-green-50 text-green-800'
+                : 'bg-red-50 text-red-800'
+            )}>
+              حالة النشر: {importStats.publicationMessage}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {validationErrors.length > 0 && (
+          <div className="mt-4 max-h-60 overflow-y-auto rounded-lg border border-red-100 bg-red-50 p-4">
+              <div className="sticky top-0 mb-2 flex items-center gap-2 bg-red-50 pb-2 font-bold text-red-700">
+                  <AlertTriangle size={18} />
+                  <span>تم العثور على أخطاء ({validationErrors.length})</span>
+              </div>
+              <ul className="space-y-2">
+                  {validationErrors.map((err, idx) => (
+                      <li key={idx} className="rounded border border-red-100 bg-white p-2 text-xs text-red-600">
+                          <span className="block font-bold text-red-800">صف (Row) {err.row}:</span>
+                          {err.messages.join(', ')}
+                      </li>
+                  ))}
+              </ul>
+          </div>
+      )}
     </div>
   );
 };
