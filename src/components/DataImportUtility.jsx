@@ -533,10 +533,11 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
       <AnimatePresence>
         {file && (
           <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
             className="mt-4"
+            data-testid="selected-import-file-panel"
           >
              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 {/* File Info */}
@@ -551,7 +552,13 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                 </div>
 
                 <div className="grid gap-2 sm:grid-cols-2">
-                    <Button onClick={processImport} disabled={isProcessing} className="w-full gap-2 bg-blue-600 hover:bg-blue-700">
+                    <Button
+                        type="button"
+                        onClick={processImport}
+                        disabled={isProcessing}
+                        className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
+                        data-testid="import-file-action"
+                    >
                         {isProcessing ? (
                           <>
                             <Loader2 className="animate-spin" size={18} />
@@ -564,7 +571,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                           </>
                         )}
                     </Button>
-                    <Button variant="outline" onClick={handleCancel} disabled={isProcessing} className="w-full">
+                    <Button type="button" variant="outline" onClick={handleCancel} disabled={isProcessing} className="w-full">
                         إلغاء
                     </Button>
                 </div>

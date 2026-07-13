@@ -200,6 +200,7 @@ const AdminDataManager = () => {
           </TabsList>
           
           <TabsContent value="exercises">
+            {/* Keep fetch callbacks stable: inline wrappers retrigger DataTab's effect indefinitely. */}
             <DataTab 
                 type="exercise"
                 title="Cloud Exercises"
