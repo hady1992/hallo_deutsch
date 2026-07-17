@@ -5,7 +5,7 @@ const GrammarTableComponent = ({ table }) => {
   const getCaseStyle = (caseType) => {
     switch (caseType?.toLowerCase()) {
       case 'nominativ':
-        return 'bg-blue-50 border-blue-200 text-blue-900';
+        return 'bg-red-50 border-red-200 text-red-900';
       case 'akkusativ':
         return 'bg-green-50 border-green-200 text-green-900';
       case 'dativ':
@@ -18,7 +18,7 @@ const GrammarTableComponent = ({ table }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="my-6 overflow-hidden rounded-xl border border-gray-200 shadow-sm"
@@ -44,7 +44,7 @@ const GrammarTableComponent = ({ table }) => {
               // Extract columns dynamically based on row object keys that aren't 'case'
               // Assuming row keys like col1, col2, etc. or specific named keys
               const cells = Object.keys(row).filter(key => key !== 'case' && key !== 'gender' && key !== 'nominativ' && key !== 'dativ' && key !== 'genitiv' && key !== 'article' && key !== 'example');
-              
+
               // Handle structured rows (gender/article/example) vs generic col1/col2
               let cellValues = [];
               if (row.gender) {

@@ -25,21 +25,21 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
+
       {/* Score Card */}
-      <Card className="border-t-4 border-t-purple-600 shadow-lg bg-white/50 backdrop-blur-sm">
+      <Card className="border-t-4 border-t-amber-600 shadow-lg bg-white/50 backdrop-blur-sm">
         <CardContent className="p-8 text-center space-y-6">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto"
+            className="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto"
           >
-            <Trophy className="w-12 h-12 text-purple-600" />
+            <Trophy className="w-12 h-12 text-amber-600" />
           </motion.div>
-          
+
           <div>
             <h2 className="text-3xl font-bold text-slate-800 mb-2">اكتمل التمرين!</h2>
-            <div className="text-6xl font-black text-purple-600 mb-2">{percentage}%</div>
+            <div className="text-6xl font-black text-amber-600 mb-2">{percentage}%</div>
             <p className="text-slate-500 text-lg">نتيجتك: {score} من {total}</p>
           </div>
 
@@ -47,7 +47,7 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
              <Button onClick={onBack} variant="outline" className="gap-2 h-12 px-6">
                 <ArrowLeft className="w-4 h-4" /> اختيار مستوى أو فئة أخرى
              </Button>
-             <Button onClick={onRetake} className="gap-2 h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white">
+             <Button onClick={onRetake} className="gap-2 h-12 px-6 bg-amber-600 hover:bg-amber-700 text-white">
                 <RefreshCw className="w-4 h-4" /> إعادة التمرين
              </Button>
           </div>
@@ -59,7 +59,7 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
           <Card className="shadow-sm border-slate-200 h-full">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                    <PieChart className="w-5 h-5 text-blue-500" /> الأداء حسب الفئة
+                    <PieChart className="w-5 h-5 text-red-500" /> الأداء حسب الفئة
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -70,8 +70,8 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
                             <span className="text-slate-500">{stat.correct}/{stat.total}</span>
                         </div>
                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                                className={`h-full rounded-full ${stat.correct === stat.total ? 'bg-green-500' : 'bg-blue-500'}`} 
+                            <div
+                                className={`h-full rounded-full ${stat.correct === stat.total ? 'bg-green-500' : 'bg-red-500'}`}
                                 style={{ width: `${(stat.correct/stat.total)*100}%` }}
                             />
                         </div>
@@ -138,7 +138,7 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
 
                             {question.explanation && (
                                 <div className="mr-11 flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
-                                    <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                    <Info className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                                     <span>{question.explanation}</span>
                                 </div>
                             )}

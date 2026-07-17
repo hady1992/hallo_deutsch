@@ -17,6 +17,13 @@ module.exports = {
 		},
 		extend: {
 			colors: {
+				brand: {
+					black: 'var(--brand-black)',
+					red: 'var(--brand-red)',
+					gold: 'var(--brand-gold)',
+					ivory: 'var(--brand-ivory)',
+					text: 'var(--brand-text)',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

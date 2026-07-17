@@ -23,25 +23,25 @@ const VerbDisplayComponent = ({ verbs }) => {
 
   // Expanded Tense Configuration to handle data variations
   const tenses = [
-    { 
-      id: 'präsens', 
-      label: 'Präsens (الحاضر)', 
-      dataKeys: ['Präsens', 'präsens', 'prasens'] 
+    {
+      id: 'präsens',
+      label: 'Präsens (الحاضر)',
+      dataKeys: ['Präsens', 'präsens', 'prasens']
     },
-    { 
-      id: 'präteritum', 
-      label: 'Präteritum (الماضي البسيط)', 
-      dataKeys: ['Präteritum', 'präteritum', 'prateritum', 'impf'] 
+    {
+      id: 'präteritum',
+      label: 'Präteritum (الماضي البسيط)',
+      dataKeys: ['Präteritum', 'präteritum', 'prateritum', 'impf']
     },
-    { 
-      id: 'perfekt', 
-      label: 'Perfekt (الماضي التام)', 
-      dataKeys: ['Perfekt', 'perfekt'] 
+    {
+      id: 'perfekt',
+      label: 'Perfekt (الماضي التام)',
+      dataKeys: ['Perfekt', 'perfekt']
     },
-    { 
-      id: 'futurI', 
-      label: 'Futur I (المستقبل)', 
-      dataKeys: ['Futur I', 'Futur 1', 'futurI', 'futur I', 'futur'] 
+    {
+      id: 'futurI',
+      label: 'Futur I (المستقبل)',
+      dataKeys: ['Futur I', 'Futur 1', 'futurI', 'futur I', 'futur']
     }
   ];
 
@@ -62,7 +62,7 @@ const VerbDisplayComponent = ({ verbs }) => {
     const allConjugations = conjugationSource && typeof conjugationSource === 'object' && !Array.isArray(conjugationSource)
       ? conjugationSource
       : {};
-    
+
     // 2. Find the specific Tense Data Object using possible keys
     let tenseData = null;
     for (const key of tenseConfig.dataKeys) {
@@ -78,7 +78,7 @@ const VerbDisplayComponent = ({ verbs }) => {
     for (const key of pronounConfig.keys) {
       if (typeof tenseData[key] === 'string' || typeof tenseData[key] === 'number') return String(tenseData[key]);
     }
-    
+
     // 4. Special Fallback: If pronoun is 'Sie (Formal)' or 'sie (Plural)' and we only found 'sie/Sie' earlier
     if (pronounConfig.label.includes('sie') || pronounConfig.label.includes('Sie')) {
          if (tenseData['sie/Sie']) return tenseData['sie/Sie'];
@@ -108,7 +108,7 @@ const VerbDisplayComponent = ({ verbs }) => {
           placeholder="ابحث عن فعل (مثال: gehen, يذهب)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pr-12 pl-4 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg"
+          className="w-full pr-12 pl-4 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-lg"
         />
       </div>
 
@@ -121,9 +121,9 @@ const VerbDisplayComponent = ({ verbs }) => {
               key={verb.id || verb.infinitive}
               className={cn(
                 "bg-white rounded-xl border transition-all overflow-hidden",
-                expandedVerb === (verb.id || verb.infinitive) 
-                  ? "border-blue-500 ring-1 ring-blue-500 shadow-md" 
-                  : "border-slate-200 shadow-sm hover:border-blue-300"
+                expandedVerb === (verb.id || verb.infinitive)
+                  ? "border-red-500 ring-1 ring-red-500 shadow-md"
+                  : "border-slate-200 shadow-sm hover:border-red-300"
               )}
             >
               <div
@@ -131,7 +131,7 @@ const VerbDisplayComponent = ({ verbs }) => {
                 className="p-4 cursor-pointer flex items-center justify-between hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-lg shrink-0">
                     {verb.infinitive.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -141,13 +141,13 @@ const VerbDisplayComponent = ({ verbs }) => {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className={cn(
-                    verb.type === 'irregular' ? 'bg-red-50 text-red-600 border-red-100' : 
-                    verb.type === 'strong' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                    verb.type === 'irregular' ? 'bg-red-50 text-red-600 border-red-100' :
+                    verb.type === 'strong' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                     'bg-green-50 text-green-600 border-green-100'
                   )}>
                     {verb.type || 'weak'}
                   </Badge>
-                  {expandedVerb === (verb.id || verb.infinitive) ? <ChevronUp className="text-blue-500" /> : <ChevronDown className="text-slate-300" />}
+                  {expandedVerb === (verb.id || verb.infinitive) ? <ChevronUp className="text-red-500" /> : <ChevronDown className="text-slate-300" />}
                 </div>
               </div>
 
@@ -164,7 +164,7 @@ const VerbDisplayComponent = ({ verbs }) => {
                         <div key={tense.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                           <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
                             <span className="font-bold text-slate-700 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
                                 {tense.label}
                             </span>
                             {getExampleText(verb, tense) && (
@@ -173,14 +173,14 @@ const VerbDisplayComponent = ({ verbs }) => {
                                 </span>
                             )}
                           </div>
-                          
+
                           {/* Responsive Grid for Conjugations */}
                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-slate-100">
                              {pronouns.map((pronoun, idx) => (
-                                 <div 
-                                    key={pronoun.label} 
+                                 <div
+                                    key={pronoun.label}
                                     className={cn(
-                                        "p-3 text-center hover:bg-blue-50/50 transition-colors flex flex-col justify-center min-h-[80px]",
+                                        "p-3 text-center hover:bg-red-50/50 transition-colors flex flex-col justify-center min-h-[80px]",
                                         // Specific styling for the last item (Sie Formal) to span col if needed on small screens
                                         idx === pronouns.length - 1 ? "col-span-2 md:col-span-1" : ""
                                     )}

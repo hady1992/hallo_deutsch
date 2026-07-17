@@ -34,8 +34,8 @@ const AudioSpeedControl = ({ onSpeedChange, initialSpeed = 1.0, className = "" }
             onClick={() => handleSpeedChange(s)}
             className={`
               px-2 py-1 text-xs font-bold rounded-md transition-all
-              ${speed === s 
-                ? 'bg-blue-500 text-white shadow-sm' 
+              ${speed === s
+                ? 'bg-red-500 text-white shadow-sm'
                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}
             `}
           >

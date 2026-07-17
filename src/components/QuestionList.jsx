@@ -19,11 +19,11 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+        <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
           {questions.length} Questions
         </span>
       </h2>
-      
+
       {questions.map((q, index) => (
         <Card key={q.id} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
@@ -35,7 +35,7 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
                 <h3 className="font-semibold text-lg text-slate-800" dir="auto">{q.question}</h3>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onEdit(q)} className="text-blue-600 hover:bg-blue-50">
+                <Button variant="ghost" size="icon" onClick={() => onEdit(q)} className="text-red-600 hover:bg-red-50">
                   <Edit2 className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => onDelete(q.id)} className="text-red-600 hover:bg-red-50">
@@ -46,12 +46,12 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-11">
               {q.options.map((opt, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={cn(
                     "p-3 rounded-lg border text-sm flex items-center gap-2",
-                    i === q.correctAnswer 
-                      ? "bg-green-50 border-green-200 text-green-800 font-medium" 
+                    i === q.correctAnswer
+                      ? "bg-green-50 border-green-200 text-green-800 font-medium"
                       : "bg-white border-slate-100 text-slate-600"
                   )}
                   dir="auto"

@@ -33,12 +33,12 @@ const Kids = () => {
   }, []);
 
   const tabs = [
-    { id: 'topics', label: 'المواضيع', icon: <Book size={18} />, color: 'data-[state=active]:bg-orange-500' },
+    { id: 'topics', label: 'المواضيع', icon: <Book size={18} />, color: 'data-[state=active]:bg-amber-500' },
     { id: 'vocab', label: 'كلمات', icon: <Smile size={18} />, color: 'data-[state=active]:bg-yellow-500' },
-    { id: 'verbs', label: 'أفعال', icon: <BookOpen size={18} />, color: 'data-[state=active]:bg-pink-500' },
-    { id: 'sentences', label: 'محادثات', icon: <MessageCircle size={18} />, color: 'data-[state=active]:bg-blue-500' },
+    { id: 'verbs', label: 'أفعال', icon: <BookOpen size={18} />, color: 'data-[state=active]:bg-red-500' },
+    { id: 'sentences', label: 'محادثات', icon: <MessageCircle size={18} />, color: 'data-[state=active]:bg-red-500' },
     { id: 'exercises', label: 'تمارين', icon: <Dumbbell size={18} />, color: 'data-[state=active]:bg-teal-500' },
-    { id: 'games', label: 'ألعاب', icon: <Gamepad2 size={18} />, color: 'data-[state=active]:bg-purple-500' },
+    { id: 'games', label: 'ألعاب', icon: <Gamepad2 size={18} />, color: 'data-[state=active]:bg-amber-500' },
     { id: 'quizzes', label: 'مسابقات مخصصة', icon: <Trophy size={18} />, color: 'data-[state=active]:bg-green-500' },
   ];
 
@@ -48,8 +48,8 @@ const Kids = () => {
         <title>{'Kids German Learning | Hallo Deutsch'}</title>
       </Helmet>
 
-      <div className="min-h-screen bg-[#FFF9F0] pb-24 font-sans selection:bg-yellow-200">
-        
+      <div className="min-h-screen bg-brand-ivory pb-24 font-sans selection:bg-amber-200">
+
         {/* Header */}
         <div className="bg-yellow-400 py-6 pt-28 pb-12 rounded-b-[2rem] md:rounded-b-[3rem] shadow-sm mb-8 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
@@ -57,9 +57,9 @@ const Kids = () => {
                 <div className="absolute top-20 right-20 text-4xl">🎨</div>
                 <div className="absolute bottom-10 left-1/4 text-4xl">🚗</div>
             </div>
-            
+
             <div className="container mx-auto px-4 text-center relative z-10">
-                <motion.h1 
+                <motion.h1
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     className="text-3xl md:text-6xl font-black text-slate-900 mb-3 tracking-tight drop-shadow-sm"
@@ -80,7 +80,7 @@ const Kids = () => {
 
         <div className="container mx-auto px-4 max-w-7xl">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                
+
                 {/* Custom Tab List - Scrollable on Mobile */}
                 <div className="flex justify-start md:justify-center mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0">
                     <TabsList className="bg-white p-2 h-auto rounded-full shadow-lg border-2 border-slate-100 flex gap-2 min-w-max md:min-w-0 mx-auto">
@@ -105,7 +105,7 @@ const Kids = () => {
                     <TabsContent value="topics">
                         <KidsTopics isAdmin={false} />
                     </TabsContent>
-                    
+
                     <TabsContent value="vocab">
                         <KidsVocabulary isAdmin={false} />
                     </TabsContent>

@@ -4,9 +4,9 @@ import { CheckCircle, XCircle, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AudioButton from '@/components/AudioButton';
 
-// Note: FillInBlankComponent doesn't typically have multiple choices to shuffle. 
-// It usually just has an input field. 
-// However, if the user requested it to "use shuffled answers", it implies it might sometimes 
+// Note: FillInBlankComponent doesn't typically have multiple choices to shuffle.
+// It usually just has an input field.
+// However, if the user requested it to "use shuffled answers", it implies it might sometimes
 // be used in a context where options are provided, or perhaps the user misunderstood the component type.
 // Based on the code provided in <codebase>, this component only has a text input.
 // Therefore, answer shuffling is not applicable here as there are no options to shuffle.
@@ -32,7 +32,7 @@ function FillInBlankComponent({ sentence, correct, hint, index, onAnswer }) {
   };
 
   const isCorrect = userAnswer.trim().toLowerCase() === correct.toLowerCase();
-  
+
   const audioText = sentence.replace('___', ' ... ');
   const correctAudioText = sentence.replace('___', correct);
 
@@ -58,7 +58,7 @@ function FillInBlankComponent({ sentence, correct, hint, index, onAnswer }) {
             value={userAnswer}
             onChange={(e) => !submitted && setUserAnswer(e.target.value)}
             disabled={submitted}
-            className={`mx-2 px-3 py-1 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 ${
+            className={`mx-2 px-3 py-1 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 ${
               submitted
                 ? isCorrect
                   ? 'border-green-500 bg-green-50'
@@ -77,7 +77,7 @@ function FillInBlankComponent({ sentence, correct, hint, index, onAnswer }) {
             <Button
               onClick={handleSubmit}
               disabled={!userAnswer.trim()}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-red-600 hover:bg-red-700"
             >
               تحقق من الإجابة
             </Button>

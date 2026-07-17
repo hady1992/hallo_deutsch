@@ -19,10 +19,10 @@ const KidsGamesAndQuestions = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
   const gameTypes = [
-    { id: 'article-hunt', title: 'صيد الأرتيكل', icon: '🫧', desc: 'Artikel-Jagd: اختر der أو die أو das', color: 'bg-purple-500' },
-    { id: 'multiple-choice', title: 'الاختيار الذكي', icon: '🧠', desc: 'اختر الإجابة الصحيحة', color: 'bg-blue-500' },
+    { id: 'article-hunt', title: 'صيد الأرتيكل', icon: '🫧', desc: 'Artikel-Jagd: اختر der أو die أو das', color: 'bg-amber-500' },
+    { id: 'multiple-choice', title: 'الاختيار الذكي', icon: '🧠', desc: 'اختر الإجابة الصحيحة', color: 'bg-red-500' },
     { id: 'fill-in', title: 'أكمل الجملة', icon: '✍️', desc: 'اكتب الكلمة الناقصة', color: 'bg-green-500' },
-    { id: 'true-false', title: 'صح أم خطأ', icon: '🤔', desc: 'هل هذه الجملة صحيحة؟', color: 'bg-orange-500' },
+    { id: 'true-false', title: 'صح أم خطأ', icon: '🤔', desc: 'هل هذه الجملة صحيحة؟', color: 'bg-amber-500' },
   ];
 
   const startGame = (type) => {
@@ -59,15 +59,15 @@ const KidsGamesAndQuestions = () => {
     const currentQ = questions[currentIndex];
     setSelectedAnswer(answer);
 
-    const isCorrect = 
-        currentQ.type === 'fill-in' 
+    const isCorrect =
+        currentQ.type === 'fill-in'
         ? answer.toLowerCase().trim() === currentQ.correctAnswer.toLowerCase().trim()
         : answer === currentQ.correctAnswer;
 
     if (isCorrect) {
         setScore(prev => prev + 1);
         setFeedback({ type: 'success', text: currentQ.feedback || 'Richtig! ممتاز!' });
-        
+
         // Play success sound effect/feedback only AFTER answer is selected
         // We do NOT read the answer text itself to avoid hints
         const utterance = new SpeechSynthesisUtterance('Richtig!');
@@ -82,7 +82,7 @@ const KidsGamesAndQuestions = () => {
         });
     } else {
         setFeedback({ type: 'error', text: `خطأ! الإجابة الصحيحة: ${currentQ.correctAnswer}` });
-        
+
         // Play error sound effect/feedback only AFTER answer is selected
         const utterance = new SpeechSynthesisUtterance('Das war falsch.');
         utterance.lang = 'de-DE';
@@ -111,7 +111,7 @@ const KidsGamesAndQuestions = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto p-4">
         {gameTypes.map((game) => (
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.05, rotate: 1 }}
             whileTap={{ scale: 0.95 }}
             key={game.id}
@@ -139,26 +139,26 @@ const KidsGamesAndQuestions = () => {
 
   if (showResult) {
       return (
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="max-w-2xl mx-auto bg-white rounded-[3rem] p-12 text-center shadow-2xl border-4 border-yellow-200"
           >
              <div className="mb-6 relative inline-block">
                 <Trophy size={120} className="text-yellow-400 drop-shadow-lg" />
-                <motion.div 
+                <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   className="absolute -top-4 -right-4 text-4xl"
                 >⭐</motion.div>
              </div>
-             
+
              <h2 className="text-5xl font-black text-slate-800 mb-4">انتهت اللعبة!</h2>
-             
+
              <div className="flex justify-center items-center gap-4 mb-8">
-                <div className="bg-blue-100 px-8 py-4 rounded-3xl">
+                <div className="bg-red-100 px-8 py-4 rounded-3xl">
                    <span className="block text-slate-500 font-bold text-sm">النتيجة</span>
-                   <span className="text-5xl font-black text-blue-600">{score}/{questions.length}</span>
+                   <span className="text-5xl font-black text-red-600">{score}/{questions.length}</span>
                 </div>
              </div>
 
@@ -183,7 +183,7 @@ const KidsGamesAndQuestions = () => {
           <Button onClick={returnToMenu} variant="ghost" className="rounded-xl text-slate-400 font-bold">
              خروج
           </Button>
-          
+
           <div className="flex items-center gap-4">
              <div className="bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full font-black flex items-center gap-2">
                 <Star size={18} fill="currentColor" /> {score}
@@ -193,7 +193,7 @@ const KidsGamesAndQuestions = () => {
        </div>
 
        {/* Question Card */}
-       <motion.div 
+       <motion.div
           key={currentIndex}
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -201,17 +201,17 @@ const KidsGamesAndQuestions = () => {
           className="bg-white rounded-[3rem] p-8 md:p-12 shadow-xl border-4 border-slate-100 text-center relative overflow-hidden"
        >
           <div className="mb-10">
-             <div className="bg-blue-50 inline-block px-10 py-8 rounded-[2rem] border-2 border-blue-100 relative mb-8">
+             <div className="bg-red-50 inline-block px-10 py-8 rounded-[2rem] border-2 border-red-100 relative mb-8">
                 {/* Question Text - Ensure it's readable */}
                 <h2 className="text-4xl md:text-5xl font-black text-slate-800 leading-tight" dir="ltr">
                   {currentQ.question || "Frage..."}
                 </h2>
-                
+
                 {/* Audio Button - STRICTLY for Question only */}
                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
-                   <Button 
+                   <Button
                       onClick={() => playAudio(currentQ.audioText || currentQ.question)}
-                      className="rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-200 text-white p-0 border-4 border-white"
+                      className="rounded-full w-14 h-14 bg-red-500 hover:bg-red-600 shadow-lg shadow-red-200 text-white p-0 border-4 border-white"
                       title="استمع للسؤال"
                    >
                       <Volume2 size={24} />
@@ -233,11 +233,11 @@ const KidsGamesAndQuestions = () => {
                          disabled={!!selectedAnswer}
                          className={`
                             p-6 rounded-2xl font-bold text-2xl border-2 transition-all shadow-sm
-                            ${selectedAnswer === opt 
-                              ? (opt === currentQ.correctAnswer 
-                                 ? 'bg-green-500 border-green-600 text-white' 
+                            ${selectedAnswer === opt
+                              ? (opt === currentQ.correctAnswer
+                                 ? 'bg-green-500 border-green-600 text-white'
                                  : 'bg-red-500 border-red-600 text-white')
-                              : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50'}
+                              : 'bg-white border-slate-200 text-slate-700 hover:border-red-300 hover:bg-red-50'}
                          `}
                       >
                          {/* Text only, no speaker icons */}
@@ -258,8 +258,8 @@ const KidsGamesAndQuestions = () => {
                          disabled={!!selectedAnswer}
                          className={`
                             w-40 h-40 rounded-[2.5rem] font-black text-3xl border-b-8 transition-all
-                            ${opt === 'Richtig' 
-                                ? 'bg-green-100 border-green-300 text-green-600 hover:bg-green-200' 
+                            ${opt === 'Richtig'
+                                ? 'bg-green-100 border-green-300 text-green-600 hover:bg-green-200'
                                 : 'bg-red-100 border-red-300 text-red-600 hover:bg-red-200'}
                             ${selectedAnswer === opt ? 'ring-4 ring-offset-4 ring-slate-200' : ''}
                          `}
@@ -275,17 +275,17 @@ const KidsGamesAndQuestions = () => {
              {currentQ.type === 'fill-in' && (
                 <div className="bg-slate-50 p-8 rounded-[2rem] border-2 border-slate-100">
                    <div className="flex gap-4">
-                      <input 
+                      <input
                          value={textInput}
                          onChange={(e) => setTextInput(e.target.value)}
                          placeholder="?"
-                         className="flex-1 text-center text-3xl font-bold p-4 rounded-2xl border-2 border-slate-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-400 outline-none"
+                         className="flex-1 text-center text-3xl font-bold p-4 rounded-2xl border-2 border-slate-200 focus:ring-4 focus:ring-red-100 focus:border-red-400 outline-none"
                          disabled={!!selectedAnswer}
                       />
-                      <Button 
+                      <Button
                          onClick={() => handleAnswer(textInput)}
                          disabled={!textInput || !!selectedAnswer}
-                         className="h-auto px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl"
+                         className="h-auto px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-xl"
                       >
                          OK
                       </Button>
@@ -296,7 +296,7 @@ const KidsGamesAndQuestions = () => {
 
           <AnimatePresence>
              {feedback && (
-                <motion.div 
+                <motion.div
                    initial={{ y: 50, opacity: 0 }}
                    animate={{ y: 0, opacity: 1 }}
                    exit={{ y: 50, opacity: 0 }}
@@ -313,12 +313,12 @@ const KidsGamesAndQuestions = () => {
              )}
           </AnimatePresence>
        </motion.div>
-       
+
        <div className="flex justify-center gap-2">
           {questions.map((_, idx) => (
-             <div 
-                key={idx} 
-                className={`w-3 h-3 rounded-full transition-colors ${idx === currentIndex ? 'bg-blue-500 scale-125' : idx < currentIndex ? 'bg-blue-200' : 'bg-slate-200'}`} 
+             <div
+                key={idx}
+                className={`w-3 h-3 rounded-full transition-colors ${idx === currentIndex ? 'bg-red-500 scale-125' : idx < currentIndex ? 'bg-red-200' : 'bg-slate-200'}`}
              />
           ))}
        </div>

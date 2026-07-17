@@ -14,11 +14,11 @@ const NumbersLesson = () => {
             ['8', 'acht', 'أخت'], ['9', 'neun', 'نوين'], ['10', 'zehn', 'تسين'], ['11', 'elf', 'إِلف'],
             ['12', 'zwölf', 'تسفُلف']
           ].map(([num, word, pron], idx) => (
-            <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-blue-200 transition-colors relative group">
+            <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-red-200 transition-colors relative group">
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <AudioButton text={word} size={16} />
               </div>
-              <span className="text-3xl font-bold text-blue-600 mb-1">{num}</span>
+              <span className="text-3xl font-bold text-red-600 mb-1">{num}</span>
               <span className="font-bold text-gray-800 text-lg">{word}</span>
               <span className="text-sm text-gray-500">{pron}</span>
             </div>
@@ -40,7 +40,7 @@ const NumbersLesson = () => {
            ].map((item, idx) => (
              <div key={idx} className={`flex items-center justify-between p-3 rounded border ${item.highlight ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                <div className="flex items-center gap-3">
-                 <span className="font-bold text-xl text-blue-700 w-8">{item.n}</span>
+                 <span className="font-bold text-xl text-red-700 w-8">{item.n}</span>
                  <span className="font-semibold text-gray-800" dir="ltr">{item.d}</span>
                  <AudioButton text={item.d} size={14} />
                </div>
@@ -57,11 +57,11 @@ const NumbersLesson = () => {
             ['20', 'zwanzig'], ['30', 'dreißig'], ['40', 'vierzig'], ['50', 'fünfzig'],
             ['60', 'sechzig'], ['70', 'siebzig'], ['80', 'achtzig'], ['90', 'neunzig']
           ].map(([n, w], idx) => (
-             <div key={idx} className="bg-blue-50 p-3 rounded text-center border border-blue-100 relative group">
+             <div key={idx} className="bg-red-50 p-3 rounded text-center border border-red-100 relative group">
                <div className="absolute top-1 right-1">
                  <AudioButton text={w} size={14} />
                </div>
-               <div className="font-bold text-blue-800">{n}</div>
+               <div className="font-bold text-red-800">{n}</div>
                <div className="text-sm font-semibold">{w}</div>
              </div>
           ))}
@@ -83,12 +83,12 @@ const NumbersLesson = () => {
              <span className="text-gray-400 text-sm">(عشرين)</span>
              <span>=</span>
              <div className="flex items-center gap-2">
-               <span className="text-blue-600 bg-white px-3 py-1 rounded shadow-sm">einundzwanzig</span>
+               <span className="text-red-600 bg-white px-3 py-1 rounded shadow-sm">einundzwanzig</span>
                <AudioButton text="einundzwanzig" size={20} />
              </div>
           </div>
         </div>
-        
+
         <ExampleBox examples={[
           { german: '21 - einundzwanzig', arabic: 'واحد وعشرون (لاحظ حذف s من eins)' },
           { german: '35 - fünfunddreißig', arabic: 'خمسة وثلاثون' },
@@ -113,7 +113,7 @@ const NumbersLesson = () => {
                <li className="flex justify-between items-center">
                  <span className="flex items-center gap-2">
                     Ein Kaffee kostet 3 Euro. <AudioButton text="Ein Kaffee kostet drei Euro" size={14} />
-                 </span> 
+                 </span>
                  <span>القهوة بـ 3 يورو.</span>
                </li>
              </ul>
@@ -138,9 +138,9 @@ const NumbersLesson = () => {
         </div>
       </LessonSection>
 
-      <ExerciseBox 
-        question="اكتب الرقم 67 بالألمانية." 
-        answer="siebenundsechzig (7 + و + 60)" 
+      <ExerciseBox
+        question="اكتب الرقم 67 بالألمانية."
+        answer="siebenundsechzig (7 + و + 60)"
       />
     </div>
   );

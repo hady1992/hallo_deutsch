@@ -82,7 +82,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
   if (showResults) {
     const percentage = Math.round((score / exercises.length) * 100);
     return (
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-8 rounded-xl text-center border border-indigo-100">
+      <div className="bg-gradient-to-br from-amber-50 to-amber-50 p-8 rounded-xl text-center border border-amber-100">
         <div className="mb-6 flex justify-center">
           <div className="p-4 bg-white rounded-full shadow-lg">
             <Trophy className={cn("w-16 h-16", percentage >= 70 ? "text-yellow-500" : "text-gray-400")} />
@@ -90,15 +90,15 @@ const GrammarExercisePanel = ({ exercises, title }) => {
         </div>
         <h3 className="text-2xl font-bold text-gray-800 mb-2">اكتملت التمارين!</h3>
         <p className="text-gray-600 mb-6">لقد أجبت بشكل صحيح على {score} من {exercises.length}</p>
-        
+
         <div className="w-full bg-gray-200 rounded-full h-4 mb-6 overflow-hidden">
-          <div 
-            className={cn("h-full transition-all duration-1000", percentage >= 70 ? "bg-green-500" : "bg-blue-500")}
+          <div
+            className={cn("h-full transition-all duration-1000", percentage >= 70 ? "bg-green-500" : "bg-red-500")}
             style={{ width: `${percentage}%` }}
           />
         </div>
 
-        <Button onClick={resetExercises} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+        <Button onClick={resetExercises} className="bg-amber-600 hover:bg-amber-700 text-white">
           <RefreshCw className="mr-2 h-4 w-4" />
           إعادة المحاولة
         </Button>
@@ -110,7 +110,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8">
       <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
         <h3 className="font-bold text-gray-700 flex items-center">
-          <HelpCircle className="w-5 h-5 mr-2 text-indigo-500" />
+          <HelpCircle className="w-5 h-5 mr-2 text-amber-500" />
           تمارين: {title}
         </h3>
         <span className="text-sm font-medium bg-white px-3 py-1 rounded-full text-gray-500 border border-gray-200">
@@ -131,7 +131,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
                 onClick={() => !isAnswered && setSelectedOption(option)}
                 className={cn(
                   "w-full p-4 rounded-lg border-2 text-right transition-all flex justify-between items-center",
-                  selectedOption === option ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-indigo-200",
+                  selectedOption === option ? "border-amber-500 bg-amber-50" : "border-gray-200 hover:border-amber-200",
                   isAnswered && option === currentExercise.correctAnswer ? "border-green-500 bg-green-50" : "",
                   isAnswered && selectedOption === option && !isCorrect ? "border-red-500 bg-red-50" : ""
                 )}
@@ -152,11 +152,11 @@ const GrammarExercisePanel = ({ exercises, title }) => {
               placeholder="اكتب إجابتك هنا..."
               className={cn(
                 "w-full p-4 rounded-lg border-2 outline-none text-lg transition-all",
-                isAnswered 
-                  ? isCorrect 
-                    ? "border-green-500 bg-green-50" 
+                isAnswered
+                  ? isCorrect
+                    ? "border-green-500 bg-green-50"
                     : "border-red-500 bg-red-50"
-                  : "border-gray-200 focus:border-indigo-500"
+                  : "border-gray-200 focus:border-amber-500"
               )}
               disabled={isAnswered}
             />
@@ -168,7 +168,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-800 text-right"
+              className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100 text-sm text-red-800 text-right"
             >
               <p className="font-bold mb-1">الشرح:</p>
               {currentExercise.explanation}
@@ -181,10 +181,10 @@ const GrammarExercisePanel = ({ exercises, title }) => {
 
         <div className="mt-8 flex justify-end">
           {!isAnswered ? (
-            <Button 
-              onClick={handleCheckAnswer} 
+            <Button
+              onClick={handleCheckAnswer}
               disabled={(!selectedOption && currentExercise.type === 'multipleChoice') || (!textAnswer && currentExercise.type !== 'multipleChoice')}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]"
+              className="bg-amber-600 hover:bg-amber-700 text-white min-w-[120px]"
             >
               تحقق
             </Button>

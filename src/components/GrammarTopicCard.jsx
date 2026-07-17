@@ -9,8 +9,8 @@ function GrammarTopicCard({ topic, index, onStartExercises }) {
 
   const difficultyColors = {
     beginner: 'from-green-500 to-emerald-600',
-    intermediate: 'from-blue-500 to-indigo-600',
-    advanced: 'from-purple-500 to-pink-600'
+    intermediate: 'from-red-500 to-amber-600',
+    advanced: 'from-amber-500 to-red-600'
   };
 
   const difficultyLabels = {
@@ -56,9 +56,9 @@ function GrammarTopicCard({ topic, index, onStartExercises }) {
           >
             <div className="p-6 space-y-6">
               {/* Learning Objectives */}
-              <div className="bg-blue-50 p-4 rounded-xl">
+              <div className="bg-red-50 p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="text-blue-600" size={20} />
+                  <Target className="text-red-600" size={20} />
                   <h4 className="font-bold text-gray-800">أهداف التعلم:</h4>
                 </div>
                 <ul className="space-y-2">
@@ -85,12 +85,12 @@ function GrammarTopicCard({ topic, index, onStartExercises }) {
                 <h4 className="font-bold text-gray-800 mb-3 text-lg">القواعد الأساسية:</h4>
                 <div className="space-y-4">
                   {topic.rules.map((rule, idx) => (
-                    <div key={idx} className="bg-gray-50 p-4 rounded-lg border-l-4 border-indigo-500">
-                      <h5 className="font-bold text-indigo-700 mb-2">{rule.rule}</h5>
+                    <div key={idx} className="bg-gray-50 p-4 rounded-lg border-l-4 border-amber-500">
+                      <h5 className="font-bold text-amber-700 mb-2">{rule.rule}</h5>
                       <p className="text-gray-600 mb-2">{rule.details}</p>
                       <div className="bg-white p-3 rounded-md flex items-center gap-2">
                         <span className="text-sm text-gray-500">مثال:</span>
-                        <span className="font-semibold text-indigo-600" dir="ltr">{rule.example}</span>
+                        <span className="font-semibold text-amber-600" dir="ltr">{rule.example}</span>
                         <AudioButton text={rule.example} size={16} />
                       </div>
                     </div>
@@ -103,10 +103,10 @@ function GrammarTopicCard({ topic, index, onStartExercises }) {
                 <h4 className="font-bold text-gray-800 mb-3 text-lg">أمثلة توضيحية:</h4>
                 <div className="grid gap-3">
                   {topic.examples.map((example, idx) => (
-                    <div key={idx} className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg hover:shadow-md transition-shadow">
+                    <div key={idx} className="bg-gradient-to-r from-red-50 to-amber-50 p-4 rounded-lg hover:shadow-md transition-shadow">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-semibold text-blue-700" dir="ltr">{example.german}</span>
+                          <span className="text-lg font-semibold text-red-700" dir="ltr">{example.german}</span>
                           <AudioButton text={example.german} size={18} />
                         </div>
                         <span className="text-gray-600">{example.arabic}</span>

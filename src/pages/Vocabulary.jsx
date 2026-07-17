@@ -16,7 +16,7 @@ import { getGrammarRules, getVocabulary } from '@/services/contentRepository';
 const GrammarRulesView = () => {
   const [rules, setRules] = useState([]);
   const [filterLevel, setFilterLevel] = useState('All');
-  
+
   useEffect(() => {
     const handleUpdate = async () => {
       const allRules = await getGrammarRules();
@@ -31,25 +31,25 @@ const GrammarRulesView = () => {
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-slate-500 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3">
+      <div className="text-sm text-slate-500 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
         هذه قواعد أضافها فريق الموقع عبر لوحة التحكم، منفصلة عن قواعد صفحة
-        <span className="font-bold text-orange-700 mx-1">"القواعد"</span>
+        <span className="font-bold text-amber-700 mx-1">"القواعد"</span>
         الرئيسية.
       </div>
       <div className="flex justify-start md:justify-end overflow-x-auto pb-2 scrollbar-hide">
          <div className="bg-white p-1 rounded-lg border border-slate-200 inline-flex min-w-max">
              {['All', 'A1', 'A2', 'B1', 'B2'].map(lvl => (
-                 <button 
+                 <button
                     key={lvl}
                     onClick={() => setFilterLevel(lvl)}
-                    className={`px-4 py-2 text-sm rounded-md transition-all ${filterLevel === lvl ? 'bg-orange-100 text-orange-800 font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
+                    className={`px-4 py-2 text-sm rounded-md transition-all ${filterLevel === lvl ? 'bg-amber-100 text-amber-800 font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
                  >
                     {lvl === 'All' ? 'الكل' : lvl}
                  </button>
              ))}
          </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          {filtered.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-dashed border-slate-200">
@@ -113,7 +113,7 @@ function Vocabulary() {
       return [];
     }
   });
-  
+
   useEffect(() => {
     localStorage.setItem('simple_vocab_favorites', JSON.stringify(favorites));
   }, [favorites]);
@@ -161,13 +161,13 @@ function Vocabulary() {
 
       <div className="min-h-screen bg-gray-50 py-12 md:py-20 mt-8 md:mt-0" dir="rtl">
         <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-          
+
           <div className="text-center mb-10">
             <h1 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
-              المكتبة <span className="text-blue-600">الشاملة</span>
+              المكتبة <span className="text-red-600">الشاملة</span>
             </h1>
             {cloudLoading && (
-                <div className="flex justify-center items-center gap-2 text-sm text-blue-500 mb-4">
+                <div className="flex justify-center items-center gap-2 text-sm text-red-500 mb-4">
                     <Loader2 className="animate-spin w-4 h-4" /> جاري مزامنة المكتبة...
                 </div>
             )}
@@ -192,7 +192,7 @@ function Vocabulary() {
             </div>
 
             <TabsContent value="vocabulary" className="outline-none">
-                <VocabularyFilter 
+                <VocabularyFilter
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     selectedLevels={selectedLevels}
@@ -209,7 +209,7 @@ function Vocabulary() {
                     <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <AnimatePresence>
                         {filteredWords.map((word) => (
-                        <VocabularyCardSimple 
+                        <VocabularyCardSimple
                             key={word.id || word.german}
                             word={word}
                             isFavorite={favorites.includes(word.id)}

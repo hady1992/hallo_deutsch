@@ -105,7 +105,7 @@ const DataImportUtility = ({ contentType = 'verbs', className }) => {
     if (isProcessing) return;
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; 
+      fileInputRef.current.value = '';
       fileInputRef.current.click();
     }
   };
@@ -149,7 +149,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       const fileName = selectedFile.name.toLowerCase();
-      
+
       if (!fileName.endsWith('.json') && !fileName.endsWith('.csv')) {
         toast({
           title: "نوع الملف غير مدعوم",
@@ -182,13 +182,13 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         if (!german) itemErrors.push("الحقل 'german' أو 'infinitive' مفقود");
         if (!translation) itemErrors.push("الحقل 'translation' مفقود");
         if (!type) itemErrors.push("الحقل 'type' مفقود");
-        
+
         // Flexible Conjugation Validation
         if (!conjugations || typeof conjugations !== 'object') {
            // If conjugations are missing, it's a soft error, allow empty object.
-           conjugations = {}; 
-        } 
-        
+           conjugations = {};
+        }
+
         if (itemErrors.length === 0) {
             const migratedItem = migrateVerbData({
                 ...item,
@@ -229,12 +229,12 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         if (!noun) itemErrors.push("الحقل 'noun' مفقود");
         if (!gender) itemErrors.push("الحقل 'gender' مفقود");
         if (!article) itemErrors.push("الحقل 'article' مفقود");
-        
+
         const validArticles = ['der', 'die', 'das'];
         if (article && !validArticles.includes(article)) {
              itemErrors.push(`أداة التعريف '${article}' غير صحيحة. يجب أن تكون der, die, أو das.`);
         }
-        
+
         if (itemErrors.length === 0) {
             validItems.push({
                 ...item,
@@ -272,7 +272,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         if (!item.type) itemErrors.push("الحقل 'type' مفقود");
         if (!item.example) itemErrors.push("الحقل 'example' مفقود");
         if (!item.exampleArabic) itemErrors.push("الحقل 'exampleArabic' مفقود");
-        
+
         if (itemErrors.length === 0) {
             validItems.push({
                 ...item,
@@ -306,7 +306,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         if (!item.title) itemErrors.push("الحقل 'title' مفقود");
         if (!item.level) itemErrors.push("الحقل 'level' مفقود");
         if (!item.explanation) itemErrors.push("الحقل 'explanation' مفقود");
-        
+
         if (itemErrors.length === 0) {
             // Handle array fields that might come as strings from CSV
             let examples = item.examples;
@@ -343,7 +343,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         let content;
         // Parse File
         const reader = new FileReader();
-        
+
         const text = await new Promise((resolve, reject) => {
             reader.onload = (e) => resolve(e.target.result);
             reader.onerror = (e) => reject(e);
@@ -360,9 +360,9 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                 throw new Error('صيغة الملف غير صحيحة.');
             }
         }
-        
+
         if (!Array.isArray(content)) content = [content];
-        
+
         // Validate & Migrate
         let validationResult;
         let storageKey;
@@ -497,19 +497,19 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
   return (
     <div className={cn("w-full mb-8", className)}>
-      <input 
-          type="file" 
+      <input
+          type="file"
           ref={fileInputRef}
-          className="hidden" 
+          className="hidden"
           accept=".json,.csv"
           onChange={handleFileChange}
       />
 
       <div className="flex gap-2 mb-2">
-         <Button 
+         <Button
             onClick={handleButtonClick}
-            className={cn("flex-1 bg-slate-900 hover:bg-slate-800 text-white shadow-md p-6 h-auto flex flex-col items-center gap-2 rounded-xl", 
-              contentType === 'grammar' ? 'bg-orange-600 hover:bg-orange-700' : ''
+            className={cn("flex-1 bg-slate-900 hover:bg-slate-800 text-white shadow-md p-6 h-auto flex flex-col items-center gap-2 rounded-xl",
+              contentType === 'grammar' ? 'bg-amber-600 hover:bg-amber-700' : ''
             )}
         >
             <div className="flex items-center gap-2 text-lg font-bold">
@@ -518,7 +518,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
             </div>
             <span className="text-white/70 text-sm font-normal">JSON أو CSV</span>
         </Button>
-        <Button 
+        <Button
             onClick={downloadTemplate}
             variant="outline"
             className="flex-shrink-0 h-auto flex flex-col items-center justify-center p-4 rounded-xl border-dashed"
@@ -532,7 +532,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
       <AnimatePresence>
         {file && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -542,7 +542,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 {/* File Info */}
                 <div className="mb-4 flex min-w-0 items-center gap-3">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                        <div className="p-3 bg-red-50 text-red-600 rounded-lg">
                             <FileText size={24} />
                         </div>
                         <div className="min-w-0">
@@ -556,7 +556,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
                         type="button"
                         onClick={processImport}
                         disabled={isProcessing}
-                        className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
+                        className="w-full gap-2 bg-red-600 hover:bg-red-700"
                         data-testid="import-file-action"
                     >
                         {isProcessing ? (

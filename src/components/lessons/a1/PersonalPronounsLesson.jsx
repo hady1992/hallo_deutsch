@@ -7,11 +7,11 @@ const PersonalPronounsLesson = () => {
     <div>
       <LessonSection title="الضمائر الشخصية في حالة الرفع (Nominativ)">
         <p className="mb-4 text-gray-700">الضمائر هي كلمات قصيرة تحل محل الأسماء وتساعدنا على تجنب التكرار. في الألمانية، التمييز بين المخاطب الرسمي وغير الرسمي مهم جداً.</p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Singular */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-blue-50 p-3 text-center font-bold text-blue-800 border-b border-blue-100">المفرد (Singular)</div>
+            <div className="bg-red-50 p-3 text-center font-bold text-red-800 border-b border-red-100">المفرد (Singular)</div>
             <table className="w-full text-sm">
               <tbody className="divide-y divide-gray-100">
                 <tr>
@@ -103,9 +103,9 @@ const PersonalPronounsLesson = () => {
         </ul>
       </ImportantNote>
 
-      <ExerciseBox 
-        question="ما هو الضمير المناسب للحديث عن مجموعة أصدقاء تخاطبهم؟" 
-        answer="ihr (أنتم)" 
+      <ExerciseBox
+        question="ما هو الضمير المناسب للحديث عن مجموعة أصدقاء تخاطبهم؟"
+        answer="ihr (أنتم)"
       />
     </div>
   );

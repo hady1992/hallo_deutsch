@@ -6,12 +6,12 @@ import { getKidsTopics, saveKidsTopics } from '@/utils/storageManager';
 import { getKidsTopics as getPublishedKidsTopics } from '@/services/contentRepository';
 
 const defaultTopics = [
-  { id: 1, title: 'Animals', arabicTitle: 'الحيوانات', icon: 'cat', color: 'bg-orange-100 text-orange-600', count: 15 },
-  { id: 2, title: 'Colors', arabicTitle: 'الألوان', icon: 'sun', color: 'bg-blue-100 text-blue-600', count: 12 },
+  { id: 1, title: 'Animals', arabicTitle: 'الحيوانات', icon: 'cat', color: 'bg-amber-100 text-amber-600', count: 15 },
+  { id: 2, title: 'Colors', arabicTitle: 'الألوان', icon: 'sun', color: 'bg-red-100 text-red-600', count: 12 },
   { id: 3, title: 'Food', arabicTitle: 'الطعام', icon: 'apple', color: 'bg-green-100 text-green-600', count: 20 },
   { id: 4, title: 'Transport', arabicTitle: 'المواصلات', icon: 'car', color: 'bg-red-100 text-red-600', count: 10 },
-  { id: 5, title: 'Home', arabicTitle: 'المنزل', icon: 'home', color: 'bg-purple-100 text-purple-600', count: 18 },
-  { id: 6, title: 'Shapes', arabicTitle: 'الأشكال', icon: 'shapes', color: 'bg-pink-100 text-pink-600', count: 8 },
+  { id: 5, title: 'Home', arabicTitle: 'المنزل', icon: 'home', color: 'bg-amber-100 text-amber-600', count: 18 },
+  { id: 6, title: 'Shapes', arabicTitle: 'الأشكال', icon: 'shapes', color: 'bg-red-100 text-red-600', count: 8 },
   { id: 7, title: 'School', arabicTitle: 'المدرسة', icon: 'school', color: 'bg-yellow-100 text-yellow-600', count: 14 },
 ];
 
@@ -59,10 +59,10 @@ const KidsTopics = ({ isAdmin }) => {
           مواضيع شيقة
         </h2>
         {isAdmin && (
-          <KidsFileUploader 
-            onUpload={handleUpload} 
-            label="إضافة مواضيع" 
-            templateData={[{ title: 'Space', arabicTitle: 'الفضاء', icon: 'star', color: 'bg-indigo-100' }]}
+          <KidsFileUploader
+            onUpload={handleUpload}
+            label="إضافة مواضيع"
+            templateData={[{ title: 'Space', arabicTitle: 'الفضاء', icon: 'star', color: 'bg-amber-100' }]}
           />
         )}
       </div>
@@ -76,7 +76,7 @@ const KidsTopics = ({ isAdmin }) => {
             transition={{ delay: index * 0.1 }}
             whileHover={{ scale: 1.05, rotate: 2 }}
             className={`
-              ${topic.color || 'bg-slate-100 text-slate-600'} 
+              ${topic.color || 'bg-slate-100 text-slate-600'}
               aspect-square rounded-3xl p-6 flex flex-col items-center justify-center gap-4 shadow-sm cursor-pointer border-4 border-white
               group relative overflow-hidden
             `}

@@ -19,9 +19,9 @@ function GrammarSection({ title, explanation, examples, index }) {
       >
         <h3 className="text-xl font-bold text-gray-800">{title}</h3>
         {isExpanded ? (
-          <ChevronUp className="text-blue-600" size={24} />
+          <ChevronUp className="text-red-600" size={24} />
         ) : (
-          <ChevronDown className="text-blue-600" size={24} />
+          <ChevronDown className="text-red-600" size={24} />
         )}
       </button>
 
@@ -33,7 +33,7 @@ function GrammarSection({ title, explanation, examples, index }) {
           transition={{ duration: 0.3 }}
           className="px-6 pb-6"
         >
-          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+          <div className="bg-red-50 p-4 rounded-lg mb-4">
             <p className="text-gray-700 leading-relaxed">{explanation}</p>
           </div>
 

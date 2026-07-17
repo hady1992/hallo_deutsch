@@ -46,7 +46,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.question.trim() || !formData.optionA.trim() || !formData.optionB.trim() || !formData.optionC.trim() || !formData.optionD.trim()) {
       toast({
@@ -65,7 +65,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
     };
 
     onSubmit(submissionData);
-    
+
     if (!initialData) {
       setFormData({
         question: '',
@@ -76,7 +76,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
         correctAnswer: '0'
       });
     }
-    
+
     toast({
       title: initialData ? "Question Updated" : "Question Added",
       description: initialData ? "Changes saved successfully." : "New question added to the list.",
@@ -88,7 +88,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
     <Card className="mb-8 border-slate-200 shadow-sm">
       <CardHeader className="bg-slate-50 border-b border-slate-100">
         <CardTitle className="text-lg flex items-center gap-2">
-          {initialData ? <Edit2 className="w-5 h-5 text-blue-600" /> : <Save className="w-5 h-5 text-green-600" />}
+          {initialData ? <Edit2 className="w-5 h-5 text-red-600" /> : <Save className="w-5 h-5 text-green-600" />}
           {initialData ? 'Edit Question' : 'Add New Question'}
         </CardTitle>
       </CardHeader>
@@ -160,7 +160,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
               name="correctAnswer"
               value={formData.correctAnswer}
               onChange={handleChange}
-              className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
             >
               <option value="0">Option A</option>
               <option value="1">Option B</option>
@@ -175,7 +175,7 @@ const QuestionForm = ({ onSubmit, onCancel, initialData }) => {
                 <X className="w-4 h-4" /> Cancel
               </Button>
             )}
-            <Button type="submit" className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="gap-2 bg-red-600 hover:bg-red-700">
               <Save className="w-4 h-4" /> {initialData ? 'Update Question' : 'Save Question'}
             </Button>
           </div>

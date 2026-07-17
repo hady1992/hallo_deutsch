@@ -35,7 +35,7 @@ const VerbConjugationDetail = ({ verb }) => {
   };
 
   const currentConjugations = verb.conjugations?.[activeTense] || {};
-  
+
   // Sort pronouns
   const pronouns = Object.keys(currentConjugations).sort((a, b) => {
     const idxA = PRONOUN_ORDER.indexOf(a);
@@ -58,7 +58,7 @@ const VerbConjugationDetail = ({ verb }) => {
                 {verb.type}
               </Badge>
             </div>
-            <p className="text-xl text-indigo-600 font-medium">{verb.translation}</p>
+            <p className="text-xl text-amber-600 font-medium">{verb.translation}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="gap-2">
@@ -76,7 +76,7 @@ const VerbConjugationDetail = ({ verb }) => {
             onClick={() => setActiveTense(tense)}
             className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-bold transition-all ${
               activeTense === tense
-                ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
+                ? 'bg-white text-red-700 shadow-sm border border-red-200'
                 : 'text-slate-500 hover:bg-slate-100 border border-transparent'
             }`}
           >
@@ -102,7 +102,7 @@ const VerbConjugationDetail = ({ verb }) => {
                   <div className="col-span-1 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleCopy(`${pronoun} ${currentConjugations[pronoun]}`, `${activeTense}-${pronoun}`)}
-                      className="text-slate-400 hover:text-indigo-600"
+                      className="text-slate-400 hover:text-amber-600"
                     >
                       {copied === `${activeTense}-${pronoun}` ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -115,8 +115,8 @@ const VerbConjugationDetail = ({ verb }) => {
           {/* Details & Examples */}
           <div className="space-y-6">
             {/* Example Box */}
-            <div className="bg-indigo-50/50 rounded-xl p-5 border border-indigo-100">
-              <h4 className="font-bold text-indigo-800 mb-3 flex items-center gap-2">
+            <div className="bg-amber-50/50 rounded-xl p-5 border border-amber-100">
+              <h4 className="font-bold text-amber-800 mb-3 flex items-center gap-2">
                 <Info size={16} /> مثال في سياق {activeTense}
               </h4>
               {verb.examples?.[activeTense] ? (

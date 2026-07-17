@@ -48,7 +48,7 @@ function Levels() {
       name: 'المستوى الأول',
       description: 'مستوى المبتدئين - تعلم الأساسيات والتعبيرات البسيطة',
       statusText: `${lessonCounts.A1 ?? fallbackCounts.A1} دروس متاحة`,
-      color: 'from-green-400 to-green-600',
+      color: 'from-[#d71920] to-[#a90f16]',
       path: '/level/a1'
     },
     {
@@ -56,7 +56,7 @@ function Levels() {
       name: 'المستوى الثاني',
       description: 'مستوى ما قبل المتوسط - بناء المهارات الأساسية',
       statusText: `${lessonCounts.A2 ?? fallbackCounts.A2} دروس متاحة`,
-      color: 'from-blue-400 to-blue-600',
+      color: 'from-[#e8b21e] to-[#8a6500]',
       path: '/level/a2'
     },
     {
@@ -64,7 +64,7 @@ function Levels() {
       name: 'المستوى الثالث',
       description: 'المستوى المتوسط - تطوير القدرة على التواصل',
       statusText: `${lessonCounts.B1 ?? fallbackCounts.B1} دروس متاحة`,
-      color: 'from-orange-400 to-orange-600',
+      color: 'from-[#2f2f2f] to-[#111111]',
       path: '/level/b1'
     },
     {
@@ -72,7 +72,7 @@ function Levels() {
       name: 'المستوى الرابع',
       description: 'المستوى فوق المتوسط - إتقان اللغة بشكل متقدم',
       statusText: `${lessonCounts.B2 ?? fallbackCounts.B2} دروس متاحة`,
-      color: 'from-red-400 to-red-600',
+      color: 'from-[#7a0d12] to-[#111111]',
       path: '/level/b2'
     }
   ];
@@ -84,7 +84,7 @@ function Levels() {
         <meta name="description" content="اختر مستواك من A1 إلى B2 وابدأ رحلتك في تعلم اللغة الألمانية" />
       </Helmet>
 
-      <div className="min-h-screen py-16 md:py-24 mt-8 md:mt-0 bg-gray-50" dir="rtl">
+      <div className="min-h-screen bg-brand-ivory py-16 md:mt-0 md:py-24 mt-8" dir="rtl">
         <div className="container mx-auto px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

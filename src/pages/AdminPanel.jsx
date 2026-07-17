@@ -51,7 +51,7 @@ const ADMIN_SECTIONS = [
     title: 'إدارة المحتوى',
     description: 'عرض وتعديل المحتوى الموجود من مكان واحد.',
     icon: BookOpen,
-    color: 'bg-blue-50 text-blue-700 border-blue-100',
+    color: 'bg-red-50 text-red-700 border-red-100',
   },
   {
     id: 'upload',
@@ -65,7 +65,7 @@ const ADMIN_SECTIONS = [
     title: 'إدارة الدروس',
     description: 'رفع دروس JSON ومراجعة الدروس المنشورة.',
     icon: BookPlus,
-    color: 'bg-cyan-50 text-cyan-700 border-cyan-100',
+    color: 'bg-amber-50 text-amber-700 border-amber-100',
   },
   {
     id: 'kids',
@@ -79,7 +79,7 @@ const ADMIN_SECTIONS = [
     title: 'الاختبارات والتمارين',
     description: 'إدارة التمارين، تحديد المستوى، والامتحانات.',
     icon: Dumbbell,
-    color: 'bg-purple-50 text-purple-700 border-purple-100',
+    color: 'bg-amber-50 text-amber-700 border-amber-100',
   },
   {
     id: 'system',
@@ -288,7 +288,7 @@ const AdminPanel = () => {
             </div>
             <div className="grid gap-6 lg:grid-cols-3">
               <div>
-                <h3 className="mb-3 text-lg font-black text-blue-700">الأفعال</h3>
+                <h3 className="mb-3 text-lg font-black text-red-700">الأفعال</h3>
                 <DataImportUtility contentType="verbs" />
               </div>
               <div>
@@ -296,11 +296,11 @@ const AdminPanel = () => {
                 <DataImportUtility contentType="nouns" />
               </div>
               <div>
-                <h3 className="mb-3 text-lg font-black text-purple-700">المفردات العامة</h3>
+                <h3 className="mb-3 text-lg font-black text-amber-700">المفردات العامة</h3>
                 <DataImportUtility contentType="vocabulary" />
               </div>
               <div className="lg:col-span-3">
-                <h3 className="mb-3 text-lg font-black text-orange-700">القواعد</h3>
+                <h3 className="mb-3 text-lg font-black text-amber-700">القواعد</h3>
                 <DataImportUtility contentType="grammar" />
               </div>
             </div>
@@ -332,7 +332,7 @@ const AdminPanel = () => {
             isOpen={openSections.lessons}
             onToggle={() => toggleSection('lessons')}
           >
-            <div className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-black text-cyan-900">
+            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-900">
               ملفات الدروس تُرفع من هنا فقط، وليس من قسم الأسماء أو المفردات.
             </div>
             <div className="mb-5 flex flex-col gap-2 sm:max-w-xs">
@@ -341,7 +341,7 @@ const AdminPanel = () => {
                 id="admin-lesson-level"
                 value={lessonLevel}
                 onChange={(event) => setLessonLevel(event.target.value)}
-                className="h-11 rounded-md border border-slate-300 bg-white px-3 font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="h-11 rounded-md border border-slate-300 bg-white px-3 font-bold text-slate-800 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
               >
                 {['A1', 'A2', 'B1', 'B2'].map((level) => (
                   <option key={level} value={level}>{level}</option>
@@ -402,10 +402,10 @@ const AdminPanel = () => {
                     <KidsFileUploader
                       onUpload={handleKidsTopicsImport}
                       label={'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0648\u0627\u0636\u064a\u0639'}
-                      templateData={[{ title: 'Space', arabicTitle: '\u0627\u0644\u0641\u0636\u0627\u0621', icon: 'star', color: 'bg-indigo-100 text-indigo-700' }]}
+                      templateData={[{ title: 'Space', arabicTitle: '\u0627\u0644\u0641\u0636\u0627\u0621', icon: 'star', color: 'bg-amber-100 text-amber-700' }]}
                     />
                   </div>
-                  <div className="rounded-2xl border border-pink-100 bg-white p-5 shadow-sm">
+                  <div className="rounded-2xl border border-red-100 bg-white p-5 shadow-sm">
                     <h3 className="mb-2 text-lg font-black text-slate-800">{'\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0623\u0641\u0639\u0627\u0644 \u0627\u0644\u0623\u0637\u0641\u0627\u0644'}</h3>
                     <p className="mb-4 text-sm font-bold text-slate-500">{'JSON/CSV \u0644\u0623\u0641\u0639\u0627\u0644 \u0642\u0633\u0645 \u0627\u0644\u0623\u0637\u0641\u0627\u0644.'}</p>
                     <KidsFileUploader
@@ -442,13 +442,13 @@ const AdminPanel = () => {
               </div>
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-xl font-black text-slate-800">
-                  <Target className="text-indigo-600" /> اختبار تحديد المستوى
+                  <Target className="text-amber-600" /> اختبار تحديد المستوى
                 </h3>
                 <ExamUploaderPlacementTest />
               </div>
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-xl font-black text-slate-800">
-                  <GraduationCap className="text-pink-600" /> امتحانات المستويات
+                  <GraduationCap className="text-red-600" /> امتحانات المستويات
                 </h3>
                 <div className="grid gap-4 lg:grid-cols-2">
                   {['A1', 'A2', 'B1', 'B2'].map((level) => (
@@ -458,7 +458,7 @@ const AdminPanel = () => {
               </div>
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-xl font-black text-slate-800">
-                  <GraduationCap className="text-pink-600" /> نماذج الامتحانات
+                  <GraduationCap className="text-red-600" /> نماذج الامتحانات
                 </h3>
                 <ExamModelsImporter />
               </div>

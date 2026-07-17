@@ -23,9 +23,9 @@ function LevelB1() {
              </p>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                {['weil', 'dass', 'wenn', 'ob'].map((word, idx) => (
-                 <div key={idx} className="bg-orange-50 p-4 rounded border border-orange-100">
+                 <div key={idx} className="bg-amber-50 p-4 rounded border border-amber-100">
                    <div className="flex items-center gap-2 mb-2">
-                      <h5 className="font-bold text-orange-900">{word}</h5>
+                      <h5 className="font-bold text-amber-900">{word}</h5>
                       <AudioButton text={word} size={14}/>
                    </div>
                    {word === 'weil' && <p className="text-sm mt-2 font-mono text-gray-600" dir="ltr">Ich esse, weil ich Hunger <span className="font-bold text-red-500">habe</span>. <AudioButton text="Ich esse, weil ich Hunger habe" size={12}/></p>}
@@ -83,8 +83,8 @@ function LevelB1() {
         <title>{'المستوى الثالث B1 - Hallo Deutsch'}</title>
         <meta name="description" content="دروس المستوى الثالث B1 في اللغة الألمانية - الجمل الجانبية، المبني للمجهول، الأفعال المنعكسة." />
       </Helmet>
-      
-      <LevelContent 
+
+      <LevelContent
         title="المستوى الثالث (B1)"
         levelId="B1"
         description="في هذا المستوى المتوسط، ستتمكن من التعامل مع معظم المواقف اللغوية. ستتعلم التعبير عن رأيك، وبناء جمل معقدة، واستخدام صيغ المبني للمجهول."

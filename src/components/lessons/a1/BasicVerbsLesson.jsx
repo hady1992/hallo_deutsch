@@ -25,13 +25,13 @@ const BasicVerbsLesson = () => {
         <p className="text-gray-700 mb-4">هذان الفعلان هما الأهم على الإطلاق، ويستخدمان في آلاف الجمل يومياً.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {verbs.slice(0, 2).map((v, idx) => (
-            <div key={idx} className="bg-white rounded-xl border border-blue-200 overflow-hidden shadow-sm">
-              <div className="bg-blue-100 p-3 border-b border-blue-200 flex justify-between items-center">
+            <div key={idx} className="bg-white rounded-xl border border-red-200 overflow-hidden shadow-sm">
+              <div className="bg-red-100 p-3 border-b border-red-200 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-blue-900 text-xl" dir="ltr">{v.inf}</span>
+                  <span className="font-bold text-red-900 text-xl" dir="ltr">{v.inf}</span>
                   <AudioButton text={v.inf} size={18} />
                 </div>
-                <span className="text-blue-800 font-medium">{v.meaning}</span>
+                <span className="text-red-800 font-medium">{v.meaning}</span>
               </div>
               <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div className="flex justify-between border-b border-gray-100 pb-1"><span>ich</span> <span className="font-bold text-gray-800">{v.conj[0]}</span></div>
@@ -63,12 +63,12 @@ const BasicVerbsLesson = () => {
                  <span>{v.meaning}</span>
                </div>
                <div className="grid grid-cols-2 gap-2 text-xs">
-                 <div>ich <span className="font-semibold text-blue-600">{v.conj[0]}</span></div>
-                 <div>wir <span className="font-semibold text-blue-600">{v.conj[3]}</span></div>
-                 <div>du <span className="font-semibold text-blue-600">{v.conj[1]}</span></div>
-                 <div>ihr <span className="font-semibold text-blue-600">{v.conj[4]}</span></div>
-                 <div>er/sie/es <span className="font-semibold text-blue-600">{v.conj[2]}</span></div>
-                 <div>sie/Sie <span className="font-semibold text-blue-600">{v.conj[5]}</span></div>
+                 <div>ich <span className="font-semibold text-red-600">{v.conj[0]}</span></div>
+                 <div>wir <span className="font-semibold text-red-600">{v.conj[3]}</span></div>
+                 <div>du <span className="font-semibold text-red-600">{v.conj[1]}</span></div>
+                 <div>ihr <span className="font-semibold text-red-600">{v.conj[4]}</span></div>
+                 <div>er/sie/es <span className="font-semibold text-red-600">{v.conj[2]}</span></div>
+                 <div>sie/Sie <span className="font-semibold text-red-600">{v.conj[5]}</span></div>
                </div>
             </div>
           ))}
@@ -88,9 +88,9 @@ const BasicVerbsLesson = () => {
         ]} />
       </LessonSection>
 
-      <ExerciseBox 
-        question="أكمل الجملة: Wir ______ Fußball. (spielen - يلعب)" 
-        answer="spielen (لأن الفاعل Wir يأخذ النهاية -en)" 
+      <ExerciseBox
+        question="أكمل الجملة: Wir ______ Fußball. (spielen - يلعب)"
+        answer="spielen (لأن الفاعل Wir يأخذ النهاية -en)"
       />
     </div>
   );

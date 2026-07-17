@@ -113,7 +113,7 @@ const Exercises = () => {
   const handleAnswer = (optionIndex) => {
     const currentQ = currentQuestions[currentIndex];
     const isCorrect = optionIndex === currentQ.correctAnswer;
-    
+
     setAnswers(prev => ({ ...prev, [currentIndex]: optionIndex }));
     if (isCorrect) setScore(prev => prev + 1);
 
@@ -172,7 +172,7 @@ const Exercises = () => {
         <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
            <div className="text-center mb-12">
                <h1 className="text-4xl font-black text-slate-800 mb-4 flex items-center justify-center gap-3">
-                   <Dumbbell className="text-purple-600 w-10 h-10" /> 
+                   <Dumbbell className="text-amber-600 w-10 h-10" />
                    تمارين القواعد والمفردات
                </h1>
                <p className="text-lg text-slate-500 max-w-2xl mx-auto">
@@ -182,21 +182,21 @@ const Exercises = () => {
 
            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                {['A1', 'A2', 'B1', 'B2'].map((level) => (
-                   <motion.div 
-                        key={level} 
+                   <motion.div
+                        key={level}
                         whileHover={{ y: -5 }}
                         className="h-full"
                    >
                        <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all overflow-hidden cursor-pointer group" onClick={() => chooseLevel(level)}>
                            <div className={`h-2 w-full ${
-                               level === 'A1' ? 'bg-green-500' : 
-                               level === 'A2' ? 'bg-blue-500' : 
+                               level === 'A1' ? 'bg-green-500' :
+                               level === 'A2' ? 'bg-red-500' :
                                level === 'B1' ? 'bg-yellow-500' : 'bg-red-500'
                            }`} />
                            <CardContent className="p-6 flex flex-col items-center text-center h-full">
                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black mb-4 shadow-sm group-hover:scale-110 transition-transform ${
-                                   level === 'A1' ? 'bg-green-50 text-green-600' : 
-                                   level === 'A2' ? 'bg-blue-50 text-blue-600' : 
+                                   level === 'A1' ? 'bg-green-50 text-green-600' :
+                                   level === 'A2' ? 'bg-red-50 text-red-600' :
                                    level === 'B1' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600'
                                }`}>
                                    {level}
@@ -207,7 +207,7 @@ const Exercises = () => {
                                </p>
                                <div className="w-full pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-medium text-slate-500">
                                    <span className="flex items-center gap-1"><Layers className="w-4 h-4" /> {getLevelCount(level)} تمرين</span>
-                                   <ArrowRight className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-purple-500 rotate-180" />
+                                   <ArrowRight className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-amber-500 rotate-180" />
                                </div>
                            </CardContent>
                        </Card>
@@ -225,7 +225,7 @@ const Exercises = () => {
             </Button>
 
             <div className="text-center mb-10">
-                <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+                <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
                     المستوى {selectedLevel}
                 </div>
                 <h1 className="text-3xl font-black text-slate-800 mb-2">اختر فئة التمارين وعددها</h1>
@@ -243,8 +243,8 @@ const Exercises = () => {
                         className={cn(
                             "px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all",
                             selectedCategory === 'all'
-                                ? "bg-purple-600 border-purple-600 text-white shadow-md"
-                                : "bg-white border-slate-200 text-slate-600 hover:border-purple-300"
+                                ? "bg-amber-600 border-amber-600 text-white shadow-md"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-amber-300"
                         )}
                     >
                         كل التمارين ({levelExercises.length})
@@ -256,8 +256,8 @@ const Exercises = () => {
                             className={cn(
                                 "german-text px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all",
                                 selectedCategory === cat.key
-                                    ? "bg-purple-600 border-purple-600 text-white shadow-md"
-                                    : "bg-white border-slate-200 text-slate-600 hover:border-purple-300"
+                                    ? "bg-amber-600 border-amber-600 text-white shadow-md"
+                                    : "bg-white border-slate-200 text-slate-600 hover:border-amber-300"
                             )}
                         >
                             {cat.label} ({cat.count})
@@ -292,7 +292,7 @@ const Exercises = () => {
             <Button
                 onClick={startSession}
                 disabled={categoryFilteredExercises.length === 0}
-                className="w-full h-14 text-lg font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg"
+                className="w-full h-14 text-lg font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg"
             >
                 ابدأ التمرين
             </Button>
@@ -315,8 +315,8 @@ const Exercises = () => {
             </div>
 
             <div className="h-2 bg-slate-200 rounded-full mb-8 overflow-hidden">
-                <motion.div 
-                    className="h-full bg-purple-600"
+                <motion.div
+                    className="h-full bg-amber-600"
                     initial={{ width: 0 }}
                     animate={{ width: `${((currentIndex + 1) / currentQuestions.length) * 100}%` }}
                 />
@@ -335,7 +335,7 @@ const Exercises = () => {
                             <span className="german-text text-xs font-bold uppercase tracking-wider text-slate-400 bg-white px-2 py-1 rounded border border-slate-200">
                                 {getCategoryLabel(getExerciseCategoryKey(currentQuestion))}
                             </span>
-                            <span className="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-1 rounded border border-purple-100">
+                            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-100">
                                 {selectedLevel}
                             </span>
                         </div>
@@ -362,16 +362,16 @@ const Exercises = () => {
                                         onClick={() => handleAnswer(idx)}
                                         className={cn(
                                             "w-full p-4 rounded-xl border-2 transition-all hover:bg-slate-50 relative flex items-center justify-between group",
-                                            answers[currentIndex] === idx ? "border-purple-500 bg-purple-50" : "border-slate-100 hover:border-purple-200"
+                                            answers[currentIndex] === idx ? "border-amber-500 bg-amber-50" : "border-slate-100 hover:border-amber-200"
                                         )}
                                     >
                                         <div className={cn(
                                             "w-5 h-5 rounded-full border-2 flex items-center justify-center ml-4 flex-shrink-0",
-                                            answers[currentIndex] === idx ? "border-purple-600" : "border-slate-300 group-hover:border-purple-400"
+                                            answers[currentIndex] === idx ? "border-amber-600" : "border-slate-300 group-hover:border-amber-400"
                                         )}>
-                                            {answers[currentIndex] === idx && <div className="w-2.5 h-2.5 bg-purple-600 rounded-full" />}
+                                            {answers[currentIndex] === idx && <div className="w-2.5 h-2.5 bg-amber-600 rounded-full" />}
                                         </div>
-                                        <span className={cn("german-text font-medium text-lg flex-grow", answers[currentIndex] === idx ? "text-purple-900" : "text-slate-600")}>
+                                        <span className={cn("german-text font-medium text-lg flex-grow", answers[currentIndex] === idx ? "text-amber-900" : "text-slate-600")}>
                                             {opt}
                                         </span>
                                     </button>
@@ -386,7 +386,7 @@ const Exercises = () => {
 
       {/* Mode: Results */}
       {exerciseMode === 'results' && (
-          <ExerciseResults 
+          <ExerciseResults
               results={{
                   score,
                   total: currentQuestions.length,

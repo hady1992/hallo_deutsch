@@ -8,7 +8,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
   const navigate = useNavigate();
   const percentage = results.score;
   const isPass = percentage >= 60;
-  
+
   // Get detailed stats for incorrect answers
   const incorrectDetails = examData.questions.map((q, idx) => {
     const userAnsIdx = results.answers[idx];
@@ -24,7 +24,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
   }).filter(Boolean);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="max-w-4xl mx-auto space-y-8 p-4"
@@ -32,7 +32,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
       {/* Main Score Card */}
       <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 p-8 md:p-12 text-center relative">
         <div className={`absolute top-0 left-0 w-full h-2 ${isPass ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gradient-to-r from-red-400 to-red-600'}`} />
-        
+
         <div className="mb-8 flex justify-center">
           <div className={`w-40 h-40 rounded-full flex flex-col items-center justify-center border-8 shadow-inner
             ${isPass ? 'border-green-100 bg-green-50 text-green-600' : 'border-red-100 bg-red-50 text-red-600'}`}
@@ -46,7 +46,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
           {isPass ? 'أداء رائع! مبروك 🎉' : 'حظ أوفر في المرة القادمة 💪'}
         </h2>
         <p className="text-slate-500 text-lg mb-8 max-w-lg mx-auto">
-          لقد أجبت بشكل صحيح على <span className="font-bold text-green-600">{results.correctAnswers}</span> سؤال 
+          لقد أجبت بشكل صحيح على <span className="font-bold text-green-600">{results.correctAnswers}</span> سؤال
           وأخطأت في <span className="font-bold text-red-600">{results.incorrectAnswers}</span> من أصل {results.totalQuestions}.
         </p>
 
@@ -54,7 +54,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
           <Button onClick={onRetake} className="bg-slate-900 hover:bg-black text-white h-14 rounded-xl text-lg flex-1 shadow-lg hover:shadow-xl transition-all">
             <RotateCcw className="ml-2" size={20} /> إعادة الامتحان
           </Button>
-          <Button onClick={onReview} variant="outline" className="border-2 h-14 rounded-xl text-lg flex-1 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all">
+          <Button onClick={onReview} variant="outline" className="border-2 h-14 rounded-xl text-lg flex-1 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-all">
             <Eye className="ml-2" size={20} /> مراجعة الإجابات
           </Button>
           <Button onClick={() => navigate('/')} variant="ghost" className="h-14 rounded-xl text-lg flex-1 hover:bg-slate-100">
@@ -70,7 +70,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
             <AlertTriangle className="text-red-500" />
             <h3 className="text-xl font-bold text-red-800">مراجعة الأخطاء ({incorrectDetails.length})</h3>
           </div>
-          
+
           <div className="divide-y divide-slate-100">
             {incorrectDetails.map((item, i) => (
               <div key={i} className="p-6 md:p-8 hover:bg-slate-50 transition-colors">
@@ -96,7 +96,7 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
                   </div>
                 </div>
 
-                <div className="mr-12 bg-blue-50 rounded-xl p-4 text-sm text-blue-800 leading-relaxed">
+                <div className="mr-12 bg-red-50 rounded-xl p-4 text-sm text-red-800 leading-relaxed">
                   <span className="font-bold block mb-1">الشرح:</span>
                   {item.explanation}
                 </div>

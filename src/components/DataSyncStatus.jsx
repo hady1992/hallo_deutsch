@@ -50,11 +50,11 @@ const DataSyncStatus = () => {
   };
 
   return (
-    <Card className="bg-white border-blue-100 shadow-sm mb-6">
+    <Card className="bg-white border-red-100 shadow-sm mb-6">
       <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-50 p-3 rounded-full relative">
-            <Cloud className="w-5 h-5 text-blue-600" />
+          <div className="bg-red-50 p-3 rounded-full relative">
+            <Cloud className="w-5 h-5 text-red-600" />
             <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
           </div>
           <div>
@@ -67,12 +67,12 @@ const DataSyncStatus = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
              {status === 'synced' && <Badge className="bg-green-100 text-green-700 hover:bg-green-100"><CheckCircle className="w-3 h-3 mr-1" /> Synced</Badge>}
              {status === 'error' && <Badge variant="destructive"><AlertTriangle className="w-3 h-3 mr-1" /> Error</Badge>}
-             {status === 'syncing' && <Badge className="bg-blue-100 text-blue-700"><RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Syncing...</Badge>}
-             
+             {status === 'syncing' && <Badge className="bg-red-100 text-red-700"><RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Syncing...</Badge>}
+
              <Button size="sm" variant="outline" onClick={handleSync} disabled={syncing || !isConnected}>
                 {syncing ? 'Syncing...' : 'Sync Now'}
              </Button>

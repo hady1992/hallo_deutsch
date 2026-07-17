@@ -52,7 +52,7 @@ const VerbConjugationTable = ({ conjugations }) => {
             onClick={() => setActiveTense(tense)}
             className={`flex-1 min-w-[100px] py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
               activeTense === tense
-                ? 'bg-white text-blue-600 shadow-sm border border-slate-100'
+                ? 'bg-white text-red-600 shadow-sm border border-slate-100'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
             }`}
           >
@@ -75,8 +75,8 @@ const VerbConjugationTable = ({ conjugations }) => {
             {pronouns.map((pronoun) => {
               const conjugation = currentConjugations[pronoun] || '-';
               return (
-                <div 
-                  key={pronoun} 
+                <div
+                  key={pronoun}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors group"
                 >
                   <div className="flex items-center gap-4">

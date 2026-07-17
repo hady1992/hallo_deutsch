@@ -19,13 +19,13 @@ const FRIENDLY_ERRORS = {
 const ExerciseImporter = () => {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
-  
+
   // Data State
   const [exercises, setExercises] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingData, setLoadingData] = useState(false);
-  
+
   // Import State
   const [isImporting, setIsImporting] = useState(false);
   const [importStats, setImportStats] = useState(null);
@@ -351,7 +351,7 @@ const ExerciseImporter = () => {
     if(window.confirm("حذف هذا التمرين؟")) {
         const current = await getPersistentExercises();
         const filtered = current.filter(ex => ex.id !== id && ex.source !== 'default');
-        
+
         await saveExercises(filtered);
         loadData();
         window.dispatchEvent(new Event('exercisesUpdated'));
@@ -363,52 +363,52 @@ const ExerciseImporter = () => {
   const handleClearAll = async () => {
     if(window.confirm("تحذير: هل أنت متأكد من حذف جميع التمارين المستوردة؟")) {
         // Clear only custom
-        await saveExercises([]); 
+        await saveExercises([]);
         loadData();
         window.dispatchEvent(new Event('exercisesUpdated'));
         toast({ title: "تم مسح الكل محلياً", className: "bg-red-50 border-red-200 text-red-800" });
     }
   };
 
-  const filteredExercises = exercises.filter(ex => 
+  const filteredExercises = exercises.filter(ex =>
     ex.question && ex.question.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="space-y-6 mb-12">
         <div className="flex items-center gap-2 mb-4">
-            <Database className="text-purple-600" />
+            <Database className="text-amber-600" />
             <h2 className="text-xl font-bold text-slate-800">إدارة التمارين (المسؤول)</h2>
         </div>
 
         {/* Import Section */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
              <div className="flex flex-col md:flex-row gap-4 items-stretch">
-                <input 
-                    type="file" 
+                <input
+                    type="file"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     accept=".csv,.json"
                     className="hidden"
                 />
-                
-                <Button 
+
+                <Button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isImporting}
-                    className="flex-1 h-auto py-6 bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex flex-col gap-2 rounded-xl transition-all hover:scale-[1.01]"
+                    className="flex-1 h-auto py-6 bg-red-600 hover:bg-red-700 text-white shadow-lg flex flex-col gap-2 rounded-xl transition-all hover:scale-[1.01]"
                 >
                     {isImporting ? (
-                        <Loader2 className="animate-spin h-8 w-8 text-blue-200" />
+                        <Loader2 className="animate-spin h-8 w-8 text-red-200" />
                     ) : (
-                        <FileUp className="h-8 w-8 text-blue-200" />
+                        <FileUp className="h-8 w-8 text-red-200" />
                     )}
                     <div className="flex flex-col items-center">
                         <span className="text-lg font-bold">رفع تمارين (CSV أو JSON)</span>
-                        <span className="text-blue-200 text-sm font-normal">استيراد أسئلة جديدة</span>
+                        <span className="text-red-200 text-sm font-normal">استيراد أسئلة جديدة</span>
                     </div>
                 </Button>
 
-                <Button 
+                <Button
                     onClick={downloadTemplate}
                     className="h-auto py-6 flex-1 bg-green-600 hover:bg-green-700 text-white shadow-lg flex flex-col gap-2 rounded-xl transition-all hover:scale-[1.01] min-w-[160px]"
                 >
@@ -455,23 +455,23 @@ const ExerciseImporter = () => {
             <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50">
             <div className="flex items-center gap-2">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <FileText className="text-blue-600" size={18} />
+                    <FileText className="text-red-600" size={18} />
                     التمارين ({exercises.length})
                 </h3>
                 <Button variant="ghost" size="sm" onClick={loadData} disabled={loadingData}>
                     <RefreshCw size={14} className={loadingData ? "animate-spin" : ""} />
                 </Button>
             </div>
-            
+
             <div className="flex gap-2 w-full md:w-auto">
                 <div className="relative flex-1">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                    <input 
-                        type="text" 
-                        placeholder="بحث في الأسئلة..." 
+                    <input
+                        type="text"
+                        placeholder="بحث في الأسئلة..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pr-9 pl-3 py-1.5 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full pr-9 pl-3 py-1.5 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none"
                     />
                 </div>
                 {exercises.length > 0 && (
@@ -490,19 +490,19 @@ const ExerciseImporter = () => {
             ) : (
                 filteredExercises.map(ex => (
                 <div key={ex.id} className="border border-slate-100 rounded-lg overflow-hidden">
-                    <div 
+                    <div
                         className="p-3 flex items-start justify-between bg-white cursor-pointer hover:bg-slate-50 transition-colors"
                         onClick={() => setExpandedId(expandedId === ex.id ? null : ex.id)}
                     >
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                                 <Badge variant="outline" className="text-[10px] px-1">{ex.level}</Badge>
-                                <Badge className={cn("text-[10px] px-1", 
-                                    ex.difficulty === 'easy' ? 'bg-green-100 text-green-800' : 
+                                <Badge className={cn("text-[10px] px-1",
+                                    ex.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
                                     ex.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                                 )}>{ex.difficulty}</Badge>
                                 {ex.source === 'default' && <Badge variant="outline" className="text-[10px] text-slate-400">افتراضي</Badge>}
-                                {ex.source === 'cloud' && <Badge variant="outline" className="text-[10px] text-blue-400 border-blue-200 bg-blue-50">سحابي</Badge>}
+                                {ex.source === 'cloud' && <Badge variant="outline" className="text-[10px] text-red-400 border-red-200 bg-red-50">سحابي</Badge>}
                                 <span className="font-medium text-slate-800 text-sm line-clamp-1 mr-2">{ex.question}</span>
                             </div>
                         </div>
@@ -511,8 +511,8 @@ const ExerciseImporter = () => {
                                 {expandedId === ex.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                             </Button>
                             {ex.source !== 'default' && (
-                                <Button 
-                                    variant="ghost" size="icon" className="h-6 w-6 text-red-300 hover:text-red-600" 
+                                <Button
+                                    variant="ghost" size="icon" className="h-6 w-6 text-red-300 hover:text-red-600"
                                     onClick={(e) => { e.stopPropagation(); handleDelete(ex.id); }}
                                 >
                                     <Trash2 size={14} />
@@ -520,13 +520,13 @@ const ExerciseImporter = () => {
                             )}
                         </div>
                     </div>
-                    
+
                     <AnimatePresence>
                         {expandedId === ex.id && (
-                            <motion.div 
-                                initial={{ height: 0, opacity: 0 }} 
-                                animate={{ height: 'auto', opacity: 1 }} 
-                                exit={{ height: 0, opacity: 0 }} 
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
                                 className="bg-slate-50 border-t border-slate-100 p-3 text-sm"
                             >
                                 <div className="grid grid-cols-2 gap-2 mb-2">

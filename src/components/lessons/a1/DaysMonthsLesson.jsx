@@ -50,7 +50,7 @@ const DaysMonthsLesson = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {months.map(([m, ar], idx) => (
             <div key={idx} className="bg-white p-3 border border-gray-200 rounded text-center shadow-sm relative overflow-hidden group">
-               <div className="absolute top-0 right-0 bg-blue-50 text-blue-300 text-[40px] font-bold leading-none opacity-20 -mr-2 -mt-1 select-none">
+               <div className="absolute top-0 right-0 bg-red-50 text-red-300 text-[40px] font-bold leading-none opacity-20 -mr-2 -mt-1 select-none">
                  {idx + 1}
                </div>
                <div className="flex items-center justify-center gap-2 mb-1 relative z-10">
@@ -77,17 +77,17 @@ const DaysMonthsLesson = () => {
              </span>
              <span className="text-sm text-yellow-600">الصيف</span>
            </div>
-           <div className="bg-orange-50 p-3 rounded text-center border border-orange-100 flex flex-col items-center">
-             <span className="font-bold text-orange-800 block flex items-center gap-2">
+           <div className="bg-amber-50 p-3 rounded text-center border border-amber-100 flex flex-col items-center">
+             <span className="font-bold text-amber-800 block flex items-center gap-2">
                Der Herbst <AudioButton text="Der Herbst" size={14} />
              </span>
-             <span className="text-sm text-orange-600">الخريف</span>
+             <span className="text-sm text-amber-600">الخريف</span>
            </div>
-           <div className="bg-blue-50 p-3 rounded text-center border border-blue-100 flex flex-col items-center">
-             <span className="font-bold text-blue-800 block flex items-center gap-2">
+           <div className="bg-red-50 p-3 rounded text-center border border-red-100 flex flex-col items-center">
+             <span className="font-bold text-red-800 block flex items-center gap-2">
                Der Winter <AudioButton text="Der Winter" size={14} />
              </span>
-             <span className="text-sm text-blue-600">الشتاء</span>
+             <span className="text-sm text-red-600">الشتاء</span>
            </div>
         </div>
       </LessonSection>
@@ -110,9 +110,9 @@ const DaysMonthsLesson = () => {
         الشهور والفصول والسنين تأخذ حرف الجر <strong>im</strong>.
       </ImportantNote>
 
-      <ExerciseBox 
-        question="أكمل الجملة: _____ Mai fahre ich nach Berlin." 
-        answer="Im (لأن Mai شهر)" 
+      <ExerciseBox
+        question="أكمل الجملة: _____ Mai fahre ich nach Berlin."
+        answer="Im (لأن Mai شهر)"
       />
     </div>
   );

@@ -18,9 +18,9 @@ const GermanVerbsTab = () => {
 
   const filteredVerbs = verbs.filter(verb => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = verb.infinitive.toLowerCase().includes(searchLower) || 
+    const matchesSearch = verb.infinitive.toLowerCase().includes(searchLower) ||
                           verb.translation.includes(searchTerm);
-    const matchesFilter = filterType === 'All' || 
+    const matchesFilter = filterType === 'All' ||
                           (verb.type && verb.type.toLowerCase() === filterType.toLowerCase());
     return matchesSearch && matchesFilter;
   });
@@ -39,10 +39,10 @@ const GermanVerbsTab = () => {
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 min-h-[600px] p-6">
       {/* Header & Controls */}
       <div className="mb-8 space-y-6">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gradient-to-r from-red-50 to-amber-50 p-6 rounded-2xl border border-red-100">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-2">
-              <BookOpen className="text-blue-600" />
+              <BookOpen className="text-red-600" />
               المكتبة الشاملة للأفعال الألمانية
             </h2>
             <p className="text-slate-600 text-sm">
@@ -56,7 +56,7 @@ const GermanVerbsTab = () => {
               placeholder="ابحث عن فعل (مثال: sein, يعمل)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white shadow-sm"
+              className="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 bg-white shadow-sm"
             />
           </div>
         </div>
@@ -68,8 +68,8 @@ const GermanVerbsTab = () => {
               key={type}
               onClick={() => setFilterType(type)}
               className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                filterType === type 
-                  ? 'bg-blue-600 text-white shadow-md transform scale-105' 
+                filterType === type
+                  ? 'bg-red-600 text-white shadow-md transform scale-105'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -92,17 +92,17 @@ const GermanVerbsTab = () => {
               transition={{ duration: 0.2 }}
               key={verb.id}
               className={`rounded-xl border transition-all duration-300 overflow-hidden ${
-                expandedVerbId === verb.id 
-                  ? 'col-span-1 md:col-span-2 lg:col-span-3 bg-white border-blue-200 shadow-xl ring-1 ring-blue-100 z-10' 
-                  : 'bg-white border-slate-100 hover:border-blue-300 hover:shadow-md'
+                expandedVerbId === verb.id
+                  ? 'col-span-1 md:col-span-2 lg:col-span-3 bg-white border-red-200 shadow-xl ring-1 ring-red-100 z-10'
+                  : 'bg-white border-slate-100 hover:border-red-300 hover:shadow-md'
               }`}
             >
-              <div 
+              <div
                 onClick={() => setExpandedVerbId(expandedVerbId === verb.id ? null : verb.id)}
                 className="p-5 cursor-pointer flex justify-between items-center bg-white hover:bg-slate-50/50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-blue-100/50 flex items-center justify-center text-blue-700 font-black text-xl">
+                    <div className="h-12 w-12 rounded-full bg-red-100/50 flex items-center justify-center text-red-700 font-black text-xl">
                         {verb.infinitive.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -113,12 +113,12 @@ const GermanVerbsTab = () => {
                 <div className="flex items-center gap-3">
                    <span className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${
                      verb.type === 'Irregular' ? 'bg-red-100 text-red-700' :
-                     verb.type === 'Strong' ? 'bg-orange-100 text-orange-700' :
+                     verb.type === 'Strong' ? 'bg-amber-100 text-amber-700' :
                      'bg-green-100 text-green-700'
                    }`}>
                      {verb.type}
                    </span>
-                   {expandedVerbId === verb.id ? <ChevronUp size={20} className="text-blue-500" /> : <ChevronDown size={20} className="text-slate-300" />}
+                   {expandedVerbId === verb.id ? <ChevronUp size={20} className="text-red-500" /> : <ChevronDown size={20} className="text-slate-300" />}
                 </div>
               </div>
 

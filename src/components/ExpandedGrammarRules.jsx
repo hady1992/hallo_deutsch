@@ -17,14 +17,14 @@ const ExpandedGrammarRules = ({ rule }) => {
   const tips = Array.isArray(rule?.tips) ? rule.tips.filter((tip) => typeof tip === 'string') : [];
 
   return (
-    <Card className={`border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden ${isExpanded ? 'ring-1 ring-blue-100' : ''}`}>
-      <div 
+    <Card className={`border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden ${isExpanded ? 'ring-1 ring-red-100' : ''}`}>
+      <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="cursor-pointer bg-white p-5 flex items-start justify-between gap-4"
       >
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100">
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-100 hover:bg-red-100">
               {rule?.level || 'Grammar'}
             </Badge>
             <h3 className="text-lg font-bold text-slate-800 leading-tight">
@@ -35,7 +35,7 @@ const ExpandedGrammarRules = ({ rule }) => {
             {normalizedRule.explanation.substring(0, 100)}{normalizedRule.explanation.length > 100 ? '...' : ''}
           </p>
         </div>
-        <div className={`p-2 rounded-full bg-slate-50 transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-blue-50 text-blue-600' : 'text-slate-400'}`}>
+        <div className={`p-2 rounded-full bg-slate-50 transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-red-50 text-red-600' : 'text-slate-400'}`}>
           <ChevronDown size={20} />
         </div>
       </div>
@@ -49,11 +49,11 @@ const ExpandedGrammarRules = ({ rule }) => {
             transition={{ duration: 0.3 }}
           >
             <div className="border-t border-slate-100 bg-slate-50/50 p-6 space-y-8">
-              
+
               {/* Detailed Explanation */}
               <div className="space-y-4">
                 <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase tracking-wider">
-                  <List size={16} className="text-blue-500" /> الشرح التفصيلي
+                  <List size={16} className="text-red-500" /> الشرح التفصيلي
                 </h4>
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-slate-700 leading-loose text-lg font-arabic">
@@ -89,7 +89,7 @@ const ExpandedGrammarRules = ({ rule }) => {
               {rule.tables && (
                 <div className="space-y-4">
                   <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase tracking-wider">
-                    <Table size={16} className="text-indigo-500" /> جداول توضيحية
+                    <Table size={16} className="text-amber-500" /> جداول توضيحية
                   </h4>
                   <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm p-4">
                      {/* Basic rendering of generic table data structure if provided */}

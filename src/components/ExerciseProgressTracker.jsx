@@ -30,21 +30,21 @@ const ExerciseProgressTracker = ({ stats, onReset }) => {
               fill="transparent"
               strokeDasharray={351}
               strokeDashoffset={351 - (351 * percentage) / 100}
-              className="text-blue-600 transition-all duration-1000 ease-out"
+              className="text-red-600 transition-all duration-1000 ease-out"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-blue-600">{percentage}%</span>
+            <span className="text-3xl font-bold text-red-600">{percentage}%</span>
             <span className="text-xs text-gray-500">دقة</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-indigo-50 rounded-xl p-4 flex flex-col items-center">
-          <Target className="text-indigo-500 mb-2" size={24} />
-          <span className="text-2xl font-bold text-indigo-700">{stats.correct}/{stats.total}</span>
-          <span className="text-xs text-indigo-400">الإجابات الصحيحة</span>
+        <div className="bg-amber-50 rounded-xl p-4 flex flex-col items-center">
+          <Target className="text-amber-500 mb-2" size={24} />
+          <span className="text-2xl font-bold text-amber-700">{stats.correct}/{stats.total}</span>
+          <span className="text-xs text-amber-400">الإجابات الصحيحة</span>
         </div>
         <div className="bg-amber-50 rounded-xl p-4 flex flex-col items-center">
           <Zap className="text-amber-500 mb-2" size={24} />
@@ -60,8 +60,8 @@ const ExerciseProgressTracker = ({ stats, onReset }) => {
             <div key={lvl} className="flex items-center justify-between text-xs">
               <span className="font-bold text-gray-600">{lvl}</span>
               <div className="flex-1 mx-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                <div
+                  className="h-full bg-red-500 rounded-full transition-all duration-500"
                   style={{ width: `${stats.byLevel?.[lvl] || 0}%` }}
                 />
               </div>

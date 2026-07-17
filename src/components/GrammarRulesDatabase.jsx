@@ -31,13 +31,13 @@ const GrammarRulesDatabase = () => {
     ...grammarB2Complete
   ], []);
 
-  const categories = useMemo(() => 
+  const categories = useMemo(() =>
     ['All', ...new Set(allRules.map(r => r.category).filter(Boolean))],
     [allRules]
   );
 
   const toggleBookmark = (id) => {
-    const newBookmarks = bookmarked.includes(id) 
+    const newBookmarks = bookmarked.includes(id)
       ? bookmarked.filter(b => b !== id)
       : [...bookmarked, id];
     setBookmarked(newBookmarks);
@@ -94,7 +94,7 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
       <div className="bg-slate-900 text-white py-12 px-6">
         <div className="container mx-auto max-w-6xl">
           <h1 className="text-4xl font-black mb-4 flex items-center gap-3">
-            <BookOpen className="text-blue-400" size={40} />
+            <BookOpen className="text-red-400" size={40} />
             المرجع الشامل لقواعد اللغة الألمانية
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl mb-8">
@@ -104,12 +104,12 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
           {/* Search Bar */}
           <div className="relative max-w-2xl">
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
+            <input
               type="text"
               placeholder="ابحث عن قاعدة (مثال: Akkusativ, Passive)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-12 pl-4 py-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-full pr-12 pl-4 py-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
             />
           </div>
         </div>
@@ -124,8 +124,8 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
                 key={level}
                 onClick={() => setSelectedLevel(level)}
                 className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                  selectedLevel === level 
-                  ? 'bg-slate-900 text-white' 
+                  selectedLevel === level
+                  ? 'bg-slate-900 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -135,7 +135,7 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto">
-             <Button 
+             <Button
                 onClick={downloadTemplate}
                 variant="outline"
                 size="sm"
@@ -147,7 +147,7 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
 
             <div className="flex items-center gap-2">
                 <Filter size={18} className="text-slate-400" />
-                <select 
+                <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"

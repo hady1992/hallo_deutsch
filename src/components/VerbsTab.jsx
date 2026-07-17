@@ -11,7 +11,7 @@ const VerbsTab = () => {
   const verbTypes = ['All', 'Regular', 'Strong', 'Irregular', 'Modal', 'Auxiliary', 'Separable', 'Reflexive'];
 
   const filteredVerbs = verbsComprehensive.filter(verb => {
-    const matchesSearch = verb.infinitive.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = verb.infinitive.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           verb.translation.includes(searchTerm);
     const matchesFilter = filterType === 'All' || verb.type === filterType;
     return matchesSearch && matchesFilter;
@@ -23,7 +23,7 @@ const VerbsTab = () => {
       <div className="mb-8 space-y-4">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <BookOpen className="text-blue-600" />
+            <BookOpen className="text-red-600" />
             قاموس الأفعال الشامل
           </h2>
           <div className="relative w-full md:w-72">
@@ -33,7 +33,7 @@ const VerbsTab = () => {
               placeholder="ابحث عن فعل (ألماني أو عربي)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full pr-10 pl-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
             />
           </div>
         </div>
@@ -45,8 +45,8 @@ const VerbsTab = () => {
               key={type}
               onClick={() => setFilterType(type)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                filterType === type 
-                  ? 'bg-blue-600 text-white shadow-md' 
+                filterType === type
+                  ? 'bg-red-600 text-white shadow-md'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -65,9 +65,9 @@ const VerbsTab = () => {
               key={verb.id}
               onClick={() => setExpandedVerb(expandedVerb === verb.id ? null : verb.id)}
               className={`cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden ${
-                expandedVerb === verb.id 
-                  ? 'col-span-1 md:col-span-2 lg:col-span-3 bg-blue-50 border-blue-200 shadow-lg ring-1 ring-blue-200' 
-                  : 'bg-white border-slate-100 hover:border-blue-300 hover:shadow-md'
+                expandedVerb === verb.id
+                  ? 'col-span-1 md:col-span-2 lg:col-span-3 bg-red-50 border-red-200 shadow-lg ring-1 ring-red-200'
+                  : 'bg-white border-slate-100 hover:border-red-300 hover:shadow-md'
               }`}
             >
               <div className="p-4 flex justify-between items-center">
@@ -94,14 +94,14 @@ const VerbsTab = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="border-t border-blue-100 bg-white"
+                    className="border-t border-red-100 bg-white"
                   >
                     <div className="p-6 grid gap-8">
                       {/* Conjugation Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {['präsens', 'präteritum', 'perfekt', 'futur'].map((tense) => (
                           <div key={tense} className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                            <h4 className="font-bold text-blue-700 mb-3 capitalize border-b border-slate-200 pb-2">
+                            <h4 className="font-bold text-red-700 mb-3 capitalize border-b border-slate-200 pb-2">
                               {tense}
                             </h4>
                             <ul className="space-y-1 text-sm" dir="ltr">
@@ -122,7 +122,7 @@ const VerbsTab = () => {
                           </div>
                         ))}
                       </div>
-                      
+
                       {/* Notes & Collocations */}
                       <div className="grid md:grid-cols-2 gap-6">
                          {verb.notes && (

@@ -2,19 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, CheckCircle, Circle, Book } from 'lucide-react';
 
-const GrammarNavigationPanel = ({ 
-  levels, 
-  currentLevel, 
-  onSelectLevel, 
-  topics, 
-  currentTopicId, 
+const GrammarNavigationPanel = ({
+  levels,
+  currentLevel,
+  onSelectLevel,
+  topics,
+  currentTopicId,
   onSelectTopic,
   completedTopics,
   searchQuery,
-  onSearchChange 
+  onSearchChange
 }) => {
-  
-  const filteredTopics = topics.filter(t => 
+
+  const filteredTopics = topics.filter(t =>
     t.title.includes(searchQuery) || t.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -29,8 +29,8 @@ const GrammarNavigationPanel = ({
               key={level}
               onClick={() => onSelectLevel(level)}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${
-                currentLevel === level 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
+                currentLevel === level
+                  ? 'bg-white text-amber-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
               }`}
             >
@@ -44,12 +44,12 @@ const GrammarNavigationPanel = ({
       <div className="p-4 border-b border-gray-100">
         <div className="relative">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="بحث في المواضيع..." 
+          <input
+            type="text"
+            placeholder="بحث في المواضيع..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full pl-4 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
           />
         </div>
       </div>
@@ -60,7 +60,7 @@ const GrammarNavigationPanel = ({
           filteredTopics.map((topic, idx) => {
             const isCompleted = completedTopics.includes(topic.id);
             const isActive = currentTopicId === topic.id;
-            
+
             return (
               <motion.button
                 key={topic.id}
@@ -69,18 +69,18 @@ const GrammarNavigationPanel = ({
                 transition={{ delay: idx * 0.05 }}
                 onClick={() => onSelectTopic(topic)}
                 className={`w-full text-right p-3 rounded-xl flex items-center gap-3 transition-all duration-200 group ${
-                  isActive 
-                    ? 'bg-indigo-50 text-indigo-700' 
+                  isActive
+                    ? 'bg-amber-50 text-amber-700'
                     : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <div className={`flex-shrink-0 transition-colors ${
-                  isCompleted ? 'text-green-500' : isActive ? 'text-indigo-500' : 'text-gray-300 group-hover:text-gray-400'
+                  isCompleted ? 'text-green-500' : isActive ? 'text-amber-500' : 'text-gray-300 group-hover:text-gray-400'
                 }`}>
                   {isCompleted ? <CheckCircle size={18} /> : isActive ? <Book size={18} /> : <Circle size={18} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={`font-semibold truncate ${isActive ? 'text-indigo-700' : 'text-gray-800'}`}>
+                  <div className={`font-semibold truncate ${isActive ? 'text-amber-700' : 'text-gray-800'}`}>
                     {topic.title}
                   </div>
                   <div className="text-xs text-gray-400 truncate font-sans" dir="ltr">

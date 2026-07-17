@@ -16,7 +16,7 @@ const KidsVerbs = ({ isAdmin }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [expandedId, setExpandedId] = useState(null);
-  
+
   // Practice Mode States
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState([]);
@@ -48,8 +48,8 @@ const KidsVerbs = ({ isAdmin }) => {
 
     if (searchTerm.trim()) {
       const lower = searchTerm.toLowerCase();
-      result = result.filter(v => 
-        v.infinitive.toLowerCase().includes(lower) || 
+      result = result.filter(v =>
+        v.infinitive.toLowerCase().includes(lower) ||
         v.arabic.includes(lower)
       );
     }
@@ -66,7 +66,7 @@ const KidsVerbs = ({ isAdmin }) => {
       category: item.category || 'daily',
       level: item.level || 'medium'
     }));
-    
+
     const newVerbs = [...verbs, ...processed];
     setVerbs(newVerbs);
     saveKidsVerbs(newVerbs);
@@ -74,14 +74,14 @@ const KidsVerbs = ({ isAdmin }) => {
 
   const categories = [
     { id: 'all', label: 'الكل', color: 'bg-slate-100 text-slate-600' },
-    { id: 'daily', label: 'يومي', color: 'bg-orange-100 text-orange-600' },
-    { id: 'movement', label: 'حركة', color: 'bg-blue-100 text-blue-600' },
+    { id: 'daily', label: 'يومي', color: 'bg-amber-100 text-amber-600' },
+    { id: 'movement', label: 'حركة', color: 'bg-red-100 text-red-600' },
     { id: 'emotions', label: 'مشاعر', color: 'bg-red-100 text-red-600' },
     { id: 'learning', label: 'تعلم', color: 'bg-yellow-100 text-yellow-600' },
     { id: 'sports', label: 'رياضة', color: 'bg-green-100 text-green-600' },
-    { id: 'family', label: 'عائلة', color: 'bg-purple-100 text-purple-600' },
+    { id: 'family', label: 'عائلة', color: 'bg-amber-100 text-amber-600' },
     { id: 'nature', label: 'طبيعة', color: 'bg-emerald-100 text-emerald-600' },
-    { id: 'creative', label: 'إبداع', color: 'bg-pink-100 text-pink-600' },
+    { id: 'creative', label: 'إبداع', color: 'bg-red-100 text-red-600' },
   ];
 
   // --- Quiz Logic ---
@@ -95,7 +95,7 @@ const KidsVerbs = ({ isAdmin }) => {
     // Shuffle and pick 5
     const shuffled = [...verbs].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 5);
-    
+
     // Generate questions with distractors
     const questions = selected.map(verb => {
       const distractors = verbs
@@ -103,9 +103,9 @@ const KidsVerbs = ({ isAdmin }) => {
         .sort(() => 0.5 - Math.random())
         .slice(0, 3)
         .map(v => v.arabic);
-        
+
       const options = [...distractors, verb.arabic].sort(() => 0.5 - Math.random());
-      
+
       return {
         verb,
         options,
@@ -127,7 +127,7 @@ const KidsVerbs = ({ isAdmin }) => {
 
     setSelectedAnswer(option);
     const isCorrect = option === quizQuestions[currentQuestionIndex].correctAnswer;
-    
+
     if (isCorrect) {
       setFeedback('correct');
       setScore(prev => prev + 1);
@@ -179,7 +179,7 @@ const KidsVerbs = ({ isAdmin }) => {
         </div>
 
         {!showResult ? (
-          <motion.div 
+          <motion.div
             key={currentQuestionIndex}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -188,16 +188,16 @@ const KidsVerbs = ({ isAdmin }) => {
             <div className="text-8xl mb-6 animate-bounce-slow">
               {quizQuestions[currentQuestionIndex].verb.image}
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="text-4xl font-black text-slate-800">
                 {quizQuestions[currentQuestionIndex].verb.infinitive}
               </h2>
               <div className="flex justify-center">
-                 <AudioButton 
-                    text={quizQuestions[currentQuestionIndex].verb.infinitive} 
-                    size={32} 
-                    className="w-16 h-16 bg-blue-50 text-blue-600 hover:bg-blue-100" 
+                 <AudioButton
+                    text={quizQuestions[currentQuestionIndex].verb.infinitive}
+                    size={32}
+                    className="w-16 h-16 bg-red-50 text-red-600 hover:bg-red-100"
                   />
               </div>
             </div>
@@ -212,11 +212,11 @@ const KidsVerbs = ({ isAdmin }) => {
                   disabled={!!selectedAnswer}
                   className={`
                     p-6 rounded-2xl text-xl font-bold border-4 transition-all
-                    ${selectedAnswer === option 
-                      ? option === quizQuestions[currentQuestionIndex].correctAnswer 
+                    ${selectedAnswer === option
+                      ? option === quizQuestions[currentQuestionIndex].correctAnswer
                         ? 'bg-green-100 border-green-400 text-green-700'
                         : 'bg-red-100 border-red-400 text-red-700'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-white'}
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-red-300 hover:bg-white'}
                     ${selectedAnswer && option === quizQuestions[currentQuestionIndex].correctAnswer && 'bg-green-100 border-green-400 text-green-700 ring-2 ring-green-200'}
                   `}
                 >
@@ -224,9 +224,9 @@ const KidsVerbs = ({ isAdmin }) => {
                 </motion.button>
               ))}
             </div>
-            
+
             {feedback && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`text-2xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}
@@ -237,7 +237,7 @@ const KidsVerbs = ({ isAdmin }) => {
 
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="bg-white rounded-[3rem] p-12 text-center space-y-8 shadow-xl"
@@ -245,7 +245,7 @@ const KidsVerbs = ({ isAdmin }) => {
             <div className="text-8xl">🏆</div>
             <h2 className="text-4xl font-black text-slate-800">انتهى التمرين!</h2>
             <div className="text-2xl font-bold text-slate-600">
-              نتيجتك: <span className="text-blue-600 text-4xl">{score}</span> / {quizQuestions.length}
+              نتيجتك: <span className="text-red-600 text-4xl">{score}</span> / {quizQuestions.length}
             </div>
             <div className="flex justify-center gap-4 pt-4">
               <Button onClick={exitPractice} variant="outline" size="lg" className="rounded-xl border-2">العودة للقائمة</Button>
@@ -275,16 +275,16 @@ const KidsVerbs = ({ isAdmin }) => {
         <div className="flex gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-             <input 
-               type="text" 
-               placeholder="بحث..." 
+             <input
+               type="text"
+               placeholder="بحث..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full pr-10 pl-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200 text-right text-sm"
+               className="w-full pr-10 pl-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200 text-right text-sm"
              />
           </div>
-          
-          <Button 
+
+          <Button
             onClick={startPractice}
             className="bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
           >
@@ -293,9 +293,9 @@ const KidsVerbs = ({ isAdmin }) => {
           </Button>
 
           {isAdmin && (
-             <KidsFileUploader 
-               onUpload={handleUpload} 
-               label="" 
+             <KidsFileUploader
+               onUpload={handleUpload}
+               label=""
                templateData={[{ infinitive: 'singen', arabic: 'يغني', category: 'creative' }]}
              />
           )}
@@ -310,8 +310,8 @@ const KidsVerbs = ({ isAdmin }) => {
             onClick={() => setActiveCategory(cat.id)}
             className={`
               px-4 py-2 rounded-xl text-sm font-bold transition-all border-2
-              ${activeCategory === cat.id 
-                ? `${cat.color} border-current scale-105 shadow-md` 
+              ${activeCategory === cat.id
+                ? `${cat.color} border-current scale-105 shadow-md`
                 : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'}
             `}
           >
@@ -336,7 +336,7 @@ const KidsVerbs = ({ isAdmin }) => {
               <div className="p-6 text-center relative">
                 <div className={`
                   absolute top-4 right-4 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full
-                  ${verb.level === 'easy' ? 'bg-green-100 text-green-700' : 
+                  ${verb.level === 'easy' ? 'bg-green-100 text-green-700' :
                     verb.level === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}
                 `}>
                   {verb.level === 'easy' ? 'سهل' : verb.level === 'medium' ? 'متوسط' : 'صعب'}
@@ -345,15 +345,15 @@ const KidsVerbs = ({ isAdmin }) => {
                 <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
                   {verb.image}
                 </div>
-                
+
                 <h3 className="text-2xl font-black text-slate-800 mb-1">{verb.infinitive}</h3>
                 <p className="text-lg text-slate-500 font-bold mb-4">{verb.arabic}</p>
-                
+
                 <div className="flex justify-center gap-2">
-                  <AudioButton text={verb.infinitive} className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white" size={20} />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <AudioButton text={verb.infinitive} className="w-10 h-10 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white" size={20} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400"
                     onClick={() => setExpandedId(expandedId === verb.id ? null : verb.id)}
                   >

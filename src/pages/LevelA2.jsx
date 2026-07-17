@@ -23,18 +23,18 @@ function LevelA2() {
               الماضي التام (Perfekt) هو الزمن الأكثر استخداماً في اللغة الألمانية المحكية للحديث عن الماضي.
               على عكس اللغة الإنجليزية أو العربية الفصحى، نستخدم هذا الزمن في المحادثات اليومية ورسائل البريد الإلكتروني غير الرسمية.
             </p>
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 text-center mb-6">
-              <h4 className="font-bold text-blue-800 mb-3">صيغة التكوين</h4>
+            <div className="bg-red-50 p-6 rounded-lg border border-red-100 text-center mb-6">
+              <h4 className="font-bold text-red-800 mb-3">صيغة التكوين</h4>
               <div className="text-xl flex items-center justify-center gap-2 flex-wrap" dir="ltr">
-                <span className="font-bold text-blue-600">haben / sein</span> (تصريف مضارع) + ... + <span className="font-bold text-red-600">Partizip II</span> (آخر الجملة)
+                <span className="font-bold text-red-600">haben / sein</span> (تصريف مضارع) + ... + <span className="font-bold text-red-600">Partizip II</span> (آخر الجملة)
               </div>
             </div>
-            
+
             <h4 className="font-bold text-gray-800 mb-2">متى نستخدم sein ومتى haben؟</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                <div className="bg-white p-4 rounded border border-gray-200">
                  <div className="flex items-center justify-center gap-2 mb-2">
-                   <span className="font-bold text-blue-600 text-lg" dir="ltr">sein</span>
+                   <span className="font-bold text-red-600 text-lg" dir="ltr">sein</span>
                    <AudioButton text="sein" size={16}/>
                  </div>
                  <ul className="list-disc list-inside text-sm space-y-2 text-gray-600">
@@ -64,14 +64,14 @@ function LevelA2() {
              { german: 'Hast du das Buch gelesen?', arabic: 'هل قرأت الكتاب؟ (haben - متعدي)' },
              { german: 'Was ist passiert?', arabic: 'ماذا حدث؟ (sein - فعل خاص)' }
           ]} />
-          
+
           <ImportantNote>
             لاحظ أن التصريف الثالث (Partizip II) يرمى دائماً إلى <strong>نهاية الجملة</strong> تماماً. هذا "قوس الجملة" (Satzklammer) هو سمة مميزة للألمانية.
           </ImportantNote>
-          
-          <ExerciseBox 
-            question="أكمل: Meine Eltern _____ in den Urlaub gefahren." 
-            answer="sind (لأن fahren فعل حركة)" 
+
+          <ExerciseBox
+            question="أكمل: Meine Eltern _____ in den Urlaub gefahren."
+            answer="sind (لأن fahren فعل حركة)"
           />
         </div>
       )
@@ -107,8 +107,8 @@ function LevelA2() {
         <title>{'المستوى الثاني A2 - Hallo Deutsch'}</title>
         <meta name="description" content="دروس المستوى الثاني A2 في اللغة الألمانية - الماضي التام، حروف الجر، الصفات والمقارنة." />
       </Helmet>
-      
-      <LevelContent 
+
+      <LevelContent
         title="المستوى الثاني (A2)"
         levelId="A2"
         description="في هذا المستوى ستنتقل من الجمل البسيطة إلى القدرة على سرد القصص ووصف الماضي. ستركز على توسيع حصيلتك اللغوية وقدرتك على ربط الجمل."

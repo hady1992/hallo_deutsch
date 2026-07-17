@@ -5,8 +5,8 @@ import { CheckCircle2, Lock } from 'lucide-react';
 function GrammarLevelSelector({ levels, selectedLevel, onSelectLevel, progress }) {
   const levelInfo = {
     A1: { name: 'مبتدئ', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', borderColor: 'border-green-500' },
-    A2: { name: 'ما قبل المتوسط', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-500' },
-    B1: { name: 'متوسط', color: 'from-purple-500 to-pink-600', bgColor: 'bg-purple-50', borderColor: 'border-purple-500' },
+    A2: { name: 'ما قبل المتوسط', color: 'from-red-500 to-amber-600', bgColor: 'bg-red-50', borderColor: 'border-red-500' },
+    B1: { name: 'متوسط', color: 'from-amber-500 to-red-600', bgColor: 'bg-amber-50', borderColor: 'border-amber-500' },
   };
 
   return (
@@ -67,7 +67,7 @@ function GrammarLevelSelector({ levels, selectedLevel, onSelectLevel, progress }
               {selectedLevel === level && (
                 <motion.div
                   layoutId="activeLevel"
-                  className="absolute inset-0 border-4 border-blue-500 rounded-2xl pointer-events-none"
+                  className="absolute inset-0 border-4 border-red-500 rounded-2xl pointer-events-none"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

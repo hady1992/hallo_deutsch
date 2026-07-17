@@ -26,10 +26,10 @@ const VerbConjugationExplorer = () => {
   const verbTypes = ['All', 'Weak', 'Strong', 'Irregular', 'Modal'];
 
   const filteredVerbs = verbs.filter(verb => {
-    const matchesSearch = 
-      verb.infinitive.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      verb.infinitive.toLowerCase().includes(searchTerm.toLowerCase()) ||
       verb.translation.includes(searchTerm);
-    const matchesFilter = filterType === 'All' || 
+    const matchesFilter = filterType === 'All' ||
                           (verb.type && verb.type.toLowerCase() === filterType.toLowerCase());
     return matchesSearch && matchesFilter;
   });
@@ -78,19 +78,19 @@ const VerbConjugationExplorer = () => {
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 min-h-0 md:min-h-[800px] flex flex-col md:flex-row">
-      
+
       {/* Sidebar List */}
       <div className="w-full md:w-1/3 border-l border-slate-200 bg-slate-50 flex flex-col max-h-[70vh] md:max-h-none">
         <div className="p-4 border-b border-slate-200 bg-white">
           <h2 className="font-bold text-lg mb-4 text-slate-800">مستكشف الأفعال</h2>
           <div className="relative mb-3">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="ابحث..." 
+            <input
+              type="text"
+              placeholder="ابحث..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full pr-10 pl-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-red-500 outline-none"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -98,7 +98,7 @@ const VerbConjugationExplorer = () => {
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`text-xs px-2 py-1 rounded-md transition-colors ${filterType === type ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                className={`text-xs px-2 py-1 rounded-md transition-colors ${filterType === type ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
               >
                 {type === 'All' ? 'الكل' : type}
               </button>
@@ -109,14 +109,14 @@ const VerbConjugationExplorer = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-2 no-scrollbar">
           {filteredVerbs.length > 0 ? (
             filteredVerbs.map((verb, idx) => (
-                <div 
+                <div
                 key={verb.id || idx}
                 onClick={() => setSelectedVerb(verb)}
-                className={`p-3 rounded-xl cursor-pointer transition-all border ${selectedVerb?.id === verb.id ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-transparent hover:bg-slate-100'}`}
+                className={`p-3 rounded-xl cursor-pointer transition-all border ${selectedVerb?.id === verb.id ? 'bg-red-50 border-red-200 shadow-sm' : 'bg-white border-transparent hover:bg-slate-100'}`}
                 >
                 <div className="flex justify-between items-center">
                     <div>
-                    <h3 className={`german-text font-bold ${selectedVerb?.id === verb.id ? 'text-blue-700' : 'text-slate-800'}`}>{verb.infinitive}</h3>
+                    <h3 className={`german-text font-bold ${selectedVerb?.id === verb.id ? 'text-red-700' : 'text-slate-800'}`}>{verb.infinitive}</h3>
                     <p className="text-xs text-slate-500">{verb.translation}</p>
                     </div>
                     <Badge variant="outline" className="text-[10px] h-5">{verb.type}</Badge>
@@ -134,7 +134,7 @@ const VerbConjugationExplorer = () => {
       {/* Main Detail View */}
       <div className="w-full md:w-2/3 bg-white p-6 md:p-8 flex flex-col">
         {selectedVerb ? (
-          <motion.div 
+          <motion.div
             key={selectedVerb.id}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -145,7 +145,7 @@ const VerbConjugationExplorer = () => {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="german-text text-4xl font-black text-slate-900">{selectedVerb.infinitive}</h1>
-                  <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none text-sm px-3 py-1">{selectedVerb.type}</Badge>
+                  <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border-none text-sm px-3 py-1">{selectedVerb.type}</Badge>
                 </div>
                 <p className="text-2xl text-slate-500 font-medium">{selectedVerb.translation}</p>
               </div>
@@ -161,8 +161,8 @@ const VerbConjugationExplorer = () => {
                   key={tense}
                   onClick={() => setActiveTense(tense)}
                   className={`german-text px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-all ${
-                    activeTense === tense 
-                    ? 'bg-slate-900 text-white shadow-lg' 
+                    activeTense === tense
+                    ? 'bg-slate-900 text-white shadow-lg'
                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                   }`}
                 >
@@ -197,9 +197,9 @@ const VerbConjugationExplorer = () => {
 
             {/* Examples & Notes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                  <Play size={16} className="fill-blue-600 text-blue-600" /> 
+              <div className="bg-red-50 rounded-xl p-6 border border-red-100">
+                <h3 className="font-bold text-red-900 mb-4 flex items-center gap-2">
+                  <Play size={16} className="fill-red-600 text-red-600" />
                   مثال ({activeTense})
                 </h3>
                 {selectedVerb.examples?.[activeTense] ? (

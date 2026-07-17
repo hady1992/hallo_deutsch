@@ -13,7 +13,7 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
     if (typeof window !== 'undefined' && !('speechSynthesis' in window)) {
       setSupported(false);
     }
-    
+
     // Cleanup on unmount
     return () => {
       window.speechSynthesis.cancel();
@@ -38,7 +38,7 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
 
   const handlePlay = (e) => {
     e.stopPropagation();
-    e.preventDefault(); 
+    e.preventDefault();
 
     if (!supported) {
       toast({
@@ -48,7 +48,7 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
       });
       return;
     }
-    
+
     if (!text) return;
 
     if (isPlaying) {
@@ -66,14 +66,14 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
-    utterance.rate = speed; 
+    utterance.rate = speed;
     utterance.volume = 1;
-    
+
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(v => v.name.includes("Google Deutsch")) ||
                            voices.find(v => v.name.includes("German") || v.name.includes("Deutsch")) ||
                            voices.find(v => v.lang.startsWith("de"));
-                           
+
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
@@ -100,7 +100,7 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
       size="sm"
       className={cn(
           "h-8 w-8 p-0 rounded-full transition-all duration-200 inline-flex items-center justify-center",
-          isPlaying ? "bg-blue-100 text-blue-600" : "hover:bg-blue-100 text-slate-500 hover:text-blue-600",
+          isPlaying ? "bg-red-100 text-red-600" : "hover:bg-red-100 text-slate-500 hover:text-red-600",
           className
       )}
       onClick={handlePlay}
@@ -108,7 +108,7 @@ const AudioButton = ({ text, lang = 'de-DE', speed = 0.9, className, size = 18, 
       type="button"
     >
       {isPlaying ? (
-        <StopCircle size={size} className="animate-pulse text-blue-600" />
+        <StopCircle size={size} className="animate-pulse text-red-600" />
       ) : (
         <Volume2 size={size} />
       )}

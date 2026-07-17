@@ -56,8 +56,8 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
         onSave();
     };
 
-    const filteredQuestions = availableQuestions.filter(q => 
-        (q.q.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const filteredQuestions = availableQuestions.filter(q =>
+        (q.q.toLowerCase().includes(searchTerm.toLowerCase()) ||
          q.source.toLowerCase().includes(searchTerm.toLowerCase())) &&
         !selectedQuestions.some(selected => selected.id === q.id)
     );
@@ -74,11 +74,11 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
 
             <div className="mb-8">
                 <label className="block text-slate-700 font-bold mb-2">اسم المسابقة</label>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     value={quizName}
                     onChange={(e) => setQuizName(e.target.value)}
-                    className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 outline-none text-xl"
+                    className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-red-500 outline-none text-xl"
                     placeholder="مثال: مسابقة الحيوانات الممتعة"
                 />
             </div>
@@ -88,14 +88,14 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col">
                     <h3 className="font-bold text-slate-700 mb-4 flex items-center justify-between">
                         <span>الأسئلة المتاحة</span>
-                        <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{filteredQuestions.length}</span>
+                        <span className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded-full">{filteredQuestions.length}</span>
                     </h3>
-                    
+
                     <div className="relative mb-4">
                         <Search className="absolute right-3 top-3 text-slate-400" size={18} />
-                        <input 
-                            type="text" 
-                            placeholder="بحث..." 
+                        <input
+                            type="text"
+                            placeholder="بحث..."
                             className="w-full pl-4 pr-10 py-2 rounded-lg border border-slate-200"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -104,7 +104,7 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
 
                     <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                         {filteredQuestions.slice(0, 100).map(question => (
-                            <div key={question.id} className="bg-white p-3 rounded-xl border border-slate-200 hover:border-blue-400 cursor-pointer group flex justify-between items-center transition-all" onClick={() => handleAddQuestion(question)}>
+                            <div key={question.id} className="bg-white p-3 rounded-xl border border-slate-200 hover:border-red-400 cursor-pointer group flex justify-between items-center transition-all" onClick={() => handleAddQuestion(question)}>
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">{question.icon}</span>
                                     <div>
@@ -112,19 +112,19 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
                                         <p className="text-xs text-slate-500">{question.source} • الجواب: {question.a}</p>
                                     </div>
                                 </div>
-                                <Plus className="text-blue-500 opacity-0 group-hover:opacity-100" size={20} />
+                                <Plus className="text-red-500 opacity-0 group-hover:opacity-100" size={20} />
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Selected Questions */}
-                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 flex flex-col">
-                    <h3 className="font-bold text-blue-800 mb-4 flex items-center justify-between">
+                <div className="bg-red-50 p-4 rounded-2xl border border-red-200 flex flex-col">
+                    <h3 className="font-bold text-red-800 mb-4 flex items-center justify-between">
                         <span>الأسئلة المختارة</span>
-                        <span className="text-sm bg-white text-blue-700 px-2 py-1 rounded-full">{selectedQuestions.length}</span>
+                        <span className="text-sm bg-white text-red-700 px-2 py-1 rounded-full">{selectedQuestions.length}</span>
                     </h3>
-                    
+
                     <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                          {selectedQuestions.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-slate-400">
@@ -132,9 +132,9 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
                             </div>
                          ) : (
                             selectedQuestions.map((question, idx) => (
-                                <motion.div layout key={question.id} className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex justify-between items-center">
+                                <motion.div layout key={question.id} className="bg-white p-3 rounded-xl border border-red-100 shadow-sm flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <span className="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">{idx + 1}</span>
+                                        <span className="bg-red-100 text-red-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">{idx + 1}</span>
                                         <span className="text-xl">{question.icon}</span>
                                         <p className="font-bold text-slate-800 text-sm">{question.q}</p>
                                     </div>

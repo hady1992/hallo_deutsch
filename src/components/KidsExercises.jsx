@@ -7,19 +7,19 @@ import { saveKidsExercises, getKidsProgress, saveKidsProgress } from '@/utils/st
 import { getKidsExercises } from '@/services/contentRepository';
 
 const defaultExercises = [
-  { 
-    id: 1, 
-    type: 'choice', 
-    question: 'ما معنى "Der Hund"?', 
-    options: ['قطة', 'كلب', 'فأر'], 
-    correct: 'كلب' 
+  {
+    id: 1,
+    type: 'choice',
+    question: 'ما معنى "Der Hund"?',
+    options: ['قطة', 'كلب', 'فأر'],
+    correct: 'كلب'
   },
-  { 
-    id: 2, 
-    type: 'choice', 
-    question: 'ما لون "Rot"?', 
-    options: ['أزرق', 'أحمر', 'أخضر'], 
-    correct: 'أحمر' 
+  {
+    id: 2,
+    type: 'choice',
+    question: 'ما لون "Rot"?',
+    options: ['أزرق', 'أحمر', 'أخضر'],
+    correct: 'أحمر'
   }
 ];
 
@@ -38,7 +38,7 @@ const KidsExercises = ({ isAdmin }) => {
     } else {
       setExercises(defaultExercises);
     }
-    
+
     // Load progress
     getKidsProgress();
     };
@@ -55,7 +55,7 @@ const KidsExercises = ({ isAdmin }) => {
     setSelected(answer);
     const correct = answer === exercises[currentIdx].correct;
     setIsCorrect(correct);
-    
+
     if (correct) {
       const newProg = { ...getKidsProgress(), exercises: { ...getKidsProgress().exercises, [exercises[currentIdx].id]: true } };
       saveKidsProgress(newProg);
@@ -92,8 +92,8 @@ const KidsExercises = ({ isAdmin }) => {
        <div className="flex justify-between items-center">
         <h2 className="text-2xl font-black text-slate-800">العب وتعلم</h2>
         {isAdmin && (
-           <KidsFileUploader 
-             onUpload={handleUpload} 
+           <KidsFileUploader
+             onUpload={handleUpload}
              label="إضافة تمارين"
              templateData={[{ type: 'choice', question: '?', options: ['a','b'], correct: 'a' }]}
            />
@@ -106,7 +106,7 @@ const KidsExercises = ({ isAdmin }) => {
                   <span>سؤال {currentIdx + 1} / {exercises.length}</span>
                   <span>نقاطك: {currentIdx * 10}</span>
               </div>
-              
+
               <h3 className="text-2xl md:text-3xl font-black text-slate-800 text-center mb-8">
                   {currentExercise.question}
               </h3>
@@ -119,9 +119,9 @@ const KidsExercises = ({ isAdmin }) => {
                         disabled={isCorrect !== null}
                         className={`
                             w-full p-4 rounded-2xl text-xl font-bold transition-all transform hover:scale-105
-                            ${selected === opt 
+                            ${selected === opt
                                 ? (isCorrect ? 'bg-green-500 text-white shadow-green-200' : 'bg-red-500 text-white shadow-red-200')
-                                : 'bg-slate-100 text-slate-700 hover:bg-blue-100 hover:text-blue-700'}
+                                : 'bg-slate-100 text-slate-700 hover:bg-red-100 hover:text-red-700'}
                         `}
                       >
                           {opt}
@@ -131,7 +131,7 @@ const KidsExercises = ({ isAdmin }) => {
 
               <AnimatePresence>
                   {isCorrect !== null && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}

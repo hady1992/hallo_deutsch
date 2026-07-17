@@ -17,7 +17,7 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
     const { shuffledOptions, newCorrectAnswer } = shuffleAnswers(options, correct);
     setCurrentOptions(shuffledOptions);
     setCurrentCorrectIndex(newCorrectAnswer);
-    
+
     // Reset state for new question
     setSelectedAnswer(null);
     setSubmitted(false);
@@ -64,8 +64,8 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
                   ? 'bg-red-100 border-2 border-red-500'
                   : 'bg-gray-50'
                 : selectedAnswer === optionIndex
-                ? 'bg-blue-100 border-2 border-blue-500'
-                : 'bg-gray-50 hover:bg-blue-50'
+                ? 'bg-red-100 border-2 border-red-500'
+                : 'bg-gray-50 hover:bg-red-50'
             }`}
           >
             <input
@@ -80,7 +80,7 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
                <span className="text-gray-800">{option}</span>
                <AudioButton text={option} size={16} />
             </div>
-            
+
             {submitted && optionIndex === currentCorrectIndex && (
               <CheckCircle className="text-green-600" size={24} />
             )}
@@ -96,7 +96,7 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
           <Button
             onClick={handleSubmit}
             disabled={selectedAnswer === null}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-red-600 hover:bg-red-700"
           >
             تحقق من الإجابة
           </Button>

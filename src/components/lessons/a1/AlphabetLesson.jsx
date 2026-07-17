@@ -42,14 +42,14 @@ const AlphabetLesson = () => {
     <div>
       <LessonSection title="الحروف الألمانية الأساسية (Das Alphabet)">
         <p className="mb-4 text-gray-700 leading-relaxed">
-          تتكون الأبجدية الألمانية من 26 حرفاً أساسياً مثل اللغة الإنجليزية تماماً، ولكن النطق يختلف في بعض الحروف بشكل جوهري. 
+          تتكون الأبجدية الألمانية من 26 حرفاً أساسياً مثل اللغة الإنجليزية تماماً، ولكن النطق يختلف في بعض الحروف بشكل جوهري.
           التمكن من الأبجدية هو مفتاح القراءة الصحيحة، حيث أن الألمانية لغة تُقرأ كما تُكتب غالباً.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {letters.map((l, idx) => (
             <div key={idx} className="bg-white p-4 rounded border border-gray-100 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center w-full">
-                <span className="text-2xl font-bold text-blue-600 font-mono">{l.char}</span>
+                <span className="text-2xl font-bold text-red-600 font-mono">{l.char}</span>
                 <PronunciationButton text="استمع" pronunciation={l.pron} />
               </div>
               <div className="text-sm text-gray-600 flex justify-between border-t pt-2 mt-1">
@@ -95,13 +95,13 @@ const AlphabetLesson = () => {
         </ul>
       </ImportantNote>
 
-      <ExerciseBox 
-        question="بناءً على القواعد السابقة، كيف تنطق كلمة 'Wein' (نبيذ)؟" 
-        answer="فاين (لأن W تنطق V، و ei تنطق آي)" 
+      <ExerciseBox
+        question="بناءً على القواعد السابقة، كيف تنطق كلمة 'Wein' (نبيذ)؟"
+        answer="فاين (لأن W تنطق V، و ei تنطق آي)"
       />
-      <ExerciseBox 
-        question="كيف تنطق كلمة 'Vier' (أربعة)؟" 
-        answer="فير (لأن V تنطق F، و ie تنطق إي ممدودة)" 
+      <ExerciseBox
+        question="كيف تنطق كلمة 'Vier' (أربعة)؟"
+        answer="فير (لأن V تنطق F، و ie تنطق إي ممدودة)"
       />
     </div>
   );

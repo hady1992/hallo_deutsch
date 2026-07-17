@@ -29,8 +29,8 @@ const GreetingsLesson = () => {
       <LessonSection title="التحيات حسب الوقت (Die Begrüßung)">
         <p className="mb-4 text-gray-700">يستخدم الألمان تحيات محددة بناءً على وقت اليوم. الدقة في اختيار التحية تعكس احترامك للوقت وللآخرين.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-orange-100">
-            <h4 className="font-bold text-orange-800 mb-3 border-b border-orange-200 pb-2">تحيات النهار</h4>
+          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-lg border border-amber-100">
+            <h4 className="font-bold text-amber-800 mb-3 border-b border-amber-200 pb-2">تحيات النهار</h4>
             <ul className="space-y-3">
               <li className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -55,8 +55,8 @@ const GreetingsLesson = () => {
               </li>
             </ul>
           </div>
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-100">
-            <h4 className="font-bold text-indigo-800 mb-3 border-b border-indigo-200 pb-2">تحيات المساء والوداع</h4>
+          <div className="bg-gradient-to-br from-amber-50 to-red-50 p-4 rounded-lg border border-amber-100">
+            <h4 className="font-bold text-amber-800 mb-3 border-b border-amber-200 pb-2">تحيات المساء والوداع</h4>
             <ul className="space-y-3">
               <li className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ const GreetingsLesson = () => {
               <div className="p-4 space-y-4">
                 {dialog.lines.map((line, lIdx) => (
                   <div key={lIdx} className={`flex flex-col ${lIdx % 2 === 0 ? 'items-start' : 'items-end'}`}>
-                    <div className={`max-w-[80%] rounded-lg p-3 ${lIdx % 2 === 0 ? 'bg-blue-50 text-blue-900 rounded-tr-none' : 'bg-green-50 text-green-900 rounded-tl-none'}`}>
+                    <div className={`max-w-[80%] rounded-lg p-3 ${lIdx % 2 === 0 ? 'bg-red-50 text-red-900 rounded-tr-none' : 'bg-green-50 text-green-900 rounded-tl-none'}`}>
                       <span className="text-xs font-bold block mb-1 opacity-70">{line.speaker}</span>
                       <div className="flex items-center gap-2">
                         <p className="font-semibold text-lg mb-1" dir="ltr">{line.text}</p>
@@ -125,9 +125,9 @@ const GreetingsLesson = () => {
         <span className="font-bold">ملاحظة ثقافية:</span> في ألمانيا، السؤال "Wie geht es dir?" (كيف حالك؟) ليس مجرد تحية عابرة دائماً. قد يتوقع الشخص إجابة صادقة ومختصرة عن حالك، وليس مجرد "بخير" آلية.
       </ImportantNote>
 
-      <ExerciseBox 
-        question="ماذا تقول لشخص تقابله الساعة 10 صباحاً في سياق رسمي؟" 
-        answer="Guten Morgen (صباح الخير)" 
+      <ExerciseBox
+        question="ماذا تقول لشخص تقابله الساعة 10 صباحاً في سياق رسمي؟"
+        answer="Guten Morgen (صباح الخير)"
       />
     </div>
   );

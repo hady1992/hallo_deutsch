@@ -14,11 +14,11 @@ const GrammarExampleBox = ({ example, index }) => {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-bold text-lg text-indigo-700" dir="ltr">{example.german}</span>
-            <AudioButton text={example.german} size={20} className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50" />
+            <span className="font-bold text-lg text-amber-700" dir="ltr">{example.german}</span>
+            <AudioButton text={example.german} size={20} className="text-amber-500 hover:text-amber-700 hover:bg-amber-50" />
           </div>
         </div>
-        
+
         <div className="flex flex-col gap-1 text-sm">
           <span className="text-gray-600 font-medium" dir="ltr">{example.translation}</span>
           <span className="text-gray-800 font-arabic font-medium">{example.arabic}</span>

@@ -35,10 +35,10 @@ const VocabularyFilter = ({
             placeholder="ابحث عن كلمة أو ترجمة أو مثال (ألماني/عربي)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-gray-800 bg-gray-50 focus:bg-white"
+            className="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 transition-all text-gray-800 bg-gray-50 focus:bg-white"
           />
         </div>
-        
+
         <div className="flex items-center gap-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
           <BarChart3 size={18} />
           <span className="font-medium text-sm">
@@ -49,7 +49,7 @@ const VocabularyFilter = ({
 
       {/* Bottom Row: Filters */}
       <div className="flex flex-col md:flex-row gap-6 border-t border-gray-100 pt-6">
-        
+
         {/* Level Filter */}
         <div className="flex-1">
           <label className="text-sm font-bold text-gray-700 mb-3 block">المستوى:</label>
@@ -60,8 +60,8 @@ const VocabularyFilter = ({
                 onClick={() => toggleLevel(level)}
                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${
                   selectedLevels.includes(level)
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                    ? 'bg-red-600 text-white border-red-600 shadow-md transform scale-105'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
                 }`}
               >
                 {level}
@@ -78,7 +78,7 @@ const VocabularyFilter = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-blue-400 cursor-pointer appearance-none hover:border-gray-300 transition-colors"
+              className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-red-400 cursor-pointer appearance-none hover:border-gray-300 transition-colors"
             >
               <option value="All">كل التصنيفات</option>
               {categories.map(cat => (
@@ -90,8 +90,8 @@ const VocabularyFilter = ({
 
         {/* Clear Button */}
         <div className="flex items-end">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={onClearFilters}
             className="text-gray-500 hover:text-red-500 hover:bg-red-50 w-full md:w-auto"
           >

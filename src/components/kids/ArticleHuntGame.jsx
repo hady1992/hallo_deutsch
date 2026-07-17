@@ -24,9 +24,9 @@ const SHOT_MODE_STORAGE_KEY = 'articleHuntShotMode';
 
 const ARTICLE_STYLES = {
   der: {
-    button: 'bg-sky-400 border-sky-500 shadow-sky-200 text-white',
-    idle: 'hover:bg-sky-500',
-    bubble: 'bg-sky-100 text-sky-700',
+    button: 'bg-amber-400 border-amber-500 shadow-amber-200 text-white',
+    idle: 'hover:bg-amber-500',
+    bubble: 'bg-amber-100 text-amber-700',
   },
   die: {
     button: 'bg-rose-400 border-rose-500 shadow-rose-200 text-white',
@@ -116,14 +116,14 @@ const ProjectileEffect = ({ projectile }) => {
     return (
       <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
         <motion.div
-          className="absolute bottom-20 left-1/2 h-4 w-[42%] origin-left rounded-full bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-yellow-200 shadow-[0_0_24px_rgba(34,211,238,0.6)]"
+          className="absolute bottom-20 left-1/2 h-4 w-[42%] origin-left rounded-full bg-gradient-to-r from-red-400 via-amber-300 to-yellow-200 shadow-[0_0_24px_rgba(34,211,238,0.6)]"
           style={{ rotate: target.rotate }}
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ scaleX: [0, 1, 1], opacity: [0, 1, 0] }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
         />
         <motion.div
-          className="absolute h-16 w-16 rounded-full border-4 border-cyan-200 bg-white/60"
+          className="absolute h-16 w-16 rounded-full border-4 border-amber-200 bg-white/60"
           style={{ left: target.left, top: target.top }}
           initial={{ scale: 0.3, opacity: 0 }}
           animate={{ scale: [0.3, 1.15, 0], opacity: [0, 1, 0] }}
@@ -142,7 +142,7 @@ const ProjectileEffect = ({ projectile }) => {
           'absolute flex h-12 w-12 items-center justify-center rounded-full text-3xl shadow-xl',
           isStarMode
             ? 'bg-yellow-200 text-yellow-500 shadow-yellow-200'
-            : 'border-4 border-white/80 bg-cyan-200/80 text-cyan-600 shadow-cyan-200'
+            : 'border-4 border-white/80 bg-amber-200/80 text-amber-600 shadow-amber-200'
         )}
         initial={{ left: '50%', top: '86%', scale: 0.35, opacity: 0.9 }}
         animate={{
@@ -162,7 +162,7 @@ const ProjectileEffect = ({ projectile }) => {
             key={`${projectile.id}-${index}`}
             className={cn(
               'absolute flex h-5 w-5 items-center justify-center rounded-full text-sm',
-              isStarMode ? 'text-yellow-400' : 'bg-cyan-100 text-cyan-500'
+              isStarMode ? 'text-yellow-400' : 'bg-amber-100 text-amber-500'
             )}
             initial={{ x: 0, y: 0, scale: 0.2, opacity: 0 }}
             animate={{
@@ -326,7 +326,7 @@ const ArticleHuntGame = ({ onExit }) => {
         particleCount: 80,
         spread: 65,
         origin: { y: 0.65 },
-        colors: ['#38bdf8', '#fb7185', '#34d399', '#facc15'],
+        colors: ['#e8b21e', '#d71920', '#34d399', '#facc15'],
       });
 
         window.setTimeout(goToNextQuestion, 1200);
@@ -370,9 +370,9 @@ const ArticleHuntGame = ({ onExit }) => {
         <p className="mb-8 text-lg font-bold text-slate-500">نتيجتك: {score} من {questions.length}</p>
 
         <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-3xl bg-blue-50 p-4">
-            <span className="block text-sm font-bold text-blue-500">النسبة</span>
-            <span className="text-3xl font-black text-blue-700">{successRate}%</span>
+          <div className="rounded-3xl bg-red-50 p-4">
+            <span className="block text-sm font-bold text-red-500">النسبة</span>
+            <span className="text-3xl font-black text-red-700">{successRate}%</span>
           </div>
           <div className="rounded-3xl bg-green-50 p-4">
             <span className="block text-sm font-bold text-green-500">الصحيح</span>
@@ -391,7 +391,7 @@ const ArticleHuntGame = ({ onExit }) => {
         <div className="mb-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Button
             onClick={replaySameSettings}
-            className="h-12 rounded-2xl bg-purple-600 px-6 text-base font-black text-white hover:bg-purple-700"
+            className="h-12 rounded-2xl bg-amber-600 px-6 text-base font-black text-white hover:bg-amber-700"
           >
             <RefreshCcw className="ml-2" size={18} />
             إعادة اللعب
@@ -442,10 +442,10 @@ const ArticleHuntGame = ({ onExit }) => {
   if (questions.length === 0) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 p-4" dir="rtl">
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-cyan-100 via-white to-yellow-100 p-6 shadow-xl md:p-10">
+        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-amber-100 via-white to-yellow-100 p-6 shadow-xl md:p-10">
           <div className="grid items-center gap-8 md:grid-cols-[1fr_0.8fr]">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-black text-cyan-700 shadow-sm">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-black text-amber-700 shadow-sm">
                 <Sparkles size={18} />
                 Artikel-Jagd
               </div>
@@ -456,8 +456,8 @@ const ArticleHuntGame = ({ onExit }) => {
             </div>
 
             <div className="relative mx-auto flex h-56 w-full max-w-sm items-center justify-center">
-              <div className="absolute bottom-5 h-20 w-28 rounded-t-[3rem] rounded-b-2xl bg-purple-500 shadow-lg shadow-purple-200" />
-              <div className="absolute bottom-20 h-16 w-16 rounded-full border-4 border-white bg-cyan-300 shadow-lg" />
+              <div className="absolute bottom-5 h-20 w-28 rounded-t-[3rem] rounded-b-2xl bg-amber-500 shadow-lg shadow-amber-200" />
+              <div className="absolute bottom-20 h-16 w-16 rounded-full border-4 border-white bg-amber-300 shadow-lg" />
               <motion.div
                 animate={{ y: [-8, 8, -8], scale: [1, 1.08, 1] }}
                 transition={{ duration: 2.4, repeat: Infinity }}
@@ -466,7 +466,7 @@ const ArticleHuntGame = ({ onExit }) => {
               <motion.div
                 animate={{ y: [12, -12, 12] }}
                 transition={{ duration: 2.8, repeat: Infinity }}
-                className="absolute right-12 top-20 h-14 w-14 rounded-full border-4 border-white/80 bg-cyan-200/70"
+                className="absolute right-12 top-20 h-14 w-14 rounded-full border-4 border-white/80 bg-amber-200/70"
               />
               <motion.div
                 animate={{ y: [-14, 10, -14] }}
@@ -494,8 +494,8 @@ const ArticleHuntGame = ({ onExit }) => {
                     className={cn(
                       'rounded-2xl border-2 p-4 text-right transition-all',
                       selectedTopic === topic.id
-                        ? 'border-purple-400 bg-purple-50 shadow-md'
-                        : 'border-slate-100 bg-slate-50 hover:border-purple-200 hover:bg-white'
+                        ? 'border-amber-400 bg-amber-50 shadow-md'
+                        : 'border-slate-100 bg-slate-50 hover:border-amber-200 hover:bg-white'
                     )}
                   >
                     <span className="block text-base font-black text-slate-800">{topic.label}</span>
@@ -516,8 +516,8 @@ const ArticleHuntGame = ({ onExit }) => {
                     className={cn(
                       'rounded-2xl border-2 p-5 text-center text-2xl font-black transition-all',
                       questionCount === count
-                        ? 'border-cyan-400 bg-cyan-50 text-cyan-700 shadow-md'
-                        : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-cyan-200 hover:bg-white'
+                        ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-md'
+                        : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-amber-200 hover:bg-white'
                     )}
                   >
                     {count}
@@ -535,8 +535,8 @@ const ArticleHuntGame = ({ onExit }) => {
                     className={cn(
                       'flex items-center justify-between gap-3 rounded-2xl border-2 p-4 text-right transition-all',
                       shotMode === mode.id
-                        ? 'border-purple-400 bg-purple-50 text-purple-700 shadow-md'
-                        : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-purple-200 hover:bg-white'
+                        ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-md'
+                        : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-amber-200 hover:bg-white'
                     )}
                   >
                     <span className="flex items-center gap-3">
@@ -589,7 +589,7 @@ const ArticleHuntGame = ({ onExit }) => {
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-slate-100" dir="ltr">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
+            className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.35 }}
           />
@@ -600,14 +600,14 @@ const ArticleHuntGame = ({ onExit }) => {
         key={currentQuestion?.id || currentIndex}
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[2rem] border-4 border-cyan-100 bg-gradient-to-br from-white via-cyan-50 to-yellow-50 p-5 shadow-xl md:p-8"
+        className="relative overflow-hidden rounded-[2rem] border-4 border-amber-100 bg-gradient-to-br from-white via-amber-50 to-yellow-50 p-5 shadow-xl md:p-8"
       >
         <div className="pointer-events-none absolute -left-8 top-10 h-24 w-24 rounded-full bg-white/50" />
-        <div className="pointer-events-none absolute right-10 top-20 h-14 w-14 rounded-full bg-cyan-200/40" />
+        <div className="pointer-events-none absolute right-10 top-20 h-14 w-14 rounded-full bg-amber-200/40" />
         <ProjectileEffect projectile={projectile} />
 
         <div className="relative z-10 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-purple-700 shadow-sm">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-amber-700 shadow-sm">
             <MousePointerClick size={18} />
             اضغط على الأرتيكل الصحيح
           </div>
@@ -620,7 +620,7 @@ const ArticleHuntGame = ({ onExit }) => {
               {!showAnswer && (
                 <AudioButton
                   text={currentQuestion.word}
-                  className="h-12 w-12 bg-blue-100 text-blue-600 hover:bg-blue-500 hover:text-white"
+                  className="h-12 w-12 bg-red-100 text-red-600 hover:bg-red-500 hover:text-white"
                   size={22}
                 />
               )}
@@ -684,21 +684,21 @@ const ArticleHuntGame = ({ onExit }) => {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 text-sm font-black text-slate-500">
             <div className="relative flex h-28 w-full max-w-sm items-end justify-center">
-              <div className="absolute bottom-0 h-12 w-28 rounded-t-[2rem] rounded-b-xl bg-purple-500 shadow-lg shadow-purple-200" />
-              <div className="absolute bottom-9 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-cyan-200 text-3xl shadow-lg">
+              <div className="absolute bottom-0 h-12 w-28 rounded-t-[2rem] rounded-b-xl bg-amber-500 shadow-lg shadow-amber-200" />
+              <div className="absolute bottom-9 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-amber-200 text-3xl shadow-lg">
                 {currentShotMode.icon}
               </div>
               <motion.div
                 animate={{ y: [-4, 4, -4], rotate: [-4, 4, -4] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute bottom-20 rounded-full bg-white px-4 py-2 text-purple-700 shadow-md"
+                className="absolute bottom-20 rounded-full bg-white px-4 py-2 text-amber-700 shadow-md"
               >
                 {currentShotMode.toolLabel}
               </motion.div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <span className="rounded-full bg-purple-500 px-4 py-2 text-white shadow-md">{currentShotMode.label}</span>
-              <span className="h-4 w-4 rounded-full bg-cyan-200" />
+              <span className="rounded-full bg-amber-500 px-4 py-2 text-white shadow-md">{currentShotMode.label}</span>
+              <span className="h-4 w-4 rounded-full bg-amber-200" />
               <span className="h-6 w-6 rounded-full bg-yellow-200" />
               <span className="h-3 w-3 rounded-full bg-rose-200" />
               <span>{currentShotMode.actionText}</span>

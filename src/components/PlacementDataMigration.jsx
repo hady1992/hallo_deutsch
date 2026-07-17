@@ -39,24 +39,24 @@ const PlacementDataMigration = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <Card className="border-blue-100 shadow-md">
-        <CardHeader className="bg-blue-50/50 border-b border-blue-100 pb-4">
+      <Card className="border-red-100 shadow-md">
+        <CardHeader className="bg-red-50/50 border-b border-red-100 pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
+              <CardTitle className="text-2xl font-bold text-red-900 flex items-center gap-2">
                 <FileCode className="w-6 h-6" />
                 أداة استخراج البيانات
               </CardTitle>
-              <CardDescription className="text-blue-700 mt-1 text-base">
+              <CardDescription className="text-red-700 mt-1 text-base">
                 استخراج أسئلة تحديد المستوى من المتصفح لدمجها في الكود المصدري.
               </CardDescription>
             </div>
-            <Badge variant="outline" className="bg-white text-blue-700 px-4 py-1 text-sm border-blue-200">
+            <Badge variant="outline" className="bg-white text-red-700 px-4 py-1 text-sm border-red-200">
               {questionCount} سؤال مكتشف
             </Badge>
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-6">
           <Alert className="mb-6 bg-amber-50 border-amber-200">
             <AlertTriangle className="h-5 w-5 text-amber-600" />

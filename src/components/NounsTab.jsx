@@ -22,14 +22,14 @@ const NounsTab = () => {
   const filteredNouns = allNouns.filter(noun => {
     const searchLower = searchTerm.toLowerCase();
     const word = noun.noun || noun.word || noun.german || '';
-    const matchSearch = 
+    const matchSearch =
       word.toLowerCase().includes(searchLower) ||
       (noun.translation || '').includes(searchLower);
-    
+
     const nounGender = (noun.gender || '').toLowerCase();
     const nounArticle = (noun.article || '').toLowerCase();
-    
-    const matchGender = selectedGender === 'All' || 
+
+    const matchGender = selectedGender === 'All' ||
       nounGender === selectedGender.toLowerCase() ||
       (selectedGender === 'Masculine' && nounArticle === 'der') ||
       (selectedGender === 'Feminine' && nounArticle === 'die') ||
@@ -40,7 +40,7 @@ const NounsTab = () => {
 
   const getArticleColor = (article) => {
     switch(article?.toLowerCase()) {
-      case 'der': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'der': return 'bg-red-100 text-red-700 border-red-200';
       case 'die': return 'bg-red-100 text-red-700 border-red-200';
       case 'das': return 'bg-green-100 text-green-700 border-green-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
@@ -52,15 +52,15 @@ const NounsTab = () => {
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-96">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="ابحث عن اسم..." 
+          <input
+            type="text"
+            placeholder="ابحث عن اسم..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 pl-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pr-10 pl-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
-        
+
         <div className="flex gap-2 w-full md:w-auto items-center">
             <div className="flex gap-1 overflow-x-auto pb-2 md:pb-0">
                 {['All', 'Masculine', 'Feminine', 'Neuter'].map(gender => (
@@ -84,9 +84,9 @@ const NounsTab = () => {
              const word = noun.noun || noun.word || noun.german;
              const article = noun.article;
              const uniqueId = noun.id || `noun-${idx}`;
-             
+
              return (
-              <motion.div 
+              <motion.div
                 key={uniqueId}
                 layout
                 className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden relative group"
@@ -100,10 +100,10 @@ const NounsTab = () => {
                         <AudioButton text={`${article || ''} ${word}`} size={16} />
                     </div>
                   </div>
-                  
+
                   <h3 className="german-text text-xl font-bold text-slate-800 mb-1">{word}</h3>
                   <p className="text-slate-500 text-sm mb-3">{noun.translation || noun.arabic}</p>
-                  
+
                   <div className="flex items-center gap-2 text-xs text-slate-400 font-mono bg-slate-50 p-2 rounded justify-between">
                     <span>Plural: <span className="font-bold text-slate-600">{noun.plural || '-'}</span></span>
                   </div>
@@ -111,17 +111,17 @@ const NounsTab = () => {
 
                 {(noun.example || noun.examples) && (
                   <div className="border-t border-slate-100">
-                    <button 
+                    <button
                       onClick={() => setExpandedId(expandedId === uniqueId ? null : uniqueId)}
                       className="w-full p-2 flex items-center justify-center gap-2 text-xs text-slate-500 hover:bg-slate-50 transition-colors"
                     >
                       {expandedId === uniqueId ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       {expandedId === uniqueId ? 'إخفاء الأمثلة' : 'أمثلة'}
                     </button>
-                    
+
                     <AnimatePresence>
                       {expandedId === uniqueId && (
-                        <motion.div 
+                        <motion.div
                           initial={{ height: 0 }}
                           animate={{ height: 'auto' }}
                           exit={{ height: 0 }}
@@ -129,12 +129,12 @@ const NounsTab = () => {
                         >
                           <div className="p-3 text-sm space-y-2">
                             {noun.example && typeof noun.example === 'string' && (
-                                <div className="border-l-2 border-blue-300 pl-2">
+                                <div className="border-l-2 border-red-300 pl-2">
                                     <p className="german-text font-medium text-slate-700">{noun.example}</p>
                                 </div>
                             )}
                             {Array.isArray(noun.examples) && noun.examples.map((ex, i) => (
-                                <div key={i} className="border-l-2 border-blue-300 pl-2">
+                                <div key={i} className="border-l-2 border-red-300 pl-2">
                                     <p className="german-text font-medium text-slate-700">{typeof ex === 'string' ? ex : ex.german}</p>
                                 </div>
                             ))}

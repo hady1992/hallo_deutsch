@@ -30,7 +30,7 @@ class AppErrorBoundary extends React.Component {
             حدث خطأ غير متوقع في جزء من المحتوى. يمكنك المحاولة مجددًا أو العودة إلى الصفحة الرئيسية.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={this.handleRetry} className="bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700">
+            <button type="button" onClick={this.handleRetry} className="bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700">
               المحاولة مجددًا
             </button>
             <button type="button" onClick={() => window.location.assign('/')} className="border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 hover:bg-slate-50">

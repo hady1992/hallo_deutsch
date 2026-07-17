@@ -23,7 +23,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
     if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
     }
-    
+
     // Reset State
     setSelectedOption(null);
     setTextAnswer('');
@@ -47,7 +47,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
     if (isAnswered) return;
 
     let correct = false;
-    
+
     if (exercise.type === 'multipleChoice') {
       correct = selectedOption === exercise.correctAnswer;
     } else if (exercise.type === 'fillBlank') {
@@ -60,13 +60,13 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
 
     setIsCorrect(correct);
     setIsAnswered(true);
-    
+
     if (correct) {
       toast({ title: "Ausgezeichnet! (ممتاز) 🎉", className: "bg-green-50 border-green-200" });
     } else {
       toast({ title: "Falsch (خطأ)", variant: "destructive" });
     }
-    
+
     onComplete(correct);
   };
 
@@ -81,7 +81,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
           disabled={isAnswered}
           className={cn(
             "p-4 rounded-xl border-2 text-left transition-all flex justify-between items-center relative overflow-hidden",
-            selectedOption === opt ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-100 bg-white hover:border-blue-200",
+            selectedOption === opt ? "border-red-500 bg-red-50 text-red-700" : "border-slate-100 bg-white hover:border-red-200",
             isAnswered && opt === exercise.correctAnswer && "border-green-500 bg-green-50 text-green-700",
             isAnswered && selectedOption === opt && !isCorrect && "border-red-500 bg-red-50 text-red-700"
           )}
@@ -105,10 +105,10 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
         className={cn(
           "w-full p-4 text-xl rounded-xl border-2 outline-none transition-all",
           isAnswered
-            ? isCorrect 
+            ? isCorrect
               ? "border-green-500 bg-green-50 text-green-700"
               : "border-red-500 bg-red-50 text-red-700"
-            : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            : "border-slate-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
         )}
         dir="ltr"
       />
@@ -119,7 +119,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
     <div className="space-y-6">
       <div className={cn(
         "min-h-[80px] p-4 rounded-xl border-2 border-dashed flex flex-wrap gap-2 items-center content-center transition-colors",
-        isAnswered 
+        isAnswered
           ? isCorrect ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
           : "border-slate-300 bg-slate-50"
       )}>
@@ -135,14 +135,14 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
        </div>
        <div className="flex flex-wrap gap-2 justify-center" dir="ltr">
           {wordOrder.map((word, idx) => (
-             <motion.div layout key={idx} className="bg-white border shadow-sm px-4 py-2 rounded-lg font-medium cursor-grab active:cursor-grabbing hover:border-blue-300">
+             <motion.div layout key={idx} className="bg-white border shadow-sm px-4 py-2 rounded-lg font-medium cursor-grab active:cursor-grabbing hover:border-red-300">
                 {word}
              </motion.div>
           ))}
        </div>
-       <Button 
-         variant="outline" 
-         size="sm" 
+       <Button
+         variant="outline"
+         size="sm"
          onClick={() => setWordOrder([...exercise.words].sort(() => Math.random() - 0.5))}
        >
          <RefreshCw size={14} className="mr-2" /> Mischen
@@ -177,13 +177,13 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
               {exercise.question}
             </h2>
           </div>
-          
+
           {/* Robust Audio Button integration */}
           <div className="flex-shrink-0 ml-4">
-             <AudioButton 
-                text={exercise.question} 
-                size={24} 
-                className="hover:bg-blue-100 text-slate-400 hover:text-blue-600" 
+             <AudioButton
+                text={exercise.question}
+                size={24}
+                className="hover:bg-red-100 text-slate-400 hover:text-red-600"
              />
           </div>
         </div>
@@ -192,7 +192,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
           {exercise.type === 'multipleChoice' && renderMultipleChoice()}
           {exercise.type === 'fillBlank' && renderFillBlank()}
           {exercise.type === 'wordOrder' && renderWordOrder()}
-          
+
           {exercise.type === 'matching' && (
               <Alert className="bg-slate-50 border-slate-200">
                   <AlertDescription>Matching exercises are simplified in this view.</AlertDescription>
@@ -210,16 +210,16 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
             </Button>
 
             {!isAnswered ? (
-              <Button 
+              <Button
                 onClick={checkAnswer}
                 disabled={(!selectedOption && exercise.type === 'multipleChoice') || (!textAnswer && exercise.type === 'fillBlank')}
-                className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] h-12 text-lg shadow-lg shadow-blue-200"
+                className="bg-red-600 hover:bg-red-700 text-white min-w-[140px] h-12 text-lg shadow-lg shadow-red-200"
               >
                 Prüfen
               </Button>
             ) : (
-              <Button 
-                onClick={onNext} 
+              <Button
+                onClick={onNext}
                 disabled={!hasNext}
                 className="bg-slate-900 hover:bg-black text-white min-w-[140px] h-12 text-lg"
               >

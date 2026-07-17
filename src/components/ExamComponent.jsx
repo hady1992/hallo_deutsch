@@ -73,7 +73,7 @@ const ExamComponent = ({ exam, onComplete }) => {
   const handleFinishExam = () => {
     window.speechSynthesis?.cancel();
     let correctCount = 0;
-    
+
     shuffledQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) {
         correctCount++;
@@ -81,7 +81,7 @@ const ExamComponent = ({ exam, onComplete }) => {
     });
 
     const score = Math.round((correctCount / shuffledQuestions.length) * 100);
-    
+
     const resultData = {
       examId: exam.id,
       score,
@@ -89,7 +89,7 @@ const ExamComponent = ({ exam, onComplete }) => {
       correctAnswers: correctCount,
       incorrectAnswers: shuffledQuestions.length - correctCount,
       date: new Date().toISOString(),
-      answers, 
+      answers,
       questionsState: shuffledQuestions,
       timeSpent: (durationMinutes * 60) - timeLeft
     };
@@ -103,9 +103,9 @@ const ExamComponent = ({ exam, onComplete }) => {
     }
     const historyEntry = {
       ...resultData,
-      questionsState: null 
+      questionsState: null
     };
-    
+
     localStorage.setItem('exam_results', JSON.stringify([...savedResults, historyEntry]));
     if (typeof onComplete === 'function') onComplete(resultData);
   };
@@ -131,14 +131,14 @@ const ExamComponent = ({ exam, onComplete }) => {
             <h2 className="text-lg font-bold text-slate-800">{exam.title}</h2>
             <p className="text-slate-500 text-sm">سؤال {currentQuestionIndex + 1} من {shuffledQuestions.length}</p>
           </div>
-          <div className={`flex items-center gap-2 font-bold text-lg ${timeLeft < 300 ? 'text-red-500' : 'text-blue-600'}`}>
+          <div className={`flex items-center gap-2 font-bold text-lg ${timeLeft < 300 ? 'text-red-500' : 'text-red-600'}`}>
             <Clock size={20} />
             {formatTime(timeLeft)}
           </div>
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-blue-600 transition-all duration-500 ease-out" 
+          <div
+            className="h-full bg-red-600 transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -154,7 +154,7 @@ const ExamComponent = ({ exam, onComplete }) => {
         className="bg-white rounded-3xl shadow-lg p-6 md:p-10 border border-slate-100 min-h-[400px] flex flex-col"
       >
         <div className="flex justify-between items-start mb-6">
-          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+          <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
             {currentQuestion.category}
           </span>
           {/* AudioButton receives ONLY the question text. The component handles stripping emojis internally. */}
@@ -171,18 +171,18 @@ const ExamComponent = ({ exam, onComplete }) => {
               key={idx}
               onClick={() => handleOptionSelect(idx)}
               className={`p-5 rounded-xl border-2 text-right transition-all text-lg font-medium flex items-center justify-between group relative overflow-hidden
-                ${answers[currentQuestionIndex] === idx 
-                  ? 'border-blue-500 bg-blue-50 text-blue-800 shadow-md' 
-                  : 'border-slate-100 hover:border-blue-200 hover:bg-slate-50 text-slate-600'
+                ${answers[currentQuestionIndex] === idx
+                  ? 'border-red-500 bg-red-50 text-red-800 shadow-md'
+                  : 'border-slate-100 hover:border-red-200 hover:bg-slate-50 text-slate-600'
                 }
               `}
             >
               <span className="relative z-10">{option}</span>
               {answers[currentQuestionIndex] === idx && (
-                <motion.div 
-                  initial={{ scale: 0 }} 
+                <motion.div
+                  initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="bg-blue-500 text-white rounded-full p-1"
+                  className="bg-red-500 text-white rounded-full p-1"
                 >
                   <CheckCircle size={20} />
                 </motion.div>
@@ -192,18 +192,18 @@ const ExamComponent = ({ exam, onComplete }) => {
         </div>
 
         <div className="mt-auto pt-6 flex justify-end">
-          <Button 
+          <Button
             onClick={handleNext}
             size="lg"
             className={`min-w-[160px] text-lg h-14 transition-all duration-300 ${
               answers[currentQuestionIndex] === undefined
-                ? 'bg-slate-200 text-slate-400 hover:bg-slate-200 cursor-not-allowed' 
+                ? 'bg-slate-200 text-slate-400 hover:bg-slate-200 cursor-not-allowed'
                 : isLastQuestion
                   ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-200'
                   : 'bg-slate-900 hover:bg-black text-white shadow-lg hover:shadow-slate-200'
             }`}
           >
-            {isLastQuestion ? 'إنهاء الامتحان' : 'التالي'} 
+            {isLastQuestion ? 'إنهاء الامتحان' : 'التالي'}
             {!isLastQuestion && <ArrowLeft className="mr-2 h-5 w-5" />}
           </Button>
         </div>

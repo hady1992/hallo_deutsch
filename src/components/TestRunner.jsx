@@ -18,12 +18,12 @@ const TestRunner = ({ questions, onBack }) => {
 
   const handleAnswer = (index) => {
     if (answered) return;
-    
+
     setSelectedAnswer(index);
     const correct = index === currentQuestion.correctAnswer;
     setIsCorrect(correct);
     setAnswered(true);
-    
+
     if (correct) {
       setScore(prev => prev + 1);
       confetti({
@@ -56,13 +56,13 @@ const TestRunner = ({ questions, onBack }) => {
     return (
       <Card className="max-w-xl mx-auto text-center p-8 shadow-lg border-slate-200">
         <CardContent className="space-y-6">
-          <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-12 h-12" />
           </div>
           <h2 className="text-3xl font-bold text-slate-800">Test Completed!</h2>
-          
+
           <div className="py-6">
-            <span className="text-6xl font-black text-blue-600 block mb-2">{percentage}%</span>
+            <span className="text-6xl font-black text-red-600 block mb-2">{percentage}%</span>
             <p className="text-slate-500">You scored {score} out of {questions.length}</p>
           </div>
 
@@ -70,7 +70,7 @@ const TestRunner = ({ questions, onBack }) => {
             <Button onClick={onBack} variant="outline" className="gap-2">
               <Home className="w-4 h-4" /> Back to Home
             </Button>
-            <Button onClick={() => window.location.reload()} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => window.location.reload()} className="gap-2 bg-red-600 hover:bg-red-700">
               <RefreshCw className="w-4 h-4" /> Retake Test
             </Button>
           </div>
@@ -87,8 +87,8 @@ const TestRunner = ({ questions, onBack }) => {
       </div>
 
       <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
-        <motion.div 
-          className="h-full bg-blue-600"
+        <motion.div
+          className="h-full bg-red-600"
           initial={{ width: 0 }}
           animate={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
         />
@@ -108,7 +108,7 @@ const TestRunner = ({ questions, onBack }) => {
                 disabled={answered}
                 className={cn(
                   "w-full p-4 rounded-xl border-2 text-left transition-all relative flex justify-between items-center",
-                  !answered && "hover:border-blue-300 hover:bg-blue-50 border-slate-200",
+                  !answered && "hover:border-red-300 hover:bg-red-50 border-slate-200",
                   answered && index === currentQuestion.correctAnswer && "border-green-500 bg-green-50 text-green-800",
                   answered && index === selectedAnswer && index !== currentQuestion.correctAnswer && "border-red-500 bg-red-50 text-red-800",
                   answered && index !== currentQuestion.correctAnswer && index !== selectedAnswer && "opacity-50 border-slate-100"
@@ -140,7 +140,7 @@ const TestRunner = ({ questions, onBack }) => {
           </div>
         </CardContent>
       </Card>
-      
+
       <div className="mt-8 text-center">
          <Button variant="ghost" onClick={onBack} className="text-slate-400 hover:text-slate-600">
             Exit Test

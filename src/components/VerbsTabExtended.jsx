@@ -20,7 +20,7 @@ const VerbsTabExtended = () => {
   const verbTypes = ['All', 'Regular', 'Strong', 'Irregular', 'Modal', 'Auxiliary', 'Separable'];
 
   const filteredVerbs = allVerbs.filter(verb => {
-    const matchesSearch = (verb.infinitive || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = (verb.infinitive || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (verb.translation || '').includes(searchTerm);
     const matchesFilter = filterType === 'All' || (verb.type && verb.type.toLowerCase() === filterType.toLowerCase());
     return matchesSearch && matchesFilter;
@@ -29,24 +29,24 @@ const VerbsTabExtended = () => {
   const getTypeColor = (type) => {
     switch (type?.toLowerCase()) {
       case 'regular': return 'bg-green-100 text-green-700 border-green-200';
-      case 'strong': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'strong': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'irregular': return 'bg-red-100 text-red-700 border-red-200';
-      case 'modal': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'modal': return 'bg-amber-100 text-amber-700 border-amber-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
 
   const pronouns = ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'];
-  const tenses = ['Präsens', 'Präteritum', 'Perfekt', 'Imperativ']; 
+  const tenses = ['Präsens', 'Präteritum', 'Perfekt', 'Imperativ'];
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 min-h-[600px] p-6">
       {/* Header & Controls */}
       <div className="mb-8 space-y-6">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gradient-to-r from-red-50 to-amber-50 p-6 rounded-2xl border border-red-100">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-2">
-              <BookOpen className="text-blue-600" />
+              <BookOpen className="text-red-600" />
               قاموس الأفعال (المستوردة)
             </h2>
             <p className="text-slate-600 text-sm">
@@ -61,7 +61,7 @@ const VerbsTabExtended = () => {
                 placeholder="بحث..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+                className="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 bg-white"
                 />
             </div>
           </div>
@@ -74,8 +74,8 @@ const VerbsTabExtended = () => {
               key={type}
               onClick={() => setFilterType(type)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                filterType === type 
-                  ? 'bg-blue-600 text-white shadow-md' 
+                filterType === type
+                  ? 'bg-red-600 text-white shadow-md'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -93,17 +93,17 @@ const VerbsTabExtended = () => {
               layout
               key={verb.id || verb.infinitive}
               className={`rounded-xl border transition-all duration-300 overflow-hidden ${
-                expandedVerb === verb.id 
-                  ? 'bg-white border-blue-200 shadow-xl ring-1 ring-blue-100' 
-                  : 'bg-white border-slate-100 hover:border-blue-300 hover:shadow-md'
+                expandedVerb === verb.id
+                  ? 'bg-white border-red-200 shadow-xl ring-1 ring-red-100'
+                  : 'bg-white border-slate-100 hover:border-red-300 hover:shadow-md'
               }`}
             >
-              <div 
+              <div
                 onClick={() => setExpandedVerb(expandedVerb === verb.id ? null : verb.id)}
                 className="p-5 cursor-pointer flex flex-col md:flex-row justify-between items-center gap-4 bg-white"
               >
                 <div className="flex items-center gap-4 w-full">
-                    <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
                         {(verb.infinitive || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -117,7 +117,7 @@ const VerbsTabExtended = () => {
                         <p className="text-slate-500 font-medium">{verb.translation}</p>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                     {expandedVerb === verb.id ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
                 </div>
@@ -155,7 +155,7 @@ const VerbsTabExtended = () => {
                                                  // Fallback for plural key 'conjugations'
                                                  val = verb.conjugations[tense][pronoun] || '-';
                                              }
-                                             
+
                                              return (
                                                  <td key={tense} className="german-text p-3 text-center border-b border-slate-100 text-slate-800 font-medium">
                                                      {val}
@@ -171,11 +171,11 @@ const VerbsTabExtended = () => {
                         {verb.examples && verb.examples.length > 0 && (
                             <div className="mt-6 bg-white p-4 rounded-xl border border-slate-200">
                                 <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                                    <BookOpen size={16} className="text-blue-500" /> أمثلة
+                                    <BookOpen size={16} className="text-red-500" /> أمثلة
                                 </h4>
                                 <ul className="space-y-2">
                                     {verb.examples.map((ex, i) => (
-                                        <li key={i} className="text-sm text-slate-700 border-l-2 border-blue-200 pl-3">
+                                        <li key={i} className="text-sm text-slate-700 border-l-2 border-red-200 pl-3">
                                             {typeof ex === 'string' ? ex : (
                                                 <>
                                                     <span className="german-text block font-medium">{ex.de || ex.german}</span>

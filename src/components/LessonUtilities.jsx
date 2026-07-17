@@ -17,11 +17,11 @@ export const PronunciationButton = ({ text, pronunciation }) => {
   const [show, setShow] = useState(false);
   return (
     <div className="flex items-center gap-2">
-      <span className="font-semibold text-blue-700" dir="ltr">{text}</span>
+      <span className="font-semibold text-red-700" dir="ltr">{text}</span>
       <AudioButton text={text} size={16} />
-      <Button 
-        variant="ghost" 
-        size="sm" 
+      <Button
+        variant="ghost"
+        size="sm"
         className="h-8 px-2 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         onClick={() => setShow(!show)}
         title="عرض النطق المكتوب"
@@ -52,9 +52,9 @@ export const ExampleBox = ({ examples }) => (
     </div>
     <div className="p-4 space-y-3">
       {examples.map((ex, idx) => (
-        <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 hover:bg-blue-50 rounded transition-colors border-b last:border-0 border-gray-50">
+        <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 hover:bg-red-50 rounded transition-colors border-b last:border-0 border-gray-50">
           <div className="flex items-center gap-2 w-full sm:w-1/2">
-             <span className="font-semibold text-blue-700 text-lg" dir="ltr">{ex.german}</span>
+             <span className="font-semibold text-red-700 text-lg" dir="ltr">{ex.german}</span>
              <AudioButton text={ex.german} size={18} />
              {ex.pronunciation && (
                <span className="text-xs text-gray-400 bg-gray-50 px-1 rounded hidden sm:inline-block">({ex.pronunciation})</span>
@@ -79,23 +79,23 @@ export const ImportantNote = ({ children }) => (
 export const ExerciseBox = ({ question, answer }) => {
   const [showAnswer, setShowAnswer] = useState(false);
   return (
-    <div className="bg-indigo-50 rounded-lg p-4 my-4 border border-indigo-100">
+    <div className="bg-amber-50 rounded-lg p-4 my-4 border border-amber-100">
       <div className="flex items-start gap-3 mb-3">
-        <HelpCircle className="text-indigo-500 flex-shrink-0 mt-1" size={20} />
-        <span className="font-semibold text-indigo-900">{question}</span>
+        <HelpCircle className="text-amber-500 flex-shrink-0 mt-1" size={20} />
+        <span className="font-semibold text-amber-900">{question}</span>
       </div>
-      
+
       <div className="mt-2">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           onClick={() => setShowAnswer(!showAnswer)}
-          className="text-xs border-indigo-200 hover:bg-indigo-100 text-indigo-700"
+          className="text-xs border-amber-200 hover:bg-amber-100 text-amber-700"
         >
           {showAnswer ? 'إخفاء الإجابة' : 'إظهار الإجابة'}
           {showAnswer ? <ChevronUp size={14} className="mr-1" /> : <ChevronDown size={14} className="mr-1" />}
         </Button>
-        
+
         <AnimatePresence>
           {showAnswer && (
             <motion.div
@@ -104,7 +104,7 @@ export const ExerciseBox = ({ question, answer }) => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-2 pt-2 border-t border-indigo-200 text-indigo-800 font-medium flex items-center gap-2" dir="ltr">
+              <div className="mt-2 pt-2 border-t border-amber-200 text-amber-800 font-medium flex items-center gap-2" dir="ltr">
                 <span>{answer}</span>
                 {/* Attempt to clean answer from parentheses for cleaner TTS */}
                 <AudioButton text={answer.replace(/\(.*?\)/g, '')} size={16} />

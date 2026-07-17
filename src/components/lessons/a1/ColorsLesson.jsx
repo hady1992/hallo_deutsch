@@ -25,15 +25,15 @@ const ColorsLesson = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {colors.map((c, idx) => (
             <div key={idx} className="group bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-all relative">
-              <div 
-                className={`w-16 h-16 rounded-full mb-3 shadow-inner transition-transform group-hover:scale-110 ${c.border ? 'border border-gray-200' : ''}`} 
+              <div
+                className={`w-16 h-16 rounded-full mb-3 shadow-inner transition-transform group-hover:scale-110 ${c.border ? 'border border-gray-200' : ''}`}
                 style={{ backgroundColor: c.hex }}
               />
               <div className="font-bold text-gray-800 text-lg mb-1 flex items-center gap-1 justify-center">
                 {c.name}
                 <AudioButton text={c.name} size={14} />
               </div>
-              <div className="text-sm font-medium text-blue-600 mb-1">{c.arabic}</div>
+              <div className="text-sm font-medium text-red-600 mb-1">{c.arabic}</div>
               <div className="text-xs text-gray-400">{c.desc}</div>
             </div>
           ))}
@@ -43,24 +43,24 @@ const ColorsLesson = () => {
       <LessonSection title="درجات الألوان (Farbnuancen)">
         <p className="text-gray-700 mb-4">لجعل اللون فاتحاً أو غامقاً، نضيف كلمات بسيطة قبل اللون:</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded border border-blue-100 flex items-center gap-3">
-             <div className="w-10 h-10 rounded bg-sky-200"></div>
+          <div className="bg-red-50 p-4 rounded border border-red-100 flex items-center gap-3">
+             <div className="w-10 h-10 rounded bg-amber-200"></div>
              <div>
-               <span className="font-bold text-blue-900 block flex items-center gap-2">
+               <span className="font-bold text-red-900 block flex items-center gap-2">
                  Hell + blau = Hellblau
                  <AudioButton text="Hellblau" size={14} />
                </span>
-               <span className="text-sm text-blue-700">أزرق فاتح</span>
+               <span className="text-sm text-red-700">أزرق فاتح</span>
              </div>
           </div>
-          <div className="bg-blue-50 p-4 rounded border border-blue-100 flex items-center gap-3">
-             <div className="w-10 h-10 rounded bg-blue-900"></div>
+          <div className="bg-red-50 p-4 rounded border border-red-100 flex items-center gap-3">
+             <div className="w-10 h-10 rounded bg-red-900"></div>
              <div>
-               <span className="font-bold text-blue-900 block flex items-center gap-2">
+               <span className="font-bold text-red-900 block flex items-center gap-2">
                  Dunkel + blau = Dunkelblau
                  <AudioButton text="Dunkelblau" size={14} />
                </span>
-               <span className="text-sm text-blue-700">أزرق غامق</span>
+               <span className="text-sm text-red-700">أزرق غامق</span>
              </div>
           </div>
         </div>
@@ -83,9 +83,9 @@ const ColorsLesson = () => {
         عندما نستخدمه كصفة (مثلاً "السيارة حمراء")، نكتبه بحرف صغير: <strong>rot</strong>.
       </ImportantNote>
 
-      <ExerciseBox 
-        question="كيف تقول 'سيارة زرقاء غامقة'؟" 
-        answer="Ein dunkelblaues Auto." 
+      <ExerciseBox
+        question="كيف تقول 'سيارة زرقاء غامقة'؟"
+        answer="Ein dunkelblaues Auto."
       />
     </div>
   );

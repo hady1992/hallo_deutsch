@@ -328,7 +328,7 @@ question,optionA,optionB,optionC,optionD,correctAnswer
     <div className="mt-8 p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-bold text-slate-800 flex items-center gap-2 text-lg">
-            <FileUp className="text-blue-600" size={24} />
+            <FileUp className="text-red-600" size={24} />
             إدارة الامتحانات - المستوى {level}
         </h3>
         <Badge variant="outline" className="text-xs font-bold px-2 py-1 bg-slate-50 border-slate-200">
@@ -350,12 +350,12 @@ question,optionA,optionB,optionC,optionD,correctAnswer
         <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}
-            className="flex-1 h-auto py-6 bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex flex-col items-center gap-2 rounded-xl transition-all hover:scale-[1.01]"
+            className="flex-1 h-auto py-6 bg-red-600 hover:bg-red-700 text-white shadow-lg flex flex-col items-center gap-2 rounded-xl transition-all hover:scale-[1.01]"
         >
-            {isImporting ? <Loader2 className="animate-spin h-8 w-8 text-blue-200" /> : <FileUp className="h-8 w-8 text-blue-100" />}
+            {isImporting ? <Loader2 className="animate-spin h-8 w-8 text-red-200" /> : <FileUp className="h-8 w-8 text-red-100" />}
             <div className="flex flex-col items-center">
                 <span className="text-lg font-bold">رفع امتحان (CSV أو JSON)</span>
-                <span className="text-blue-100 text-sm font-medium opacity-90">استيراد أسئلة جديدة</span>
+                <span className="text-red-100 text-sm font-medium opacity-90">استيراد أسئلة جديدة</span>
             </div>
         </Button>
       </div>
@@ -407,7 +407,7 @@ question,optionA,optionB,optionC,optionD,correctAnswer
             exams.map(exam => (
                 <div key={exam.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all group">
                     <div className="flex items-start gap-4">
-                        <div className="bg-blue-50 p-2.5 rounded-lg text-blue-600">
+                        <div className="bg-red-50 p-2.5 rounded-lg text-red-600">
                              <FileText size={20} />
                         </div>
                         <div>

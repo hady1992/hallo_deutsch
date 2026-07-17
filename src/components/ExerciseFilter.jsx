@@ -38,7 +38,7 @@ const ExerciseFilter = ({ filters, onFilterChange, onReset, counts }) => {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-gray-800 flex items-center gap-2">
-          <Filter size={20} className="text-blue-600" />
+          <Filter size={20} className="text-red-600" />
           تصفية التمارين
         </h3>
         <Button variant="ghost" size="sm" onClick={onReset} className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8">
@@ -56,7 +56,7 @@ const ExerciseFilter = ({ filters, onFilterChange, onReset, counts }) => {
               onClick={() => handleLevelChange(lvl)}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                 filters.level === lvl
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'bg-red-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -76,7 +76,7 @@ const ExerciseFilter = ({ filters, onFilterChange, onReset, counts }) => {
               onClick={() => toggleType(t.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1 ${
                 filters.types?.includes(t.id)
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                  ? 'bg-amber-50 border-amber-200 text-amber-700'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >

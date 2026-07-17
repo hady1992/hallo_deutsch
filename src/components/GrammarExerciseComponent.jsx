@@ -61,7 +61,7 @@ function GrammarExerciseComponent({ topic, onClose }) {
       toast({
         title: "أحسنت! انتهيت من جميع التمارين 🎊",
         description: `النتيجة: ${score}/${total}`,
-        className: "bg-blue-50 border-blue-200",
+        className: "bg-red-50 border-red-200",
       });
     }
   };
@@ -128,8 +128,8 @@ function GrammarExerciseComponent({ topic, onClose }) {
                       ? 'bg-red-100 border-red-500 text-red-800'
                       : 'bg-gray-50 border-gray-200 text-gray-500'
                     : userAnswer === option
-                    ? 'bg-blue-100 border-blue-500 text-blue-800'
-                    : 'bg-white border-gray-300 text-gray-800 hover:border-blue-400 hover:bg-blue-50'
+                    ? 'bg-red-100 border-red-500 text-red-800'
+                    : 'bg-white border-gray-300 text-gray-800 hover:border-red-400 hover:bg-red-50'
                 }`}
                 dir="ltr"
               >
@@ -157,7 +157,7 @@ function GrammarExerciseComponent({ topic, onClose }) {
                   ? isCorrect
                     ? 'border-green-500 bg-green-50 text-green-800'
                     : 'border-red-500 bg-red-50 text-red-800'
-                  : 'border-blue-400 bg-white text-gray-800'
+                  : 'border-red-400 bg-white text-gray-800'
               }`}
               placeholder="..."
             />
@@ -167,7 +167,7 @@ function GrammarExerciseComponent({ topic, onClose }) {
             <Button
               onClick={checkAnswer}
               disabled={!userAnswer.trim()}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl"
             >
               تحقق من الإجابة
             </Button>
@@ -185,11 +185,11 @@ function GrammarExerciseComponent({ topic, onClose }) {
         className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-amber-600 to-amber-600 text-white p-6 rounded-t-2xl">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-2xl font-bold mb-2">{topic.title}</h2>
-              <p className="text-indigo-100">
+              <p className="text-amber-100">
                 التمرين {currentExerciseIndex + 1} من {topic.exercises.length}
               </p>
             </div>
@@ -294,7 +294,7 @@ function GrammarExerciseComponent({ topic, onClose }) {
           {currentExerciseIndex === topic.exercises.length - 1 ? (
             <Button
               onClick={restartExercises}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+              className="flex-1 bg-gradient-to-r from-red-500 to-amber-600 hover:from-red-600 hover:to-amber-700 text-white"
             >
               <RotateCcw className="ml-2" size={18} />
               ابدأ من جديد

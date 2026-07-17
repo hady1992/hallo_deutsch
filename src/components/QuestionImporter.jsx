@@ -40,7 +40,7 @@ const QuestionImporter = ({ levelId, onImportComplete }) => {
     try {
         const text = await file.text();
         const lines = text.split(/\r\n|\n/).filter(line => line.trim());
-        
+
         if (lines.length < 2) throw new Error("الملف فارغ");
 
         // Parse CSV
@@ -50,7 +50,7 @@ const QuestionImporter = ({ levelId, onImportComplete }) => {
                 const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                 // Fallback basic split if simple
                 const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-                
+
                 // Assuming simple CSV structure: question, type, difficulty, correctAnswer, opt1, opt2, opt3, opt4, explanation, hint
                 // Note: a robust parser is better, but simple split works for template adherence
                 const [question, type, difficulty, correctAnswer, opt1, opt2, opt3, opt4, explanation, hint] = cols;
@@ -66,11 +66,11 @@ const QuestionImporter = ({ levelId, onImportComplete }) => {
                     explanation: explanation || '',
                     hint: hint || ''
                 };
-                
+
                 // Basic type validation correction
                 if (newQ.type === 'multipleChoice' && newQ.options.length < 2) {
                     // Try to fix options if empty
-                    newQ.options = ['Ja', 'Nein']; 
+                    newQ.options = ['Ja', 'Nein'];
                 }
 
                 saveManualQuestion(levelId, newQ);
@@ -83,7 +83,7 @@ const QuestionImporter = ({ levelId, onImportComplete }) => {
         }
 
         setImportStats({ success: successCount, errors: errorCount });
-        
+
         toast({
             title: "تم الاستيراد",
             description: `تم استيراد ${successCount} سؤال بنجاح.`,
@@ -107,27 +107,27 @@ const QuestionImporter = ({ levelId, onImportComplete }) => {
   return (
     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
       <h3 className="font-bold text-slate-800 mb-4">استيراد أسئلة (Excel/CSV)</h3>
-      
+
       <div className="flex gap-4">
-        <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileSelect} 
-            accept=".csv" 
-            className="hidden" 
+        <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept=".csv"
+            className="hidden"
         />
-        
-        <Button 
-            onClick={() => fileInputRef.current?.click()} 
+
+        <Button
+            onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white"
         >
             {isImporting ? <Loader2 className="animate-spin mr-2" /> : <FileUp className="mr-2" size={18} />}
             رفع ملف CSV
         </Button>
 
-        <Button 
-            variant="outline" 
+        <Button
+            variant="outline"
             onClick={downloadTemplate}
             className="border-slate-300 text-slate-700 hover:bg-white"
         >

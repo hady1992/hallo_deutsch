@@ -3,11 +3,11 @@ import { Trash2, Plus, Save, Target, ListOrdered, CheckCircle, RefreshCw, AlertT
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input'; 
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-    savePlacementTestQuestions, 
-    getPersistentPlacementTestQuestions 
+import {
+    savePlacementTestQuestions,
+    getPersistentPlacementTestQuestions
 } from '@/utils/persistentDataStorage';
 import { getPlacementQuestionDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
@@ -27,7 +27,7 @@ const ExamUploaderPlacementTest = () => {
   const [saving, setSaving] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importStats, setImportStats] = useState(null);
-  
+
   // Manual Entry State
   const [newQuestion, setNewQuestion] = useState({
       question: '',
@@ -35,7 +35,7 @@ const ExamUploaderPlacementTest = () => {
       option2: '',
       option3: '',
       option4: '',
-      correctAnswer: '0', 
+      correctAnswer: '0',
       level: 'A1'
   });
 
@@ -77,7 +77,7 @@ const ExamUploaderPlacementTest = () => {
           const newId = crypto.randomUUID ? crypto.randomUUID() : `pt_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
           const formattedQuestion = {
-              id: newId, 
+              id: newId,
               question: newQuestion.question,
               options: [newQuestion.option1, newQuestion.option2, newQuestion.option3, newQuestion.option4],
               correctAnswer: parseInt(newQuestion.correctAnswer),
@@ -87,21 +87,21 @@ const ExamUploaderPlacementTest = () => {
 
           // 1. Get FRESH current data to ensure we don't overwrite concurrent updates from this session
           const current = await getPersistentPlacementTestQuestions();
-          
+
           // 2. Append new
           // We only save the "User Added" or "Modified" ones typically, but our saver handles the full list logic for LS
           // Filter out defaults if we only want to save custom, BUT getPersistent.. returns ALL.
           // IMPORTANT: We should only pass user-modifiable data to save if we want to avoid saving defaults to DB
           // For now, let's assume we save everything that isn't flagged 'default' OR we just append to the custom list.
-          
+
           // Actually, `getPersistentPlacementTestQuestions` merges default + local.
           // If we save `[...current, new]`, we might re-save defaults as custom.
           // Better: Get current, filter to only non-default, add new, then save.
           const customOnly = current.filter(q => q.source !== 'default');
           const updatedList = [...customOnly, formattedQuestion];
-          
+
           const result = await savePlacementTestQuestions(updatedList);
-          
+
           if (result.success) {
             toast({
                 title: "تم الحفظ بنجاح",
@@ -143,7 +143,7 @@ const ExamUploaderPlacementTest = () => {
       const current = await getPersistentPlacementTestQuestions();
       // Only allow deleting custom ones usually, but let's assume admin can delete any 'local/cloud' copy
       const updated = current.filter(q => q.id !== id && q.source !== 'default');
-      
+
       await savePlacementTestQuestions(updated);
       loadData();
       window.dispatchEvent(new Event('placementTestsUpdated'));
@@ -317,7 +317,7 @@ const ExamUploaderPlacementTest = () => {
       <div className="bg-slate-50 p-6 border-b border-slate-200 flex items-center justify-between">
         <div>
             <h3 className="font-bold text-slate-800 flex items-center gap-2 text-xl">
-                <Target className="text-purple-600" size={24} />
+                <Target className="text-amber-600" size={24} />
                 إدارة اختبار تحديد المستوى
             </h3>
             <p className="text-slate-500 text-sm mt-1">أضف وعدل الأسئلة التي تظهر في اختبار تحديد المستوى.</p>
@@ -352,7 +352,7 @@ const ExamUploaderPlacementTest = () => {
                   <Button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isImporting}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2"
                   >
                       {isImporting ? <Loader2 className="animate-spin w-4 h-4" /> : <FileUp className="w-4 h-4" />}
                       رفع ملف أسئلة (JSON)
@@ -389,26 +389,26 @@ const ExamUploaderPlacementTest = () => {
               {/* Form Section */}
               <div className="lg:col-span-1 space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-100 h-fit">
                   <h4 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
-                      <Plus className="w-5 h-5 text-blue-500" /> إضافة سؤال جديد
+                      <Plus className="w-5 h-5 text-red-500" /> إضافة سؤال جديد
                   </h4>
-                  
+
                   <div className="space-y-3">
                       <div>
                           <Label className="text-xs text-slate-500 mb-1.5 block">نص السؤال</Label>
-                          <Input 
+                          <Input
                               value={newQuestion.question}
                               onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
                               placeholder="اكتب السؤال بالألمانية..."
-                              className="bg-white border-slate-200 focus:border-blue-400"
+                              className="bg-white border-slate-200 focus:border-red-400"
                               dir="ltr"
                           />
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-3">
                         {[1, 2, 3, 4].map((num, idx) => (
                              <div key={idx}>
                                 <Label className="text-xs text-slate-500 mb-1.5 block">خيار {num}</Label>
-                                <Input 
+                                <Input
                                     value={newQuestion[`option${num}`]}
                                     onChange={(e) => setNewQuestion({...newQuestion, [`option${num}`]: e.target.value})}
                                     placeholder={`Option ${num}`}
@@ -422,8 +422,8 @@ const ExamUploaderPlacementTest = () => {
                       <div className="grid grid-cols-2 gap-3">
                           <div>
                               <Label className="text-xs text-slate-500 mb-1.5 block">الإجابة الصحيحة</Label>
-                              <select 
-                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                              <select
+                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                                   value={newQuestion.correctAnswer}
                                   onChange={(e) => setNewQuestion({...newQuestion, correctAnswer: e.target.value})}
                               >
@@ -436,8 +436,8 @@ const ExamUploaderPlacementTest = () => {
 
                           <div>
                               <Label className="text-xs text-slate-500 mb-1.5 block">المستوى</Label>
-                              <select 
-                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                              <select
+                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                                   value={newQuestion.level}
                                   onChange={(e) => setNewQuestion({...newQuestion, level: e.target.value})}
                               >
@@ -449,8 +449,8 @@ const ExamUploaderPlacementTest = () => {
                           </div>
                       </div>
 
-                      <Button onClick={handleManualAdd} disabled={saving} className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-4">
-                          {saving ? <RefreshCw className="animate-spin w-4 h-4 mr-2"/> : <Save className="w-4 h-4 mr-2" />} 
+                      <Button onClick={handleManualAdd} disabled={saving} className="w-full bg-red-600 hover:bg-red-700 text-white mt-4">
+                          {saving ? <RefreshCw className="animate-spin w-4 h-4 mr-2"/> : <Save className="w-4 h-4 mr-2" />}
                           {saving ? "جاري الحفظ..." : "حفظ السؤال"}
                       </Button>
                   </div>
@@ -461,7 +461,7 @@ const ExamUploaderPlacementTest = () => {
                   <h4 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                       <ListOrdered className="w-5 h-5 text-slate-500" /> قائمة الأسئلة
                   </h4>
-                  
+
                   <div className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
                       {questionsList.length === 0 ? (
                           <div className="text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
@@ -472,9 +472,9 @@ const ExamUploaderPlacementTest = () => {
                               <div key={q.id || idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow relative group">
                                   {q.source !== 'default' && (
                                       <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <Button 
-                                              variant="ghost" 
-                                              size="icon" 
+                                          <Button
+                                              variant="ghost"
+                                              size="icon"
                                               className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
                                               onClick={() => handleDelete(q.id)}
                                           >
@@ -482,20 +482,20 @@ const ExamUploaderPlacementTest = () => {
                                           </Button>
                                       </div>
                                   )}
-                                  
+
                                   <div className="flex items-start gap-3 mb-2 pr-8">
                                       <Badge variant="secondary" className={`${
                                           q.level === 'A1' ? 'bg-green-100 text-green-800' :
-                                          q.level === 'A2' ? 'bg-blue-100 text-blue-800' :
+                                          q.level === 'A2' ? 'bg-red-100 text-red-800' :
                                           q.level === 'B1' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                                       }`}>
                                           {q.level}
                                       </Badge>
                                       {q.source === 'default' && <Badge variant="outline" className="text-xs text-slate-400">افتراضي</Badge>}
-                                      {q.source === 'cloud' && <Badge variant="outline" className="text-xs text-blue-400 border-blue-200 bg-blue-50">سحابي</Badge>}
+                                      {q.source === 'cloud' && <Badge variant="outline" className="text-xs text-red-400 border-red-200 bg-red-50">سحابي</Badge>}
                                       <h5 className="font-bold text-slate-800 text-lg" dir="ltr">{q.question}</h5>
                                   </div>
-                                  
+
                                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm pl-2 border-r-2 border-slate-100 mr-1" dir="ltr">
                                       {q.options && q.options.map((opt, i) => (
                                           <div key={i} className={`flex items-center gap-2 ${i === parseInt(q.correctAnswer) ? 'text-green-600 font-bold bg-green-50 px-2 rounded' : 'text-slate-600 px-2'}`}>

@@ -15,17 +15,17 @@ const GrammarRuleCard = ({ rule }) => {
   const tips = Array.isArray(rule?.tips) ? rule.tips.filter((tip) => typeof tip === 'string') : [];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-300"
     >
-      <div 
+      <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="p-5 cursor-pointer flex items-center justify-between bg-gradient-to-r from-white to-slate-50 hover:to-slate-100 transition-colors"
       >
         <div className="flex items-center gap-4">
-          <div className="bg-indigo-100 text-indigo-600 p-2 rounded-lg">
+          <div className="bg-amber-100 text-amber-600 p-2 rounded-lg">
             <Star size={20} />
           </div>
           <div>
@@ -35,8 +35,8 @@ const GrammarRuleCard = ({ rule }) => {
             </span>
           </div>
         </div>
-        <ChevronDown 
-          className={`text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+        <ChevronDown
+          className={`text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
         />
       </div>
 
@@ -61,15 +61,15 @@ const GrammarRuleCard = ({ rule }) => {
 
               {/* Examples */}
               <div className="space-y-3">
-                <h4 className="font-bold text-indigo-700 flex items-center gap-2">
+                <h4 className="font-bold text-amber-700 flex items-center gap-2">
                   <PlayCircle size={18} /> أمثلة تطبيقية
                 </h4>
                 <div className="grid gap-3">
                   {normalizedRule.examples.map((ex, idx) => (
-                    <div key={idx} className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 hover:border-indigo-200 transition-colors">
+                    <div key={idx} className="bg-amber-50/50 p-4 rounded-xl border border-amber-100 hover:border-amber-200 transition-colors">
                       <p className="text-lg font-medium text-slate-800 mb-1" dir="ltr">{ex.de}</p>
                       <p className="text-slate-600 text-sm">{ex.ar}</p>
-                      {ex.note && <p className="text-xs text-indigo-500 mt-2 font-medium">{ex.note}</p>}
+                      {ex.note && <p className="text-xs text-amber-500 mt-2 font-medium">{ex.note}</p>}
                     </div>
                   ))}
                 </div>

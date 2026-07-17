@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 
 const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }) => {
   const { toast } = useToast();
-  
+
   const initialFormState = {
     question: '',
     type: 'multipleChoice', // multipleChoice, fillBlank
@@ -58,14 +58,14 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
       return;
     }
     const newOptions = formData.options.filter((_, i) => i !== index);
-    
+
     // Adjust correct answer index if needed
     let newCorrect = parseInt(formData.correctAnswer);
     if (index < newCorrect) newCorrect -= 1;
     else if (index === newCorrect) newCorrect = 0; // Reset to first if selected was removed
 
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       options: newOptions,
       correctAnswer: newCorrect.toString()
     }));
@@ -92,7 +92,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
     }
 
     // Save
-    const success = editingQuestion 
+    const success = editingQuestion
       ? updateManualQuestion(levelId, editingQuestion.id, formData)
       : saveManualQuestion(levelId, formData);
 
@@ -102,11 +102,11 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
         description: editingQuestion ? "تم تحديث السؤال بنجاح." : "تمت إضافة السؤال بنجاح.",
         className: "bg-green-50 border-green-200 text-green-800"
       });
-      
+
       if (!editingQuestion) {
         setFormData(initialFormState); // Reset if adding new
       }
-      
+
       if (onSave) onSave();
     } else {
       toast({ title: "خطأ", description: "حدث خطأ أثناء الحفظ.", variant: "destructive" });
@@ -139,7 +139,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
             <select
               value={formData.type}
               onChange={(e) => handleChange('type', e.target.value)}
-              className="w-full p-2 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="multipleChoice">اختيار من متعدد</option>
               <option value="fillBlank">ملء الفراغ</option>
@@ -152,7 +152,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
             <select
               value={formData.difficulty}
               onChange={(e) => handleChange('difficulty', e.target.value)}
-              className="w-full p-2 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="easy">سهل</option>
               <option value="medium">متوسط</option>
@@ -173,7 +173,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
                     name="correctAnswer"
                     checked={parseInt(formData.correctAnswer) === index}
                     onChange={() => handleChange('correctAnswer', index.toString())}
-                    className="w-4 h-4 text-blue-600 cursor-pointer"
+                    className="w-4 h-4 text-red-600 cursor-pointer"
                   />
                   <Input
                     value={option}
@@ -196,7 +196,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
                 variant="outline"
                 size="sm"
                 onClick={addOption}
-                className="mt-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                className="mt-2 text-red-600 border-red-200 hover:bg-red-50"
               >
                 <Plus size={16} className="mr-1" /> إضافة خيار
               </Button>
@@ -229,7 +229,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
             <textarea
               value={formData.explanation}
               onChange={(e) => handleChange('explanation', e.target.value)}
-              className="w-full p-2 rounded-md border border-slate-200 bg-white min-h-[80px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 rounded-md border border-slate-200 bg-white min-h-[80px] text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
               placeholder="لماذا هذه هي الإجابة الصحيحة؟"
               dir="auto"
             />
@@ -240,7 +240,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
                 <textarea
                 value={formData.hint}
                 onChange={(e) => handleChange('hint', e.target.value)}
-                className="w-full p-2 rounded-md border border-slate-200 bg-white min-h-[80px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-md border border-slate-200 bg-white min-h-[80px] text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 placeholder="مساعدة للطالب..."
                 dir="auto"
                 />
@@ -262,7 +262,7 @@ const QuestionAdder = ({ levelId, onSave, editingQuestion = null, onCancelEdit }
           )}
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
+            className="bg-red-600 hover:bg-red-700 text-white min-w-[120px]"
           >
             <Save size={18} className="mr-2" />
             {editingQuestion ? 'حفظ التعديلات' : 'حفظ السؤال'}

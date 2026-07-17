@@ -5,13 +5,13 @@ import { Trophy, Clock, Target, TrendingUp, Award } from 'lucide-react';
 const ExerciseStatistics = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4"
       >
-        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+        <div className="p-3 bg-red-50 text-red-600 rounded-xl">
           <Target size={24} />
         </div>
         <div>
@@ -22,13 +22,13 @@ const ExerciseStatistics = ({ stats }) => {
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4"
       >
-        <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+        <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
           <Trophy size={24} />
         </div>
         <div>
@@ -37,7 +37,7 @@ const ExerciseStatistics = ({ stats }) => {
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -52,7 +52,7 @@ const ExerciseStatistics = ({ stats }) => {
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}

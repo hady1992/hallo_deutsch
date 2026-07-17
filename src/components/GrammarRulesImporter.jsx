@@ -11,7 +11,7 @@ import { publishContentItems } from '@/services/contentRepository';
 const GrammarRulesImporter = () => {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
-  
+
   // Data State
   const [rules, setRules] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
@@ -67,11 +67,11 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
   const processFile = async (file) => {
     setIsImporting(true);
     setImportStats(null);
-    
+
     try {
         const text = await file.text();
         const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim());
-        
+
         if (lines.length < 2) throw new Error("الملف فارغ أو لا يحتوي على بيانات");
 
         const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
@@ -110,8 +110,8 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
                 // Process examples (handle pipe separated)
                 let examples = [];
                 if (obj.examples) {
-                    examples = obj.examples.includes('|') 
-                        ? obj.examples.split('|').map(s => s.trim()) 
+                    examples = obj.examples.includes('|')
+                        ? obj.examples.split('|').map(s => s.trim())
                         : [obj.examples];
                 }
 
@@ -139,10 +139,10 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
         const publishResult = await publishContentItems('grammar', newRules);
         if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
         saveImportedGrammarRules(merged);
-        
+
         setImportStats({ success: newRules.length, errors });
         setRules(merged);
-        
+
         toast({
             title: "تم النشر للزوار",
             description: `تمت إضافة ${newRules.length} قاعدة جديدة.`,
@@ -177,7 +177,7 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
   };
 
   const filteredRules = rules.filter(rule => {
-    const matchesSearch = rule.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = rule.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (rule.explanation || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLevel = filterLevel === 'All' || (rule.level || '').toUpperCase() === filterLevel;
     return matchesSearch && matchesLevel;
@@ -185,9 +185,9 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
 
   const getLevelColor = (level) => {
     switch(level?.toUpperCase()) {
-        case 'A1': return 'bg-blue-100 text-blue-800';
+        case 'A1': return 'bg-red-100 text-red-800';
         case 'A2': return 'bg-green-100 text-green-800';
-        case 'B1': return 'bg-orange-100 text-orange-800';
+        case 'B1': return 'bg-amber-100 text-amber-800';
         case 'B2': return 'bg-red-100 text-red-800';
         default: return 'bg-gray-100 text-gray-800';
     }
@@ -198,23 +198,23 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
         {/* Import Section */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
              <div className="flex flex-col md:flex-row gap-4 items-stretch">
-                <input 
-                    type="file" 
+                <input
+                    type="file"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     accept=".csv"
                     className="hidden"
                 />
-                
-                <Button 
+
+                <Button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isImporting}
                     className="flex-1 h-auto py-6 bg-slate-900 hover:bg-slate-800 text-white shadow-md flex flex-col gap-2 rounded-xl transition-all hover:scale-[1.01]"
                 >
                     {isImporting ? (
-                        <Loader2 className="animate-spin h-8 w-8 text-blue-400" />
+                        <Loader2 className="animate-spin h-8 w-8 text-red-400" />
                     ) : (
-                        <FileUp className="h-8 w-8 text-blue-400" />
+                        <FileUp className="h-8 w-8 text-red-400" />
                     )}
                     <div className="flex flex-col items-center">
                         <span className="text-lg font-bold">رفع ملف قواعد (CSV)</span>
@@ -222,10 +222,10 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
                     </div>
                 </Button>
 
-                <Button 
+                <Button
                     onClick={downloadTemplate}
                     variant="outline"
-                    className="h-auto py-6 flex flex-col gap-2 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all min-w-[160px]"
+                    className="h-auto py-6 flex flex-col gap-2 rounded-xl border-2 border-dashed border-slate-200 hover:border-red-400 hover:bg-red-50 transition-all min-w-[160px]"
                 >
                     <FileDown className="h-6 w-6 text-slate-500" />
                     <div className="flex flex-col items-center">
@@ -253,23 +253,23 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                <FileText className="text-blue-600" size={20} />
+                <FileText className="text-red-600" size={20} />
                 قواعد النحو المسجلة ({rules.length})
             </h3>
-            
+
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
                 <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input 
-                        type="text" 
-                        placeholder="بحث في القواعد..." 
+                    <input
+                        type="text"
+                        placeholder="بحث في القواعد..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pr-10 pl-3 py-2 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full pr-10 pl-3 py-2 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none"
                     />
                 </div>
-                <select 
-                    className="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                <select
+                    className="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white outline-none focus:ring-2 focus:ring-red-500"
                     value={filterLevel}
                     onChange={(e) => setFilterLevel(e.target.value)}
                 >
@@ -296,7 +296,7 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
             ) : (
                 filteredRules.map(rule => (
                 <div key={rule.id} className="border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all">
-                    <div 
+                    <div
                         className="p-4 flex items-start justify-between bg-white cursor-pointer hover:bg-slate-50 transition-colors"
                         onClick={() => setExpandedId(expandedId === rule.id ? null : rule.id)}
                     >
@@ -308,36 +308,36 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
                             <p className="text-sm text-slate-600 line-clamp-2 pl-4">{rule.description || rule.explanation}</p>
                         </div>
                         <div className="flex items-center gap-1">
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
+                            <Button
+                                variant="ghost"
+                                size="sm"
                                 className="text-slate-400"
                             >
                                 {expandedId === rule.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </Button>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="text-red-300 hover:text-red-600 hover:bg-red-50" 
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-300 hover:text-red-600 hover:bg-red-50"
                                 onClick={(e) => { e.stopPropagation(); handleDelete(rule.id); }}
                             >
                                 <Trash2 size={16} />
                             </Button>
                         </div>
                     </div>
-                    
+
                     <AnimatePresence>
                         {expandedId === rule.id && (
-                            <motion.div 
-                                initial={{ height: 0, opacity: 0 }} 
-                                animate={{ height: 'auto', opacity: 1 }} 
-                                exit={{ height: 0, opacity: 0 }} 
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
                                 className="bg-slate-50 border-t border-slate-100"
                             >
                                 <div className="p-4 text-sm space-y-4">
                                     <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
                                         <span className="font-bold text-slate-700 block mb-1 flex items-center gap-2">
-                                            <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                                            <div className="w-1 h-4 bg-red-500 rounded-full"></div>
                                             الشرح
                                         </span>
                                         <p className="text-slate-700 leading-relaxed">{rule.explanation}</p>
@@ -350,7 +350,7 @@ Genitiv,B1,حالة الإضافة,"Das Buch des Mannes.",تستخدم للمل�
                                                 أمثلة
                                             </span>
                                             <ul className="space-y-2">
-                                                {Array.isArray(rule.examples) 
+                                                {Array.isArray(rule.examples)
                                                     ? rule.examples.map((ex, i) => (
                                                         <li key={i} className="flex gap-2 text-slate-600 bg-slate-50 p-2 rounded text-xs font-medium">
                                                             <span className="text-green-600 font-bold">•</span>

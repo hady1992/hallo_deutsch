@@ -40,7 +40,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
       setSelectedOption(option);
       const currentQuestion = shuffledQuestions[currentQuestionIndex];
       const correct = currentQuestion.originalAnswer === option;
-      
+
       if(correct) {
           setScore(s => s + 1);
           setAnswerStatus('correct');
@@ -50,7 +50,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
       } else {
           setAnswerStatus('incorrect');
       }
-      
+
       setTimeout(() => {
           if (currentQuestionIndex < shuffledQuestions.length - 1) {
               setCurrentQuestionIndex(prev => prev + 1);
@@ -92,16 +92,16 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
       else message = 'حاول مرة أخرى 💪';
 
       return (
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-w-2xl mx-auto text-center space-y-8 bg-white p-12 rounded-[3rem] shadow-2xl border-4 border-purple-100 mt-8"
+            className="max-w-2xl mx-auto text-center space-y-8 bg-white p-12 rounded-[3rem] shadow-2xl border-4 border-amber-100 mt-8"
           >
               <div className="text-9xl mb-4 animate-bounce filter drop-shadow-lg">{percentage === 100 ? '👑' : '🎉'}</div>
               <h2 className="text-4xl font-black text-slate-800">{message}</h2>
-              
+
               <div className="py-8 bg-slate-50 rounded-3xl mx-8">
-                 <div className="text-6xl font-black text-purple-600 mb-2">{score} / {shuffledQuestions.length}</div>
+                 <div className="text-6xl font-black text-amber-600 mb-2">{score} / {shuffledQuestions.length}</div>
                  <div className="text-slate-400 font-bold text-xl">إجابة صحيحة</div>
               </div>
 
@@ -109,7 +109,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                   <Button onClick={onBack} variant="outline" size="lg" className="rounded-2xl border-2 h-14 text-lg">
                       <ArrowLeft className="mr-2" /> خروج
                   </Button>
-                  <Button onClick={restart} size="lg" className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold h-14 text-lg shadow-lg shadow-purple-200">
+                  <Button onClick={restart} size="lg" className="rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold h-14 text-lg shadow-lg shadow-amber-200">
                       <RefreshCw className="mr-2" /> إعادة المحاولة
                   </Button>
               </div>
@@ -127,10 +127,10 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                     <ArrowLeft />
                 </Button>
                 <div className="flex-1 h-5 bg-white rounded-full overflow-hidden shadow-inner border border-slate-100 p-1">
-                    <motion.div 
+                    <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${((currentQuestionIndex + 1) / shuffledQuestions.length) * 100}%` }}
-                        className="h-full bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-red-400 to-amber-500 rounded-full"
                     />
                 </div>
                 <span className="font-black text-slate-500 bg-white px-3 py-1 rounded-lg shadow-sm text-sm whitespace-nowrap">
@@ -140,7 +140,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
               <AudioSpeedControl onSpeedChange={setPlaybackSpeed} />
           </div>
 
-          <motion.div 
+          <motion.div
              key={currentQuestionIndex}
              initial={{ x: 20, opacity: 0 }}
              animate={{ x: 0, opacity: 1 }}
@@ -150,7 +150,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                   <h2 className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-6" dir="ltr">
                       {currentQuestion.q}
                   </h2>
-                  
+
                   {currentQuestion.icon && (
                       <div className="text-8xl my-6 filter drop-shadow-md animate-in zoom-in duration-300">
                           {currentQuestion.icon}
@@ -158,18 +158,18 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                   )}
 
                   <div className="flex justify-center mt-4">
-                    <div className="bg-blue-50 hover:bg-blue-100 transition-colors rounded-full px-6 py-3 flex items-center gap-3 cursor-pointer group"
+                    <div className="bg-red-50 hover:bg-red-100 transition-colors rounded-full px-6 py-3 flex items-center gap-3 cursor-pointer group"
                          onClick={(e) => {
                              const btn = e.currentTarget.querySelector('button');
                              if(btn) btn.click();
                          }}>
-                        <AudioButton 
-                            text={currentQuestion.q ? currentQuestion.q.trim() : ''} 
+                        <AudioButton
+                            text={currentQuestion.q ? currentQuestion.q.trim() : ''}
                             speed={playbackSpeed}
-                            className="bg-blue-600 text-white hover:bg-blue-700 h-10 w-10"
+                            className="bg-red-600 text-white hover:bg-red-700 h-10 w-10"
                             size={20}
                         />
-                        <span className="font-bold text-blue-600 text-lg group-hover:text-blue-700">استمع للسؤال</span>
+                        <span className="font-bold text-red-600 text-lg group-hover:text-red-700">استمع للسؤال</span>
                     </div>
                   </div>
               </div>
@@ -178,8 +178,8 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                   {currentQuestion.options.map((opt, idx) => {
                       const isSelected = selectedOption === opt;
                       const isCorrect = currentQuestion.originalAnswer === opt;
-                      
-                      let btnClass = "bg-white border-2 border-slate-100 text-slate-600 hover:border-blue-300 hover:shadow-md"; 
+
+                      let btnClass = "bg-white border-2 border-slate-100 text-slate-600 hover:border-red-300 hover:shadow-md";
                       if (isSelected) {
                           if (answerStatus === 'correct') btnClass = "bg-green-500 border-green-600 text-white shadow-lg shadow-green-200";
                           if (answerStatus === 'incorrect') btnClass = "bg-red-500 border-red-600 text-white shadow-lg shadow-red-200";
@@ -204,7 +204,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                               <div className="flex items-center">
                                 {isSelected && answerStatus === 'correct' && <CheckCircle2 size={28} className="text-white" />}
                                 {isSelected && answerStatus === 'incorrect' && <XCircle size={28} className="text-white" />}
-                                {!selectedOption && <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-blue-400" />}
+                                {!selectedOption && <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-red-400" />}
                               </div>
                           </motion.button>
                       );

@@ -28,11 +28,11 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+        <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">
           {exercises.length} Exercises
         </span>
       </h2>
-      
+
       {exercises.map((ex, index) => (
         <Card key={ex.id} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
@@ -49,7 +49,7 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onEdit(ex)} className="text-blue-600 hover:bg-blue-50">
+                <Button variant="ghost" size="icon" onClick={() => onEdit(ex)} className="text-red-600 hover:bg-red-50">
                   <Edit2 className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => onDelete(ex.id)} className="text-red-600 hover:bg-red-50">
@@ -60,12 +60,12 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-11">
               {ex.options.map((opt, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={cn(
                     "p-3 rounded-lg border text-sm flex items-center gap-2",
-                    i === ex.correctAnswer 
-                      ? "bg-green-50 border-green-200 text-green-800 font-medium" 
+                    i === ex.correctAnswer
+                      ? "bg-green-50 border-green-200 text-green-800 font-medium"
                       : "bg-white border-slate-100 text-slate-600"
                   )}
                   dir="auto"

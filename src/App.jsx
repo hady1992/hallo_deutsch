@@ -31,7 +31,7 @@ const GrammarRulesDatabase = lazy(() => import('@/components/GrammarRulesDatabas
 const RouteLoader = () => (
   <div dir="rtl" className="flex min-h-[55vh] items-center justify-center px-4 text-center">
     <div role="status" className="space-y-3">
-      <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+      <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-4 border-red-100 border-t-red-600" />
       <p className="font-bold text-slate-600">جاري تحميل الصفحة...</p>
     </div>
   </div>

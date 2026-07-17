@@ -28,8 +28,8 @@ const JsonEditor = ({ initialValue, onSave, onCancel }) => {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>JSON Content</Label>
-        <Textarea 
-          value={value} 
+        <Textarea
+          value={value}
           onChange={(e) => { setValue(e.target.value); setError(null); }}
           className="font-mono text-xs min-h-[300px]"
         />
@@ -49,7 +49,7 @@ const DataTab = ({ type, fetchData, deleteData, saveData, title, isAuthenticated
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  
+
   const loadData = async () => {
     setLoading(true);
     const data = await fetchData();
@@ -100,27 +100,27 @@ const DataTab = ({ type, fetchData, deleteData, saveData, title, isAuthenticated
             <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </Button>
-            <Button 
-                onClick={() => setIsCreating(true)} 
+            <Button
+                onClick={() => setIsCreating(true)}
                 disabled={loading || isCreating || !isAuthenticated}
                 title={!isAuthenticated ? "Login required" : "Add New"}
             >
-                {isAuthenticated ? <Plus className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />} 
+                {isAuthenticated ? <Plus className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
                 Add New
             </Button>
         </div>
       </div>
 
       {isCreating && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-red-200 bg-red-50">
           <CardHeader>
             <CardTitle className="text-base">Add New Item</CardTitle>
           </CardHeader>
           <CardContent>
-            <JsonEditor 
-              initialValue={getTemplate()} 
-              onSave={handleSaveNew} 
-              onCancel={() => setIsCreating(false)} 
+            <JsonEditor
+              initialValue={getTemplate()}
+              onSave={handleSaveNew}
+              onCancel={() => setIsCreating(false)}
             />
           </CardContent>
         </Card>
@@ -140,9 +140,9 @@ const DataTab = ({ type, fetchData, deleteData, saveData, title, isAuthenticated
                   {JSON.stringify(item, (key, value) => (key === 'supabaseId' || key === 'source' ? undefined : value), 2).substring(0, 150)}...
                 </pre>
               </div>
-              <Button 
-                variant="destructive" 
-                size="icon" 
+              <Button
+                variant="destructive"
+                size="icon"
                 onClick={() => handleDelete(item)}
                 title={isAuthenticated ? "Delete from Database" : "Login required"}
                 disabled={!isAuthenticated}
@@ -165,7 +165,7 @@ const AdminDataManager = () => {
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
-  const { 
+  const {
     fetchExercises, saveExercise, deleteExercise,
     fetchVocabulary, saveVocabulary, deleteVocabulary,
     fetchExams, saveExam, deleteExam,
@@ -176,7 +176,7 @@ const AdminDataManager = () => {
     <Card className="border-slate-200 shadow-md">
       <CardHeader className="bg-slate-900 text-white rounded-t-xl">
         <div className="flex items-center gap-2">
-          <Database className="w-6 h-6 text-blue-400" />
+          <Database className="w-6 h-6 text-red-400" />
           <div className="flex-1">
             <CardTitle>Supabase Data Management</CardTitle>
             <CardDescription className="text-slate-400">
@@ -198,48 +198,48 @@ const AdminDataManager = () => {
             <TabsTrigger value="exams" className="flex-1">Exams</TabsTrigger>
             <TabsTrigger value="placement" className="flex-1">Placement Tests</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="exercises">
             {/* Keep fetch callbacks stable: inline wrappers retrigger DataTab's effect indefinitely. */}
-            <DataTab 
+            <DataTab
                 type="exercise"
                 title="Cloud Exercises"
                 fetchData={fetchExercises}
-                saveData={saveExercise} 
-                deleteData={deleteExercise} 
+                saveData={saveExercise}
+                deleteData={deleteExercise}
                 isAuthenticated={isAuthenticated}
             />
           </TabsContent>
-          
+
           <TabsContent value="vocabulary">
-             <DataTab 
+             <DataTab
                 type="vocabulary"
                 title="Cloud Vocabulary"
                 fetchData={fetchVocabulary}
-                saveData={saveVocabulary} 
-                deleteData={deleteVocabulary} 
+                saveData={saveVocabulary}
+                deleteData={deleteVocabulary}
                 isAuthenticated={isAuthenticated}
             />
           </TabsContent>
 
           <TabsContent value="exams">
-             <DataTab 
+             <DataTab
                 type="exam"
                 title="Cloud Exams"
                 fetchData={fetchExams}
-                saveData={saveExam} 
-                deleteData={deleteExam} 
+                saveData={saveExam}
+                deleteData={deleteExam}
                 isAuthenticated={isAuthenticated}
             />
           </TabsContent>
 
           <TabsContent value="placement">
-             <DataTab 
+             <DataTab
                 type="placement"
                 title="Placement Test Questions"
                 fetchData={fetchPlacementTests}
-                saveData={savePlacementTest} 
-                deleteData={deletePlacementTest} 
+                saveData={savePlacementTest}
+                deleteData={deletePlacementTest}
                 isAuthenticated={isAuthenticated}
             />
           </TabsContent>

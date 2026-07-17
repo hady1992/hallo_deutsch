@@ -39,7 +39,7 @@ const KidsConversationAdder = () => {
       toast({ title: "خطأ", description: "يرجى ملء جميع الحقول الأساسية", variant: "destructive" });
       return;
     }
-    
+
     if (sentences.length < 7) {
         toast({ title: "تنبيه", description: "يجب إضافة 7 جمل على الأقل للمحادثة", variant: "warning" });
         return;
@@ -66,9 +66,9 @@ const KidsConversationAdder = () => {
       return;
     }
     saveKidsSentences([...existing, newConversation]);
-    
+
     toast({ title: "تم النشر للزوار", description: "تمت إضافة المحادثة ونشرها بنجاح", className: "bg-green-500 text-white" });
-    
+
     // Reset form
     setTitle('');
     setSentences([{ german: '', arabic: '' }, { german: '', arabic: '' }]);
@@ -77,7 +77,7 @@ const KidsConversationAdder = () => {
   return (
     <div className="bg-white p-8 rounded-[2rem] border-2 border-slate-100 shadow-sm space-y-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+        <div className="bg-red-100 p-3 rounded-full text-red-600">
           <MessageCircle size={24} />
         </div>
         <div>
@@ -89,19 +89,19 @@ const KidsConversationAdder = () => {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
            <label className="text-sm font-bold text-slate-700">عنوان المحادثة</label>
-           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: في المتجر" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200" />
+           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: في المتجر" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200" />
         </div>
         <div className="space-y-2">
            <label className="text-sm font-bold text-slate-700">الموضوع</label>
-           <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="مثلاً: التسوق" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200" />
+           <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="مثلاً: التسوق" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200" />
         </div>
         <div className="space-y-2">
            <label className="text-sm font-bold text-slate-700">الشخصية 1</label>
-           <input value={char1} onChange={(e) => setChar1(e.target.value)} placeholder="الاسم" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200" />
+           <input value={char1} onChange={(e) => setChar1(e.target.value)} placeholder="الاسم" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200" />
         </div>
         <div className="space-y-2">
            <label className="text-sm font-bold text-slate-700">الشخصية 2</label>
-           <input value={char2} onChange={(e) => setChar2(e.target.value)} placeholder="الاسم" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200" />
+           <input value={char2} onChange={(e) => setChar2(e.target.value)} placeholder="الاسم" className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200" />
         </div>
       </div>
 
@@ -110,26 +110,26 @@ const KidsConversationAdder = () => {
             <h3 className="font-bold text-lg text-slate-700">الجمل ({sentences.length})</h3>
             <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">يجب إضافة 7 جمل على الأقل</span>
          </div>
-         
+
          {sentences.map((sent, idx) => (
            <div key={idx} className="flex gap-4 items-start p-4 rounded-xl bg-slate-50 border border-slate-200">
              <div className="bg-slate-200 w-8 h-8 rounded-full flex items-center justify-center font-bold text-slate-600 shrink-0 mt-2">
                {idx + 1}
              </div>
              <div className="grid md:grid-cols-2 gap-4 flex-1">
-               <input 
-                 placeholder="النص بالألمانية" 
+               <input
+                 placeholder="النص بالألمانية"
                  value={sent.german}
                  onChange={(e) => updateSentence(idx, 'german', e.target.value)}
                  dir="ltr"
-                 className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-white focus:ring-2 focus:ring-blue-200"
+                 className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-white focus:ring-2 focus:ring-red-200"
                />
-               <input 
-                 placeholder="الترجمة العربية" 
+               <input
+                 placeholder="الترجمة العربية"
                  value={sent.arabic}
                  onChange={(e) => updateSentence(idx, 'arabic', e.target.value)}
                  dir="rtl"
-                 className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-white focus:ring-2 focus:ring-blue-200 text-right"
+                 className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 bg-white focus:ring-2 focus:ring-red-200 text-right"
                />
              </div>
              <Button variant="ghost" size="icon" onClick={() => removeSentence(idx)} className="text-red-400 hover:text-red-600 hover:bg-red-50 mt-1">
@@ -138,7 +138,7 @@ const KidsConversationAdder = () => {
            </div>
          ))}
 
-         <Button onClick={addSentence} variant="outline" className="w-full py-6 border-dashed border-2 text-slate-500 hover:text-blue-600 hover:border-blue-300">
+         <Button onClick={addSentence} variant="outline" className="w-full py-6 border-dashed border-2 text-slate-500 hover:text-red-600 hover:border-red-300">
             <Plus className="mr-2" /> إضافة جملة جديدة
          </Button>
       </div>

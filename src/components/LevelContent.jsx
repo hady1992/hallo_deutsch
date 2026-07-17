@@ -22,7 +22,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
   const [completedSections, setCompletedSections] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const isAdmin = isAuthorizedAdminEmail(user?.email);
-  
+
   // Tabs for managing content vs viewing lessons
   const [viewMode, setViewMode] = useState('lessons'); // 'lessons' or 'questions'
 
@@ -41,7 +41,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
       });
     }
   };
-  
+
   const startExercises = (e) => {
       e.stopPropagation();
       navigate('/exercises');
@@ -57,43 +57,43 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
     <div className="min-h-screen py-16 mt-16 bg-gray-50" dir="rtl">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10 relative"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">{title}</h1>
           <p className="text-xl text-gray-600 mb-6">{description}</p>
-          
+
           {/* Admin Toggle for Question Management */}
           {isAdmin && (
               <div className="absolute top-0 right-0">
                   <div className="inline-flex bg-white rounded-lg p-1 shadow-sm border border-slate-200">
-                      <button 
+                      <button
                         onClick={() => setViewMode('lessons')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'lessons' ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'lessons' ? 'bg-red-100 text-red-700' : 'text-slate-500 hover:text-slate-700'}`}
                       >
                           الدروس
                       </button>
-                      <button 
+                      <button
                         onClick={() => setViewMode('questions')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1 ${viewMode === 'questions' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1 ${viewMode === 'questions' ? 'bg-amber-100 text-amber-700' : 'text-slate-500 hover:text-slate-700'}`}
                       >
                           <PenTool size={14} /> إدارة الأسئلة
                       </button>
                   </div>
               </div>
           )}
-          
-          <div className="bg-blue-50 p-6 rounded-xl text-right mb-8 shadow-sm border border-blue-100">
-            <h3 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
+
+          <div className="bg-red-50 p-6 rounded-xl text-right mb-8 shadow-sm border border-red-100">
+            <h3 className="text-lg font-bold text-red-800 mb-3 flex items-center gap-2">
               <BookOpen size={20}/>
               أهداف هذا المستوى:
             </h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {objectives.map((obj, idx) => (
                 <li key={idx} className="flex items-center text-gray-700">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full ml-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-red-500 rounded-full ml-2 flex-shrink-0"></span>
                   <span>{obj}</span>
                 </li>
               ))}
@@ -109,46 +109,46 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
 
         {/* --- QUESTIONS MANAGEMENT VIEW --- */}
         {viewMode === 'questions' && isAdmin ? (
-             <motion.div 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }} 
+             <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="space-y-8"
              >
-                 <div className="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-6 flex items-center gap-3">
-                     <div className="bg-white p-2 rounded-full shadow-sm text-purple-600">
+                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl mb-6 flex items-center gap-3">
+                     <div className="bg-white p-2 rounded-full shadow-sm text-amber-600">
                         <PenTool size={24} />
                      </div>
                      <div>
-                         <h3 className="font-bold text-purple-800">إدارة بنك الأسئلة ({levelId})</h3>
-                         <p className="text-purple-600 text-sm">أضف أو عدل الأسئلة الخاصة بهذا المستوى لتظهر في الاختبارات والتمارين.</p>
+                         <h3 className="font-bold text-amber-800">إدارة بنك الأسئلة ({levelId})</h3>
+                         <p className="text-amber-600 text-sm">أضف أو عدل الأسئلة الخاصة بهذا المستوى لتظهر في الاختبارات والتمارين.</p>
                      </div>
                  </div>
 
                  <Tabs defaultValue="add" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 bg-white border border-slate-200 p-1 rounded-xl mb-6 h-auto">
-                        <TabsTrigger value="add" className="py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">إضافة سؤال</TabsTrigger>
-                        <TabsTrigger value="list" className="py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">قائمة الأسئلة</TabsTrigger>
-                        <TabsTrigger value="import" className="py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">استيراد (CSV)</TabsTrigger>
+                        <TabsTrigger value="add" className="py-3 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700">إضافة سؤال</TabsTrigger>
+                        <TabsTrigger value="list" className="py-3 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700">قائمة الأسئلة</TabsTrigger>
+                        <TabsTrigger value="import" className="py-3 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700">استيراد (CSV)</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="add" className="mt-0">
-                        <QuestionAdder 
-                            levelId={levelId} 
-                            editingQuestion={editingQuestion} 
+                        <QuestionAdder
+                            levelId={levelId}
+                            editingQuestion={editingQuestion}
                             onSave={() => setEditingQuestion(null)}
                             onCancelEdit={() => setEditingQuestion(null)}
                         />
                     </TabsContent>
 
                     <TabsContent value="list" className="mt-0">
-                        <QuestionList 
-                            levelId={levelId} 
+                        <QuestionList
+                            levelId={levelId}
                             onEdit={(q) => {
                                 setEditingQuestion(q);
-                                // Switch tab logic requires controlled tabs or manual dom manipulation, 
+                                // Switch tab logic requires controlled tabs or manual dom manipulation,
                                 // simplified here by just setting state and user manually clicks 'add' to see edit form usually.
                                 // But to be better UX:
-                                document.querySelector('[value="add"]').click(); 
+                                document.querySelector('[value="add"]').click();
                             }}
                         />
                     </TabsContent>
@@ -178,10 +178,10 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className={`bg-white rounded-xl shadow-md overflow-hidden border transition-all ${
-                        expandedSection === index ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-200'
+                        expandedSection === index ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'
                     }`}
                     >
-                    <div 
+                    <div
                         onClick={() => toggleSection(index)}
                         className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                     >
@@ -193,7 +193,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-800">{section.title}</h3>
-                            {section.isCustom && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mr-2">مخصص</span>}
+                            {section.isCustom && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full mr-2">مخصص</span>}
                             {section.publicationStatus === 'local-only' && (
                                 <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mr-2">محلي فقط — لن يظهر للزوار</span>
                             )}
@@ -220,13 +220,13 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
 
                             <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200 justify-between items-center">
                                 <div className="flex gap-3">
-                                    <Button 
+                                    <Button
                                     onClick={startExercises}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    className="bg-red-600 hover:bg-red-700 text-white"
                                     >
                                     ابدأ التمارين
                                     </Button>
-                                    <Button 
+                                    <Button
                                     onClick={(e) => markComplete(index, e)}
                                     variant="outline"
                                     className={completedSections.includes(index) ? "text-green-600 border-green-200 bg-green-50 hover:bg-green-100" : "hover:bg-gray-100"}
@@ -267,7 +267,7 @@ function LevelContent({ title, description, objectives, sections, prevLevel, nex
           </Button>
 
           {nextLevel ? (
-             <Button onClick={() => navigate(nextLevel.path)} className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 w-full md:w-auto">
+             <Button onClick={() => navigate(nextLevel.path)} className="bg-red-600 hover:bg-red-700 flex items-center gap-2 w-full md:w-auto">
                {nextLevel.label}
                <ArrowLeft size={16}/>
              </Button>

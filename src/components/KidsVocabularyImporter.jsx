@@ -4,8 +4,8 @@ import { Trash2, Download, RefreshCw, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import KidsFileUploader from './KidsFileUploader';
-import { 
-  getKidsVocabulary, 
+import {
+  getKidsVocabulary,
   saveKidsVocabulary
 } from '@/utils/storageManager';
 import { kidsVocabularyData } from '@/data/kidsVocabularyData';
@@ -77,7 +77,7 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     const updatedVocab = [...currentVocab, ...newItems];
     saveKidsVocabulary(updatedVocab);
     setImportedItems(prev => [...prev, ...newItems]);
-    
+
     if(refreshData) refreshData();
 
     toast({
@@ -92,7 +92,7 @@ const KidsVocabularyImporter = ({ refreshData }) => {
     const exampleRow = category === 'animals' ? ['Der Hund', 'الكلب', '🐶'] :
                        category === 'food' ? ['Der Apfel', 'التفاحة', '🍎'] :
                        ['Das Auto', 'السيارة', '🚗'];
-    
+
     const csvContent = [
       headers.join(','),
       exampleRow.join(',')
@@ -110,14 +110,14 @@ const KidsVocabularyImporter = ({ refreshData }) => {
 
   const clearAllImported = () => {
     if(!window.confirm('هل أنت متأكد من حذف جميع الكلمات المستوردة؟')) return;
-    
+
     const allVocab = getKidsVocabulary();
     const staticVocab = allVocab.filter((item) => !isImportedVocabularyItem(item));
-    
+
     saveKidsVocabulary(staticVocab);
     setImportedItems([]);
     if(refreshData) refreshData();
-    
+
     toast({
       title: "تم المسح",
       description: "تم حذف جميع الكلمات المستوردة.",
@@ -136,19 +136,19 @@ const KidsVocabularyImporter = ({ refreshData }) => {
 
   return (
     <div className="space-y-8 p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
-      
+
       <div className="flex items-center justify-between border-b border-slate-100 pb-6">
         <div>
           <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-            <Database className="text-blue-500" />
+            <Database className="text-red-500" />
             إدارة قاعدة البيانات
           </h3>
           <p className="text-slate-500 mt-1">استيراد وتصدير المفردات لجميع الفئات</p>
         </div>
-        
+
         {importedItems.length > 0 && (
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={clearAllImported}
             className="flex items-center gap-2"
           >
@@ -167,16 +167,16 @@ const KidsVocabularyImporter = ({ refreshData }) => {
               <div key={cat.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="font-bold text-slate-600">{cat.label}</span>
                 <div className="flex gap-2">
-                   <Button 
-                    variant="ghost" 
-                    size="sm" 
+                   <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => downloadTemplate(cat.id)}
                     title="تحميل النموذج"
                    >
                      <Download size={16} className="text-slate-400" />
                    </Button>
-                   <KidsFileUploader 
-                     label="استيراد" 
+                   <KidsFileUploader
+                     label="استيراد"
                      onUpload={(data) => handleUpload(data, cat.id)}
                    />
                 </div>
@@ -188,10 +188,10 @@ const KidsVocabularyImporter = ({ refreshData }) => {
         {/* Status Section */}
         <div className="space-y-6">
           <h4 className="font-bold text-lg text-slate-700">حالة البيانات</h4>
-          <div className="bg-blue-50 p-6 rounded-2xl text-center space-y-2">
-            <div className="text-4xl font-black text-blue-600">{importedItems.length}</div>
-            <div className="font-bold text-blue-800">كلمة مستوردة</div>
-            <p className="text-xs text-blue-600/70">تضاف إلى قاعدة البيانات الأصلية</p>
+          <div className="bg-red-50 p-6 rounded-2xl text-center space-y-2">
+            <div className="text-4xl font-black text-red-600">{importedItems.length}</div>
+            <div className="font-bold text-red-800">كلمة مستوردة</div>
+            <p className="text-xs text-red-600/70">تضاف إلى قاعدة البيانات الأصلية</p>
           </div>
 
           <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">

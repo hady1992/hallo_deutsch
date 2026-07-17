@@ -18,7 +18,7 @@ const DataStatus = ({ loading, error, emptyMessage }) => (
   <div role="status" className="border border-dashed border-slate-200 bg-white py-16 text-center">
     {loading ? (
       <>
-        <span className="mx-auto mb-3 block h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+        <span className="mx-auto mb-3 block h-8 w-8 animate-spin rounded-full border-4 border-red-100 border-t-red-600" />
         <p className="font-bold text-slate-600">جاري تحميل المحتوى...</p>
       </>
     ) : (
@@ -137,10 +137,10 @@ function Grammar() {
 
   const filteredNouns = useMemo(() => {
     return (Array.isArray(allNouns) ? allNouns : []).filter(noun => {
-      const matchesSearch = 
-        (noun.german || "").toLowerCase().includes(nounSearch.toLowerCase()) || 
+      const matchesSearch =
+        (noun.german || "").toLowerCase().includes(nounSearch.toLowerCase()) ||
         (noun.translation || "").includes(nounSearch);
-      
+
       const matchesGender = nounGenderFilter === 'all' || noun.gender === nounGenderFilter;
 
       return matchesSearch && matchesGender;
@@ -155,11 +155,11 @@ function Grammar() {
 
       <div className="min-h-screen bg-slate-50 pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-5xl">
-          
+
           {/* Hero Section */}
           <div className="text-center mb-10">
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
-              المكتبة <span className="text-blue-600">الشاملة</span>
+              المكتبة <span className="text-red-600">الشاملة</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               مرجعك الكامل لقواعد اللغة، الأفعال، والأسماء الألمانية.
@@ -170,23 +170,23 @@ function Grammar() {
             {/* Main Navigation Tabs */}
             <div className="flex justify-center mb-8">
               <TabsList className="bg-white p-1 rounded-full shadow-sm border border-slate-200 overflow-x-auto flex-nowrap max-w-full">
-                <TabsTrigger 
-                  value="grammar" 
-                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
+                <TabsTrigger
+                  value="grammar"
+                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <BookOpen size={18} />
                   قواعد اللغة
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="verbs" 
-                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
+                <TabsTrigger
+                  value="verbs"
+                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <Layers size={18} />
                   قاموس الأفعال
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="nouns" 
-                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
+                <TabsTrigger
+                  value="nouns"
+                  className="px-6 py-3 rounded-full text-base font-bold data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <BookA size={18} />
                   قاموس الأسماء
@@ -204,7 +204,7 @@ function Grammar() {
                   value={grammarSearch}
                   onChange={(e) => setGrammarSearch(e.target.value)}
                   placeholder="ابحث في قواعد هذا المستوى (عربي أو ألماني)..."
-                  className="w-full pr-11 pl-4 py-3 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white text-slate-800"
+                  className="w-full pr-11 pl-4 py-3 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 bg-white text-slate-800"
                 />
               </div>
 
@@ -216,8 +216,8 @@ function Grammar() {
                     onClick={() => setActiveLevel(level)}
                     className={`
                       w-12 h-12 rounded-full font-black text-lg transition-all shadow-sm
-                      ${activeLevel === level 
-                        ? 'bg-slate-900 text-white scale-110 ring-4 ring-slate-100' 
+                      ${activeLevel === level
+                        ? 'bg-slate-900 text-white scale-110 ring-4 ring-slate-100'
                         : 'bg-white text-slate-400 hover:bg-slate-100 hover:text-slate-600'}
                     `}
                   >
@@ -273,7 +273,7 @@ function Grammar() {
                       <h2 className="text-2xl font-bold text-slate-800">مستكشف الأفعال</h2>
                       <p className="text-slate-500 mt-1">ابحث في تصريفات أكثر من {allVerbs.length} فعل أساسي.</p>
                     </div>
-                    <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100">
+                    <div className="bg-red-50 text-red-800 px-4 py-2 rounded-lg text-sm font-medium border border-red-100">
                       يتم عرض 7 ضمائر لكل زمن
                     </div>
                   </div>
@@ -298,12 +298,12 @@ function Grammar() {
                  <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative w-full md:flex-1">
                         <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-                        <input 
-                            type="text" 
-                            placeholder="ابحث عن كلمة ألمانية أو عربية..." 
+                        <input
+                            type="text"
+                            placeholder="ابحث عن كلمة ألمانية أو عربية..."
                             value={nounSearch}
                             onChange={(e) => setNounSearch(e.target.value)}
-                            className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500"
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
@@ -313,8 +313,8 @@ function Grammar() {
                                 onClick={() => setNounGenderFilter(g)}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors",
-                                    nounGenderFilter === g 
-                                    ? "bg-slate-900 text-white" 
+                                    nounGenderFilter === g
+                                    ? "bg-slate-900 text-white"
                                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 )}
                             >
@@ -333,16 +333,16 @@ function Grammar() {
                     ) : filteredNouns.length > 0 ? (
                         filteredNouns.map(noun => (
                             <div key={noun.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
-                                <div className={cn("absolute top-0 right-0 w-2 h-full", 
-                                    noun.gender === 'masculine' ? 'bg-blue-400' :
+                                <div className={cn("absolute top-0 right-0 w-2 h-full",
+                                    noun.gender === 'masculine' ? 'bg-red-400' :
                                     noun.gender === 'feminine' ? 'bg-red-400' :
                                     'bg-green-400'
                                 )}></div>
-                                
+
                                 <div className="flex justify-between items-start mb-2 pr-4">
                                     <div className="flex items-center gap-2">
                                         <span className={cn("text-xs font-bold px-2 py-1 rounded uppercase",
-                                            noun.gender === 'masculine' ? 'bg-blue-50 text-blue-600' :
+                                            noun.gender === 'masculine' ? 'bg-red-50 text-red-600' :
                                             noun.gender === 'feminine' ? 'bg-red-50 text-red-600' :
                                             'bg-green-50 text-green-600'
                                         )}>
@@ -355,7 +355,7 @@ function Grammar() {
 
                                 <h3 className="text-2xl font-black text-slate-800 mb-1">{noun.noun}</h3>
                                 <p className="text-lg text-slate-600 mb-4 font-medium">{noun.translation}</p>
-                                
+
                                 {noun.example && (
                                     <div className="bg-slate-50 p-3 rounded-lg text-sm border border-slate-100">
                                         <p className="text-slate-800 italic mb-1">"{noun.example}"</p>
@@ -369,7 +369,7 @@ function Grammar() {
                             <Filter size={48} className="mx-auto text-slate-300 mb-4" />
                             <h3 className="text-xl font-bold text-slate-800">لا توجد نتائج</h3>
                             <p className="text-slate-500">جرب البحث عن كلمة أخرى أو تغيير الفلتر</p>
-                            <Button onClick={() => {setNounSearch(""); setNounGenderFilter("all");}} variant="link" className="mt-2 text-blue-600">
+                            <Button onClick={() => {setNounSearch(""); setNounGenderFilter("all");}} variant="link" className="mt-2 text-red-600">
                                 إعادة تعيين
                             </Button>
                         </div>

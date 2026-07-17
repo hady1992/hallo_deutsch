@@ -84,9 +84,9 @@ function Exams() {
 
       <div className="min-h-screen bg-slate-50 pt-24 pb-16">
         <div className="container mx-auto px-4">
-          
+
           {examState === 'list' && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-12"
@@ -96,7 +96,7 @@ function Exams() {
                   مركز الامتحانات
                 </h1>
                 {cloudLoading && (
-                    <div className="flex justify-center items-center gap-2 text-blue-500 mb-2">
+                    <div className="flex justify-center items-center gap-2 text-red-500 mb-2">
                         <Loader2 className="animate-spin" size={16} /> تحديث الامتحانات...
                     </div>
                 )}
@@ -111,10 +111,10 @@ function Exams() {
               <Tabs defaultValue="A1" value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="flex flex-wrap justify-center gap-3 mb-12 bg-transparent h-auto p-0">
                   {EXAM_LEVELS.map(level => (
-                    <TabsTrigger 
-                      key={level} 
+                    <TabsTrigger
+                      key={level}
                       value={level}
-                      className="px-8 py-4 rounded-2xl text-lg font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 w-32 md:w-40"
+                      className="px-8 py-4 rounded-2xl text-lg font-bold data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 w-32 md:w-40"
                     >
                       {level}
                     </TabsTrigger>
@@ -127,13 +127,13 @@ function Exams() {
                       {getAllExams(level).map((exam) => {
                         const history = userHistory[exam.id];
                         return (
-                          <motion.div 
+                          <motion.div
                             key={exam.id}
                             whileHover={{ y: -8 }}
                             className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300"
                           >
                             <div className={`h-3 w-full bg-slate-200`} />
-                            
+
                             <div className="p-8 flex-1 flex flex-col">
                               <div className="flex justify-between items-start mb-6">
                                 <span className="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide">
@@ -142,27 +142,27 @@ function Exams() {
                                 {history && (
                                   <div className={`flex flex-col items-end`}>
                                     <span className={`text-xl font-black ${history.score >= 60 ? 'text-green-600' : 'text-red-500'}`}>
-                                      {history.score}% 
+                                      {history.score}%
                                     </span>
                                   </div>
                                 )}
                               </div>
-                              
+
                               <h3 className="text-2xl font-bold text-slate-800 mb-4">{exam.title}</h3>
                               <p className="text-slate-500 mb-8 leading-relaxed flex-1">
                                 {exam.description}
                               </p>
-                              
+
                               <div className="flex items-center gap-6 text-sm text-slate-500 font-medium mb-8 border-t border-slate-100 pt-6">
-                                <span className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-lg"><Clock size={18} className="text-blue-500" /> {exam.duration} دقيقة</span>
-                                <span className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-lg"><BarChart2 size={18} className="text-purple-500" /> {exam.questions?.length || 0} سؤال</span>
+                                <span className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-lg"><Clock size={18} className="text-red-500" /> {exam.duration} دقيقة</span>
+                                <span className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-lg"><BarChart2 size={18} className="text-amber-500" /> {exam.questions?.length || 0} سؤال</span>
                               </div>
 
-                              <Button 
+                              <Button
                                 onClick={() => startExam(exam)}
                                 className="w-full bg-slate-900 hover:bg-black text-white h-14 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all group"
                               >
-                                {history ? 'إعادة الامتحان' : 'ابدأ الآن'} 
+                                {history ? 'إعادة الامتحان' : 'ابدأ الآن'}
                                 <PlayCircle className="mr-2 group-hover:scale-110 transition-transform" size={20} />
                               </Button>
                             </div>
@@ -184,24 +184,24 @@ function Exams() {
                  <ExamComponent exam={currentExam} onComplete={handleExamComplete} />
               </motion.div>
             )}
-            
+
             {examState === 'results' && results && (
               <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <ExamResults 
-                  results={results} 
-                  examData={currentExam} 
-                  onReview={() => setExamState('review')} 
-                  onRetake={() => { setResults(null); setExamState('taking'); }} 
+                <ExamResults
+                  results={results}
+                  examData={currentExam}
+                  onReview={() => setExamState('review')}
+                  onRetake={() => { setResults(null); setExamState('taking'); }}
                 />
               </motion.div>
             )}
 
             {examState === 'review' && (
               <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <ExamReview 
-                    exam={currentExam} 
-                    userAnswers={results.answers} 
-                    onBack={() => setExamState('results')} 
+                <ExamReview
+                    exam={currentExam}
+                    userAnswers={results.answers}
+                    onBack={() => setExamState('results')}
                     onRetake={() => { setResults(null); setExamState('taking'); }}
                 />
               </motion.div>

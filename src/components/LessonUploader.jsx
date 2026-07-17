@@ -294,8 +294,8 @@ const LessonUploader = ({
     <div className="mb-8 rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="lesson-uploader">
       <div className="flex flex-col flex-wrap items-center justify-between gap-4 sm:flex-row">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-50 p-2">
-            <FilePlus className="text-blue-600" size={24} />
+          <div className="rounded-lg bg-red-50 p-2">
+            <FilePlus className="text-red-600" size={24} />
           </div>
           <div>
             <h3 className="font-bold text-slate-800">إضافة دروس جديدة</h3>
@@ -319,7 +319,7 @@ const LessonUploader = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="flex-1 gap-2 bg-blue-600 text-white hover:bg-blue-700 sm:flex-none"
+            className="flex-1 gap-2 bg-red-600 text-white hover:bg-red-700 sm:flex-none"
             data-testid="lesson-upload-action"
           >
             {isUploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
@@ -348,7 +348,7 @@ const LessonUploader = ({
         <div className="mt-6 border-t border-slate-200 pt-5" data-testid="published-lessons-list">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h4 className="flex items-center gap-2 font-black text-slate-800">
-              <BookOpen size={18} className="text-blue-600" />
+              <BookOpen size={18} className="text-red-600" />
               قائمة الدروس
             </h4>
             <span className="text-xs font-bold text-slate-500">{publishedLessons.length + localLessons.length} درس</span>

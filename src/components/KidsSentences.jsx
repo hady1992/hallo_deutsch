@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   MessageCircle, Search, Filter, PlayCircle, PauseCircle, StopCircle,
   ChevronDown, ChevronUp, Star, Users, BarChart3, Volume2,
   ArrowRight, ArrowLeft
@@ -20,7 +20,7 @@ const KidsSentences = ({ isAdmin }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [favorites, setFavorites] = useState([]);
-  
+
   // Audio Playback State
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeConvId, setActiveConvId] = useState(null);
@@ -55,14 +55,14 @@ const KidsSentences = ({ isAdmin }) => {
 
     if (searchTerm.trim()) {
       const lower = searchTerm.toLowerCase();
-      result = result.filter(c => 
-        c.title.toLowerCase().includes(lower) || 
+      result = result.filter(c =>
+        c.title.toLowerCase().includes(lower) ||
         c.sentences.some(s => s.german.toLowerCase().includes(lower) || s.arabic.includes(lower))
       );
     }
 
     setFilteredConversations(result);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   }, [conversations, activeTopic, searchTerm]);
 
   // Audio Logic
@@ -91,15 +91,15 @@ const KidsSentences = ({ isAdmin }) => {
     }
 
     setActiveSentenceIndex(index);
-    
+
     const text = sentences[index].german;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
     utterance.rate = playbackSpeed;
-    
+
     utterance.onend = () => {
        setTimeout(() => {
-           if (speechRef.current) { 
+           if (speechRef.current) {
                playSentenceRecursive(sentences, index + 1);
            }
        }, 800);
@@ -146,9 +146,9 @@ const KidsSentences = ({ isAdmin }) => {
        {/* Filters & Controls */}
        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
          <div className="flex flex-wrap gap-2 justify-center md:justify-start w-full md:w-auto">
-            <AudioSpeedControl 
-                onSpeedChange={setPlaybackSpeed} 
-                className="order-last md:order-first" 
+            <AudioSpeedControl
+                onSpeedChange={setPlaybackSpeed}
+                className="order-last md:order-first"
             />
             <div className="flex gap-2 overflow-x-auto max-w-full pb-2 md:pb-0 scrollbar-hide">
                 {topics.map(topic => (
@@ -156,7 +156,7 @@ const KidsSentences = ({ isAdmin }) => {
                     key={topic}
                     onClick={() => setActiveTopic(topic)}
                     className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2
-                    ${activeTopic === topic ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'}
+                    ${activeTopic === topic ? 'bg-red-600 text-white border-red-600' : 'bg-white text-slate-500 border-slate-200 hover:border-red-300'}
                     `}
                 >
                     {topic === 'All' ? 'الكل' : topic}
@@ -166,12 +166,12 @@ const KidsSentences = ({ isAdmin }) => {
          </div>
          <div className="relative w-full md:w-64">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="بحث..." 
+            <input
+              type="text"
+              placeholder="بحث..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-2 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-200 text-right font-bold text-sm"
+              className="w-full pr-10 pl-4 py-2 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-red-200 text-right font-bold text-sm"
             />
          </div>
        </div>
@@ -187,11 +187,11 @@ const KidsSentences = ({ isAdmin }) => {
                  exit={{ opacity: 0 }}
                  transition={{ delay: idx * 0.05 }}
                  className={`bg-white rounded-[2rem] border-2 overflow-hidden shadow-sm transition-all hover:shadow-md
-                    ${expandedId === conv.id ? 'border-blue-400 ring-2 ring-blue-50' : 'border-slate-100'}
+                    ${expandedId === conv.id ? 'border-red-400 ring-2 ring-red-50' : 'border-slate-100'}
                  `}
                >
                  {/* Header */}
-                 <div 
+                 <div
                    onClick={() => {
                      setExpandedId(expandedId === conv.id ? null : conv.id);
                      if(expandedId === conv.id) stopAudio();
@@ -199,7 +199,7 @@ const KidsSentences = ({ isAdmin }) => {
                    className="p-6 cursor-pointer flex flex-col md:flex-row gap-4 items-center justify-between"
                  >
                     <div className="flex items-center gap-4 w-full">
-                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${activeConvId === conv.id ? 'bg-blue-100 text-blue-600 animate-pulse' : 'bg-slate-100 text-slate-400'}`}>
+                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${activeConvId === conv.id ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-slate-100 text-slate-400'}`}>
                           {activeConvId === conv.id ? <Volume2 /> : '💬'}
                        </div>
                        <div className="flex-1">
@@ -216,9 +216,9 @@ const KidsSentences = ({ isAdmin }) => {
                           {conv.level}
                        </Badge>
                        <div className="flex gap-2">
-                          <Button 
-                             size="icon" 
-                             variant="ghost" 
+                          <Button
+                             size="icon"
+                             variant="ghost"
                              onClick={(e) => toggleFavorite(conv.id, e)}
                              className={favorites.includes(conv.id) ? 'text-red-500 bg-red-50' : 'text-slate-300'}
                           >
@@ -234,16 +234,16 @@ const KidsSentences = ({ isAdmin }) => {
                  {/* Body */}
                  <AnimatePresence>
                    {expandedId === conv.id && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}
                         className="bg-slate-50/50 border-t-2 border-slate-100"
                       >
                          <div className="p-6">
                             <div className="flex flex-col items-center mb-6 gap-4">
-                               <Button 
+                               <Button
                                  onClick={() => playFullConversation(conv.id, conv.sentences)}
                                  className={`rounded-full px-8 py-6 font-black text-lg gap-2 shadow-lg transition-all hover:scale-105 w-full md:w-auto
-                                   ${activeConvId === conv.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}
+                                   ${activeConvId === conv.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}
                                  `}
                                >
                                   {activeConvId === conv.id ? <StopCircle size={24} /> : <PlayCircle size={24} />}
@@ -253,27 +253,27 @@ const KidsSentences = ({ isAdmin }) => {
 
                             <div className="space-y-3">
                                {conv.sentences.map((sent, i) => (
-                                  <motion.div 
+                                  <motion.div
                                     key={i}
                                     initial={{ x: -20, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
                                     transition={{ delay: i * 0.1 }}
                                     className={`
                                       flex gap-4 p-4 rounded-2xl border-2 transition-all duration-300
-                                      ${activeConvId === conv.id && activeSentenceIndex === i 
-                                         ? 'bg-blue-50 border-blue-300 scale-[1.02] shadow-md' 
+                                      ${activeConvId === conv.id && activeSentenceIndex === i
+                                         ? 'bg-red-50 border-red-300 scale-[1.02] shadow-md'
                                          : 'bg-white border-transparent hover:border-slate-200'}
                                     `}
                                   >
-                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 
-                                        ${i % 2 === 0 ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}
+                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0
+                                        ${i % 2 === 0 ? 'bg-amber-100 text-amber-600' : 'bg-amber-100 text-amber-600'}
                                      `}>
                                         {conv.characters[i % 2 === 0 ? 0 : 1].charAt(0)}
                                      </div>
                                      <div className="flex-1">
                                         <div className="flex justify-between items-start mb-1">
                                            <p className="text-lg font-bold text-slate-800">{sent.german}</p>
-                                           <AudioButton text={sent.german} speed={playbackSpeed} size={18} className="shrink-0 text-slate-400 hover:text-blue-500" />
+                                           <AudioButton text={sent.german} speed={playbackSpeed} size={18} className="shrink-0 text-slate-400 hover:text-red-500" />
                                         </div>
                                         <p className="text-slate-500 font-medium text-right dir-rtl">{sent.arabic}</p>
                                      </div>
