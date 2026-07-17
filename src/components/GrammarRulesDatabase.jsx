@@ -14,7 +14,13 @@ const GrammarRulesDatabase = () => {
   const [selectedLevel, setSelectedLevel] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [bookmarked, setBookmarked] = useState(() => {
-    return JSON.parse(localStorage.getItem('grammar_bookmarks') || '[]');
+    try {
+      const stored = JSON.parse(localStorage.getItem('grammar_bookmarks') || '[]');
+      return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+      console.warn('[GrammarRulesDatabase] Ignoring invalid bookmark data:', error);
+      return [];
+    }
   });
 
   // Combine all rules
@@ -60,12 +66,21 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
 
   const filteredRules = allRules.filter(rule => {
     const q = searchTerm.trim().toLowerCase();
+    const title = typeof rule?.title === 'string'
+      ? rule.title
+      : rule?.title?.ar || rule?.title?.de || '';
+    const explanationAr = typeof rule?.explanation === 'string'
+      ? rule.explanation
+      : rule?.explanation?.ar || '';
+    const explanationDe = typeof rule?.explanation === 'object' ? rule?.explanation?.de || '' : '';
     const matchesSearch = !q || (
-      (rule.title || '').toLowerCase().includes(q) ||
-      (rule.explanation?.ar || '').toLowerCase().includes(q) ||
-      (rule.explanation?.de || '').toLowerCase().includes(q) ||
-      (rule.examples || []).some(ex =>
-        (ex.de || '').toLowerCase().includes(q) || (ex.ar || '').toLowerCase().includes(q)
+      title.toLowerCase().includes(q) ||
+      explanationAr.toLowerCase().includes(q) ||
+      explanationDe.toLowerCase().includes(q) ||
+      (Array.isArray(rule?.examples) ? rule.examples : []).some(ex =>
+        typeof ex === 'string'
+          ? ex.toLowerCase().includes(q)
+          : (ex?.de || '').toLowerCase().includes(q) || (ex?.ar || '').toLowerCase().includes(q)
       )
     );
     const matchesLevel = selectedLevel === 'All' || rule.level === selectedLevel;

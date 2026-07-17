@@ -1,45 +1,10 @@
 import { supabase } from '@/lib/customSupabaseClient';
-import { vocabularyA1 } from '@/data/vocabularyA1';
-import { vocabularyA2 } from '@/data/vocabularyA2';
-import { vocabularyB1 } from '@/data/vocabularyB1';
-import { vocabularyB2 } from '@/data/vocabularyB2';
-import { nounsDatabase } from '@/data/nounsDatabase';
-import { germanVerbsComprehensive } from '@/data/germanVerbsComprehensive';
-import { grammarA1Full } from '@/data/grammarA1Full';
-import { grammarA2Full } from '@/data/grammarA2Full';
-import { grammarB1Full } from '@/data/grammarB1Full';
-import { grammarB2Full } from '@/data/grammarB2Full';
-import { exercisesData } from '@/data/exercisesData';
-import { placementTestQuestions } from '@/data/placementTestQuestions';
-import { examsA1 } from '@/data/examsA1';
-import { examsA2 } from '@/data/examsA2';
-import { examsB1 } from '@/data/examsB1';
-import { examsB2 } from '@/data/examsB2';
-import { kidsVocabularyData } from '@/data/kidsVocabularyData';
-import { kidsVerbsDatabase } from '@/data/kidsVerbsDatabase';
-import { kidsConversationsDatabase } from '@/data/kidsConversationsDatabase';
-import { kidsQuizzesData } from '@/data/kidsQuizzesData';
-import {
-  getCustomQuizzes as getLocalCustomQuizzes,
-  getCustomPlacementTestQuestions,
-  getImportedExams,
-  getImportedExercises,
-  getImportedGrammarRules,
-  getImportedLessons,
-  getImportedNouns,
-  getImportedVerbs,
-  getImportedVocabulary,
-  getKidsExercises as getLocalKidsExercises,
-  getKidsSentences,
-  getKidsTopics as getLocalKidsTopics,
-  getKidsVerbs as getLocalKidsVerbs,
-  getKidsVocabulary as getLocalKidsVocabulary,
-} from '@/utils/storageManager';
 import {
   dedupeByKey,
   getContentDedupKey,
   splitNewUniqueItems,
 } from '@/utils/contentDedupUtils';
+import { normalizeGrammarRuleForDisplay } from '@/utils/grammarNormalizer';
 import { normalizeLessonForDisplay } from '@/utils/lessonNormalizer';
 
 const LEGACY_TABLES = {
@@ -51,50 +16,94 @@ const LEGACY_TABLES = {
 
 const missingLegacyTables = new Set();
 
-const STATIC_CONTENT = {
-  lessons: [],
-  vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
-  nouns: nounsDatabase,
-  verbs: germanVerbsComprehensive,
-  grammar: [...grammarA1Full, ...grammarA2Full, ...grammarB1Full, ...grammarB2Full],
-  exercises: exercisesData,
-  placement_tests: placementTestQuestions,
-  exams: [
-    ...examsA1.map((item) => ({ ...item, level: item.level || 'A1' })),
-    ...examsA2.map((item) => ({ ...item, level: item.level || 'A2' })),
-    ...examsB1.map((item) => ({ ...item, level: item.level || 'B1' })),
-    ...examsB2.map((item) => ({ ...item, level: item.level || 'B2' })),
-  ],
-  kids_vocabulary: kidsVocabularyData,
-  kids_conversations: kidsConversationsDatabase,
-  kids_verbs: kidsVerbsDatabase,
-  kids_exercises: [],
-  kids_topics: [],
-  custom_quizzes: kidsQuizzesData,
-};
-
-const LOCAL_READERS = {
-  lessons: getImportedLessons,
-  vocabulary: getImportedVocabulary,
-  nouns: getImportedNouns,
-  verbs: getImportedVerbs,
-  grammar: getImportedGrammarRules,
-  exercises: getImportedExercises,
-  placement_tests: getCustomPlacementTestQuestions,
-  exams: () => ['A1', 'A2', 'B1', 'B2'].flatMap((level) => getImportedExams(level)),
-  kids_vocabulary: getLocalKidsVocabulary,
-  kids_conversations: getKidsSentences,
-  kids_verbs: getLocalKidsVerbs,
-  kids_exercises: getLocalKidsExercises,
-  kids_topics: getLocalKidsTopics,
-  custom_quizzes: getLocalCustomQuizzes,
-};
-
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
-const readLocalFallback = (contentType) => {
+const LEVELS = ['A1', 'A2', 'B1', 'B2'];
+const contentPromiseCache = new Map();
+const staticPromiseCache = new Map();
+
+const vocabularyLoaders = {
+  A1: () => import('@/data/vocabularyA1').then(({ vocabularyA1 }) => vocabularyA1),
+  A2: () => import('@/data/vocabularyA2').then(({ vocabularyA2 }) => vocabularyA2),
+  B1: () => import('@/data/vocabularyB1').then(({ vocabularyB1 }) => vocabularyB1),
+  B2: () => import('@/data/vocabularyB2').then(({ vocabularyB2 }) => vocabularyB2),
+};
+
+const grammarLoaders = {
+  A1: () => import('@/data/grammarA1Full').then(({ grammarA1Full }) => grammarA1Full),
+  A2: () => import('@/data/grammarA2Full').then(({ grammarA2Full }) => grammarA2Full),
+  B1: () => import('@/data/grammarB1Full').then(({ grammarB1Full }) => grammarB1Full),
+  B2: () => import('@/data/grammarB2Full').then(({ grammarB2Full }) => grammarB2Full),
+};
+
+const examLoaders = {
+  A1: () => import('@/data/examsA1').then(({ examsA1 }) => examsA1),
+  A2: () => import('@/data/examsA2').then(({ examsA2 }) => examsA2),
+  B1: () => import('@/data/examsB1').then(({ examsB1 }) => examsB1),
+  B2: () => import('@/data/examsB2').then(({ examsB2 }) => examsB2),
+};
+
+const loadLevelData = async (loaders, level) => {
+  const selectedLevels = level && loaders[level] ? [level] : LEVELS;
+  const groups = await Promise.all(selectedLevels.map(async (currentLevel) => {
+    const items = asArray(await loaders[currentLevel]());
+    return items.map((item) => ({ ...item, level: item.level || currentLevel }));
+  }));
+  return groups.flat();
+};
+
+const loadStaticContentUncached = async (contentType, level = null) => {
+  switch (contentType) {
+    case 'lessons': return [];
+    case 'vocabulary': return loadLevelData(vocabularyLoaders, level);
+    case 'grammar': return loadLevelData(grammarLoaders, level);
+    case 'exams': return loadLevelData(examLoaders, level);
+    case 'nouns': return import('@/data/nounsDatabase').then(({ nounsDatabase }) => asArray(nounsDatabase));
+    case 'verbs': return import('@/data/germanVerbsComprehensive').then(({ germanVerbsComprehensive }) => asArray(germanVerbsComprehensive));
+    case 'exercises': return import('@/data/exercisesData').then(({ exercisesData }) => asArray(exercisesData));
+    case 'placement_tests': return import('@/data/placementTestQuestions').then(({ placementTestQuestions }) => asArray(placementTestQuestions));
+    case 'kids_vocabulary': return import('@/data/kidsVocabularyData').then(({ kidsVocabularyData }) => asArray(kidsVocabularyData));
+    case 'kids_conversations': return import('@/data/kidsConversationsDatabase').then(({ kidsConversationsDatabase }) => asArray(kidsConversationsDatabase));
+    case 'kids_verbs': return import('@/data/kidsVerbsDatabase').then(({ kidsVerbsDatabase }) => asArray(kidsVerbsDatabase));
+    case 'custom_quizzes': return import('@/data/kidsQuizzesData').then(({ kidsQuizzesData }) => asArray(kidsQuizzesData));
+    case 'kids_exercises':
+    case 'kids_topics':
+    default: return [];
+  }
+};
+
+const loadStaticContent = (contentType, level = null) => {
+  const cacheKey = `${contentType}:${level || 'all'}`;
+  if (!staticPromiseCache.has(cacheKey)) {
+    staticPromiseCache.set(cacheKey, loadStaticContentUncached(contentType, level));
+  }
+  return staticPromiseCache.get(cacheKey);
+};
+
+const localReaderNames = {
+  lessons: 'getImportedLessons',
+  vocabulary: 'getImportedVocabulary',
+  nouns: 'getImportedNouns',
+  verbs: 'getImportedVerbs',
+  grammar: 'getImportedGrammarRules',
+  exercises: 'getImportedExercises',
+  placement_tests: 'getCustomPlacementTestQuestions',
+  kids_vocabulary: 'getKidsVocabulary',
+  kids_conversations: 'getKidsSentences',
+  kids_verbs: 'getKidsVerbs',
+  kids_exercises: 'getKidsExercises',
+  kids_topics: 'getKidsTopics',
+  custom_quizzes: 'getCustomQuizzes',
+};
+
+const readLocalFallback = async (contentType) => {
   try {
-    return asArray(LOCAL_READERS[contentType]?.());
+    const storage = await import('@/utils/storageManager');
+    if (contentType === 'exams') {
+      return LEVELS.flatMap((level) => asArray(storage.getImportedExams(level)));
+    }
+    const reader = storage[localReaderNames[contentType]];
+    return typeof reader === 'function' ? asArray(reader()) : [];
   } catch (error) {
     console.warn(`[ContentRepository] Local fallback failed for ${contentType}:`, error);
     return [];
@@ -145,60 +154,70 @@ const fetchCloudContent = async (contentType, level = null) => {
   const legacyTable = LEGACY_TABLES[contentType];
   const contentItemsResult = await queryContentItems(contentType, level);
 
-  if (!legacyTable || missingLegacyTables.has(legacyTable)) {
-    if (contentItemsResult.error) throw contentItemsResult.error;
+  if (!contentItemsResult.error) {
     return asArray(contentItemsResult.data)
       .map((row) => unwrapRow(row, contentType, 'content_items'));
   }
 
+  if (!legacyTable || missingLegacyTables.has(legacyTable)) throw contentItemsResult.error;
+
+  console.warn(`[ContentRepository] content_items read failed for ${contentType}; trying legacy table ${legacyTable}.`, contentItemsResult.error);
   const legacyResult = await queryLegacyTable(legacyTable, level);
   if (isMissingTableError(legacyResult.error)) missingLegacyTables.add(legacyTable);
-  const contentItemsAvailable = !contentItemsResult.error;
-  const legacyAvailable = !legacyResult.error;
+  if (legacyResult.error) throw contentItemsResult.error;
 
-  if (!contentItemsAvailable && !legacyAvailable) {
-    if (!isMissingTableError(legacyResult.error)) throw legacyResult.error;
-    throw contentItemsResult.error;
-  }
-
-  if (contentItemsResult.error && !isMissingTableError(contentItemsResult.error)) {
-    console.warn(`[ContentRepository] content_items read failed for ${contentType}; using ${legacyTable}.`, contentItemsResult.error);
-  }
-
-  if (legacyResult.error && !isMissingTableError(legacyResult.error)) {
-    console.warn(`[ContentRepository] ${legacyTable} read failed; using content_items for ${contentType}.`, legacyResult.error);
-  }
-
-  const legacyItems = legacyAvailable
-    ? asArray(legacyResult.data).map((row) => unwrapRow(row, contentType, legacyTable))
-    : [];
-  const unifiedItems = contentItemsAvailable
-    ? asArray(contentItemsResult.data).map((row) => unwrapRow(row, contentType, 'content_items'))
-    : [];
-
-  return dedupeByKey(
-    [...legacyItems, ...unifiedItems],
-    (item) => getContentDedupKey(contentType, item),
-    { prefer: 'last' }
-  );
+  return asArray(legacyResult.data)
+    .map((row) => unwrapRow(row, contentType, legacyTable));
 };
 
-const mergeContent = (contentType, extraItems = []) => {
+const normalizeContent = (contentType, items) => {
+  if (contentType === 'grammar') return asArray(items).map(normalizeGrammarRuleForDisplay);
+  if (contentType === 'lessons') return asArray(items).map(normalizeLessonForDisplay);
+  return asArray(items);
+};
+
+const mergeContent = (contentType, staticItems = [], extraItems = [], level = null) => {
   const keyGetter = (item) => getContentDedupKey(contentType, item);
-  return dedupeByKey([
-    ...asArray(STATIC_CONTENT[contentType]),
+  const merged = dedupeByKey([
+    ...asArray(staticItems),
     ...asArray(extraItems),
   ], keyGetter, { prefer: 'last' });
+  const filtered = level ? merged.filter((item) => item?.level === level) : merged;
+  return normalizeContent(contentType, filtered);
 };
 
-export const getContent = async (contentType) => {
+const clearContentCache = (contentType = null) => {
+  if (!contentType) {
+    contentPromiseCache.clear();
+    return;
+  }
+  for (const key of contentPromiseCache.keys()) {
+    if (key.startsWith(`${contentType}:`)) contentPromiseCache.delete(key);
+  }
+};
+
+const loadContent = async (contentType, level = null) => {
+  const staticItems = await loadStaticContent(contentType, level);
   try {
-    const cloudItems = await fetchCloudContent(contentType);
-    return mergeContent(contentType, cloudItems);
+    const cloudItems = await fetchCloudContent(contentType, level);
+    return mergeContent(contentType, staticItems, cloudItems, level);
   } catch (error) {
     console.warn(`[ContentRepository] Supabase read failed for ${contentType}; using local fallback.`, error);
-    return mergeContent(contentType, readLocalFallback(contentType));
+    const localItems = await readLocalFallback(contentType);
+    return mergeContent(contentType, staticItems, localItems, level);
   }
+};
+
+export const getContent = (contentType, level = null) => {
+  const cacheKey = `${contentType}:${level || 'all'}`;
+  if (!contentPromiseCache.has(cacheKey)) {
+    const request = loadContent(contentType, level).catch((error) => {
+      contentPromiseCache.delete(cacheKey);
+      throw error;
+    });
+    contentPromiseCache.set(cacheKey, request);
+  }
+  return contentPromiseCache.get(cacheKey);
 };
 
 const ensureItemId = (contentType, item, index) => ({
@@ -207,10 +226,16 @@ const ensureItemId = (contentType, item, index) => ({
 });
 
 const dispatchContentEvents = (contentType) => {
+  clearContentCache(contentType);
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new Event('dataImported'));
   window.dispatchEvent(new Event(`${contentType}Updated`));
 };
+
+if (typeof window !== 'undefined' && !window.__halloDeutschContentCacheListener) {
+  window.__halloDeutschContentCacheListener = true;
+  window.addEventListener('dataImported', () => clearContentCache());
+}
 
 const buildUnifiedPayload = (contentType, items, userId) => items.map((item) => ({
   content_type: contentType,
@@ -289,7 +314,9 @@ export const publishContentItems = async (contentType, items) => {
 
 export const publishContentItem = (contentType, item) => publishContentItems(contentType, [item]);
 
-export const getPublishedContent = (contentType, level = null) => fetchCloudContent(contentType, level);
+export const getPublishedContent = async (contentType, level = null) => (
+  normalizeContent(contentType, await fetchCloudContent(contentType, level))
+);
 
 export const deletePublishedContentItem = async (contentType, itemOrId) => {
   const item = typeof itemOrId === 'object' ? itemOrId : { supabaseId: itemOrId };
@@ -318,15 +345,17 @@ export const deletePublishedContentItem = async (contentType, itemOrId) => {
 
 export const getLessons = async (level = null, options = {}) => {
   const { includeLocal = false } = options;
-  let cloudItems = [];
-  try {
-    cloudItems = await fetchCloudContent('lessons', level);
-  } catch (error) {
-    console.warn('[ContentRepository] Supabase lessons read failed; showing local fallback only.', error);
+  const cacheKey = `lessons:published:${level || 'all'}`;
+  if (!contentPromiseCache.has(cacheKey)) {
+    contentPromiseCache.set(cacheKey, fetchCloudContent('lessons', level).catch((error) => {
+      console.warn('[ContentRepository] Supabase lessons read failed; published lessons are unavailable.', error);
+      return [];
+    }));
   }
+  const cloudItems = await contentPromiseCache.get(cacheKey);
 
   const localItems = includeLocal
-    ? readLocalFallback('lessons')
+    ? (await readLocalFallback('lessons'))
       .filter((item) => !level || item.level === level)
       .map((item) => ({
         ...item,
@@ -371,13 +400,13 @@ export const unpublishLesson = async (itemOrId) => {
   }
 };
 
-export const getVocabulary = () => getContent('vocabulary');
+export const getVocabulary = (level = null) => getContent('vocabulary', level);
 export const getNouns = () => getContent('nouns');
 export const getVerbs = () => getContent('verbs');
-export const getGrammarRules = () => getContent('grammar');
-export const getExercises = () => getContent('exercises');
+export const getGrammarRules = (level = null) => getContent('grammar', level);
+export const getExercises = (level = null) => getContent('exercises', level);
 export const getPlacementTests = () => getContent('placement_tests');
-export const getExams = () => getContent('exams');
+export const getExams = (level = null) => getContent('exams', level);
 export const getKidsVocabulary = () => getContent('kids_vocabulary');
 export const getKidsConversations = () => getContent('kids_conversations');
 export const getKidsVerbs = () => getContent('kids_verbs');

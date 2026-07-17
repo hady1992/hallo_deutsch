@@ -8,8 +8,15 @@ import {
   getKidsVerbs, saveKidsVerbs
 } from '@/utils/storageManager';
 
+const DEFAULT_DATA_VERSION = '2026-07-17-runtime-safety-v1';
+const INITIALIZED_VERSION_KEY = 'halloDeutschDefaultDataVersion';
+
 export const initializeDefaultData = () => {
     try {
+        if (localStorage.getItem(INITIALIZED_VERSION_KEY) === DEFAULT_DATA_VERSION) {
+            return { initialized: false, reason: 'already-current' };
+        }
+
         console.log("Initializing default data check...");
         
         // 1. Exercises
@@ -51,8 +58,11 @@ export const initializeDefaultData = () => {
             saveKidsVerbs(defaultData.kidsData.verbs);
         }
 
+        localStorage.setItem(INITIALIZED_VERSION_KEY, DEFAULT_DATA_VERSION);
         console.log("Data initialization check complete.");
+        return { initialized: true };
     } catch (error) {
         console.error("Failed to initialize default data:", error);
+        return { initialized: false, error };
     }
 };

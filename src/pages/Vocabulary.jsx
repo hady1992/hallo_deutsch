@@ -20,14 +20,14 @@ const GrammarRulesView = () => {
   useEffect(() => {
     const handleUpdate = async () => {
       const allRules = await getGrammarRules();
-      setRules(allRules.filter((rule) => rule.source === 'cloud' || typeof rule.title === 'string'));
+      setRules((Array.isArray(allRules) ? allRules : []).filter((rule) => rule?.source === 'cloud'));
     };
     handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
   }, []);
 
-  const filtered = rules.filter(r => filterLevel === 'All' || r.level === filterLevel);
+  const filtered = (Array.isArray(rules) ? rules : []).filter(r => filterLevel === 'All' || r?.level === filterLevel);
 
   return (
     <div className="space-y-6">
@@ -61,10 +61,12 @@ const GrammarRulesView = () => {
                 <div key={rule.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
                     <div className="p-5 border-b border-slate-50">
                         <div className="flex justify-between items-start mb-2">
-                             <h3 className="font-bold text-lg text-slate-800">{rule.title}</h3>
+                             <h3 className="font-bold text-lg text-slate-800">
+                               {typeof rule.title === 'string' ? rule.title : rule.title?.ar || rule.title?.de || 'قاعدة لغوية'}
+                             </h3>
                              <Badge variant="outline" className="bg-slate-50">{rule.level}</Badge>
                         </div>
-                        <p className="text-slate-600 text-sm">{rule.description}</p>
+                        <p className="text-slate-600 text-sm">{rule.description || rule.explanation || 'لا يوجد وصف إضافي.'}</p>
                     </div>
                 </div>
             ))
@@ -82,7 +84,8 @@ function Vocabulary() {
   useEffect(() => {
     const loadVocab = async () => {
       setCloudLoading(true);
-      setAllVocabulary(await getVocabulary());
+      const vocabulary = await getVocabulary();
+      setAllVocabulary(Array.isArray(vocabulary) ? vocabulary : []);
       setCloudLoading(false);
     };
     loadVocab();
@@ -92,7 +95,7 @@ function Vocabulary() {
   }, []);
 
   const categories = useMemo(() => {
-    const cats = new Set(allVocabulary.map(item => item.category));
+    const cats = new Set((Array.isArray(allVocabulary) ? allVocabulary : []).map(item => item?.category).filter(Boolean));
     return Array.from(cats).sort();
   }, [allVocabulary]);
 
@@ -101,8 +104,14 @@ function Vocabulary() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('simple_vocab_favorites');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('simple_vocab_favorites');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.warn('[Vocabulary] Ignoring invalid favorites data:', error);
+      return [];
+    }
   });
   
   useEffect(() => {
@@ -129,15 +138,16 @@ function Vocabulary() {
     setShowFavoritesOnly(false);
   };
 
-  const filteredWords = allVocabulary.filter(word => {
+  const filteredWords = (Array.isArray(allVocabulary) ? allVocabulary : []).filter(word => {
+    if (!word || typeof word !== 'object') return false;
     if (selectedLevels.length > 0 && !selectedLevels.includes(word.level)) return false;
     if (selectedCategory !== "All" && word.category !== selectedCategory) return false;
     const searchLower = searchTerm.trim().toLowerCase();
     const matchesSearch =
-      (word.german || '').toLowerCase().includes(searchLower) ||
-      (word.arabic || '').toLowerCase().includes(searchLower) ||
-      (word.example || '').toLowerCase().includes(searchLower) ||
-      (word.exampleArabic || '').toLowerCase().includes(searchLower);
+      String(word.german || '').toLowerCase().includes(searchLower) ||
+      String(word.arabic || '').toLowerCase().includes(searchLower) ||
+      String(word.example || '').toLowerCase().includes(searchLower) ||
+      String(word.exampleArabic || '').toLowerCase().includes(searchLower);
     if (searchTerm && !matchesSearch) return false;
     if (showFavoritesOnly && !favorites.includes(word.id)) return false;
     return true;

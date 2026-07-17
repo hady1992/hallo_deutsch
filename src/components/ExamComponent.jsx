@@ -7,15 +7,18 @@ import { useToast } from '@/components/ui/use-toast';
 import { shuffleAnswers } from '@/utils/answerShuffler';
 
 const ExamComponent = ({ exam, onComplete }) => {
+  const durationMinutes = Number.isFinite(Number(exam?.duration)) ? Number(exam.duration) : 30;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(exam.duration * 60);
+  const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (exam && exam.questions) {
-      const processedQuestions = exam.questions.map(q => {
+    if (exam && Array.isArray(exam.questions)) {
+      const processedQuestions = exam.questions
+        .filter((question) => question && typeof question === 'object' && Array.isArray(question.options) && question.options.length > 0)
+        .map(q => {
         // Use the utility to shuffle options and get the new correct index
         const { shuffledOptions, newCorrectAnswer } = shuffleAnswers(q.options, q.correctAnswer);
 
@@ -24,13 +27,13 @@ const ExamComponent = ({ exam, onComplete }) => {
           options: shuffledOptions,
           correctAnswer: newCorrectAnswer,
         };
-      });
+        });
       setShuffledQuestions(processedQuestions);
       setAnswers({});
       setCurrentQuestionIndex(0);
-      setTimeLeft(exam.duration * 60);
+      setTimeLeft(durationMinutes * 60);
     }
-  }, [exam]);
+  }, [durationMinutes, exam]);
 
   useEffect(() => {
     if (timeLeft > 0 && shuffledQuestions.length > 0) {
@@ -63,12 +66,12 @@ const ExamComponent = ({ exam, onComplete }) => {
     } else {
       setCurrentQuestionIndex(prev => prev + 1);
       // Ensure audio stops when moving to next question
-      window.speechSynthesis.cancel();
+      window.speechSynthesis?.cancel();
     }
   };
 
   const handleFinishExam = () => {
-    window.speechSynthesis.cancel();
+    window.speechSynthesis?.cancel();
     let correctCount = 0;
     
     shuffledQuestions.forEach((q, idx) => {
@@ -88,17 +91,23 @@ const ExamComponent = ({ exam, onComplete }) => {
       date: new Date().toISOString(),
       answers, 
       questionsState: shuffledQuestions,
-      timeSpent: (exam.duration * 60) - timeLeft
+      timeSpent: (durationMinutes * 60) - timeLeft
     };
 
-    const savedResults = JSON.parse(localStorage.getItem('exam_results') || '[]');
+    let savedResults = [];
+    try {
+      const parsedResults = JSON.parse(localStorage.getItem('exam_results') || '[]');
+      savedResults = Array.isArray(parsedResults) ? parsedResults : [];
+    } catch (error) {
+      console.warn('[ExamComponent] Ignoring invalid local exam history:', error);
+    }
     const historyEntry = {
       ...resultData,
       questionsState: null 
     };
     
     localStorage.setItem('exam_results', JSON.stringify([...savedResults, historyEntry]));
-    onComplete(resultData);
+    if (typeof onComplete === 'function') onComplete(resultData);
   };
 
   const formatTime = (seconds) => {
@@ -157,7 +166,7 @@ const ExamComponent = ({ exam, onComplete }) => {
         </h3>
 
         <div className="grid grid-cols-1 gap-4 mb-8">
-          {currentQuestion.options.map((option, idx) => (
+          {(Array.isArray(currentQuestion.options) ? currentQuestion.options : []).map((option, idx) => (
             <button
               key={idx}
               onClick={() => handleOptionSelect(idx)}

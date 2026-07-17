@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,12 +14,29 @@ import { getGrammarRules, getNouns, getVerbs } from '@/services/contentRepositor
 import GrammarDisplayComponent from '@/components/GrammarDisplayComponent';
 import VerbDisplayComponent from '@/components/VerbDisplayComponent';
 
+const DataStatus = ({ loading, error, emptyMessage }) => (
+  <div role="status" className="border border-dashed border-slate-200 bg-white py-16 text-center">
+    {loading ? (
+      <>
+        <span className="mx-auto mb-3 block h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+        <p className="font-bold text-slate-600">جاري تحميل المحتوى...</p>
+      </>
+    ) : (
+      <p className={error ? 'font-bold text-red-600' : 'text-slate-500'}>{error || emptyMessage}</p>
+    )}
+  </div>
+);
+
 function Grammar() {
   const [activeLevel, setActiveLevel] = useState('A1');
   const [activeMainTab, setActiveMainTab] = useState('grammar');
   const [allVerbs, setAllVerbs] = useState([]);
   const [allNouns, setAllNouns] = useState([]);
-  const [allRules, setAllRules] = useState([]);
+  const [rulesByLevel, setRulesByLevel] = useState({});
+  const [loading, setLoading] = useState({ grammar: false, verbs: false, nouns: false });
+  const [errors, setErrors] = useState({ grammar: '', verbs: '', nouns: '' });
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const loadedTabs = useRef({ verbs: false, nouns: false });
 
   // Grammar Rules Search State
   const [grammarSearch, setGrammarSearch] = useState("");
@@ -28,7 +45,7 @@ function Grammar() {
   const [nounSearch, setNounSearch] = useState("");
   const [nounGenderFilter, setNounGenderFilter] = useState("all");
 
-  const currentRules = allRules.filter((rule) => rule.level === activeLevel);
+  const currentRules = Array.isArray(rulesByLevel[activeLevel]) ? rulesByLevel[activeLevel] : [];
 
   const filteredRules = useMemo(() => {
     const q = grammarSearch.trim().toLowerCase();
@@ -37,7 +54,7 @@ function Grammar() {
       const titleAr = (rule.title?.ar || '').toLowerCase();
       const titleDe = (rule.title?.de || '').toLowerCase();
       const explanation = (rule.explanation || '').toLowerCase();
-      const examplesMatch = (rule.examples || []).some(ex =>
+      const examplesMatch = (Array.isArray(rule.examples) ? rule.examples : []).some(ex =>
         (ex.de || '').toLowerCase().includes(q) || (ex.ar || '').toLowerCase().includes(q)
       );
       return titleAr.includes(q) || titleDe.includes(q) || explanation.includes(q) || examplesMatch;
@@ -45,28 +62,81 @@ function Grammar() {
   }, [currentRules, grammarSearch]);
 
   useEffect(() => {
-    const loadData = async () => {
-      const [rules, verbs, nouns] = await Promise.all([
-        getGrammarRules(),
-        getVerbs(),
-        getNouns(),
-      ]);
-      setAllRules(rules.map((rule) => ({
-        ...rule,
-        title: typeof rule.title === 'string' ? { ar: rule.title, de: '' } : rule.title,
-      })));
-      setAllVerbs(verbs);
-      setAllNouns(nouns);
+    const refreshData = () => {
+      loadedTabs.current = { verbs: false, nouns: false };
+      setRulesByLevel({});
+      setRefreshVersion((version) => version + 1);
     };
-    
-    loadData();
-    // Listen for changes from Admin Panel
-    window.addEventListener('dataImported', loadData);
-    return () => window.removeEventListener('dataImported', loadData);
+    window.addEventListener('dataImported', refreshData);
+    return () => window.removeEventListener('dataImported', refreshData);
   }, []);
 
+  useEffect(() => {
+    if (activeMainTab !== 'grammar' || rulesByLevel[activeLevel]) return undefined;
+    let active = true;
+    setLoading((state) => ({ ...state, grammar: true }));
+    setErrors((state) => ({ ...state, grammar: '' }));
+
+    getGrammarRules(activeLevel)
+      .then((rules) => {
+        if (!active) return;
+        setRulesByLevel((state) => ({
+          ...state,
+          [activeLevel]: Array.isArray(rules) ? rules : [],
+        }));
+      })
+      .catch((error) => {
+        if (active) setErrors((state) => ({ ...state, grammar: error?.message || 'تعذر تحميل القواعد.' }));
+      })
+      .finally(() => {
+        if (active) setLoading((state) => ({ ...state, grammar: false }));
+      });
+
+    return () => { active = false; };
+  }, [activeLevel, activeMainTab, refreshVersion, rulesByLevel]);
+
+  useEffect(() => {
+    if (activeMainTab !== 'verbs' || loadedTabs.current.verbs) return undefined;
+    let active = true;
+    setLoading((state) => ({ ...state, verbs: true }));
+    setErrors((state) => ({ ...state, verbs: '' }));
+    getVerbs()
+      .then((verbs) => {
+        if (!active) return;
+        setAllVerbs(Array.isArray(verbs) ? verbs : []);
+        loadedTabs.current.verbs = true;
+      })
+      .catch((error) => {
+        if (active) setErrors((state) => ({ ...state, verbs: error?.message || 'تعذر تحميل الأفعال.' }));
+      })
+      .finally(() => {
+        if (active) setLoading((state) => ({ ...state, verbs: false }));
+      });
+    return () => { active = false; };
+  }, [activeMainTab, refreshVersion]);
+
+  useEffect(() => {
+    if (activeMainTab !== 'nouns' || loadedTabs.current.nouns) return undefined;
+    let active = true;
+    setLoading((state) => ({ ...state, nouns: true }));
+    setErrors((state) => ({ ...state, nouns: '' }));
+    getNouns()
+      .then((nouns) => {
+        if (!active) return;
+        setAllNouns(Array.isArray(nouns) ? nouns : []);
+        loadedTabs.current.nouns = true;
+      })
+      .catch((error) => {
+        if (active) setErrors((state) => ({ ...state, nouns: error?.message || 'تعذر تحميل الأسماء.' }));
+      })
+      .finally(() => {
+        if (active) setLoading((state) => ({ ...state, nouns: false }));
+      });
+    return () => { active = false; };
+  }, [activeMainTab, refreshVersion]);
+
   const filteredNouns = useMemo(() => {
-    return allNouns.filter(noun => {
+    return (Array.isArray(allNouns) ? allNouns : []).filter(noun => {
       const matchesSearch = 
         (noun.german || "").toLowerCase().includes(nounSearch.toLowerCase()) || 
         (noun.translation || "").includes(nounSearch);
@@ -165,7 +235,11 @@ function Grammar() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {filteredRules.length > 0 ? (
+                  {loading.grammar ? (
+                    <DataStatus loading />
+                  ) : errors.grammar ? (
+                    <DataStatus error={errors.grammar} />
+                  ) : filteredRules.length > 0 ? (
                     filteredRules.map((rule) => (
                       <GrammarDisplayComponent key={rule.id} rule={rule} />
                     ))
@@ -203,7 +277,13 @@ function Grammar() {
                       يتم عرض 7 ضمائر لكل زمن
                     </div>
                   </div>
-                  <VerbDisplayComponent verbs={allVerbs} />
+                  {loading.verbs || errors.verbs ? (
+                    <DataStatus loading={loading.verbs} error={errors.verbs} />
+                  ) : allVerbs.length > 0 ? (
+                    <VerbDisplayComponent verbs={allVerbs} />
+                  ) : (
+                    <DataStatus emptyMessage="لا توجد أفعال متاحة حاليًا." />
+                  )}
                 </div>
               </motion.div>
             </TabsContent>
@@ -246,7 +326,11 @@ function Grammar() {
 
                  {/* Nouns Grid */}
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredNouns.length > 0 ? (
+                    {loading.nouns ? (
+                        <div className="col-span-full"><DataStatus loading /></div>
+                    ) : errors.nouns ? (
+                        <div className="col-span-full"><DataStatus error={errors.nouns} /></div>
+                    ) : filteredNouns.length > 0 ? (
                         filteredNouns.map(noun => (
                             <div key={noun.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
                                 <div className={cn("absolute top-0 right-0 w-2 h-full", 

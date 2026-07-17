@@ -8,9 +8,17 @@ const VerbDisplayComponent = ({ verbs }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedVerb, setExpandedVerb] = useState(null);
 
-  const filteredVerbs = verbs.filter(verb =>
-    verb.infinitive.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    verb.translation.includes(searchTerm)
+  const safeVerbs = (Array.isArray(verbs) ? verbs : [])
+    .filter((verb) => verb && typeof verb === 'object' && !Array.isArray(verb))
+    .map((verb) => ({
+      ...verb,
+      infinitive: typeof verb.infinitive === 'string' ? verb.infinitive : '',
+      translation: typeof verb.translation === 'string' ? verb.translation : '',
+    }));
+  const normalizedSearch = searchTerm.toLowerCase();
+  const filteredVerbs = safeVerbs.filter(verb =>
+    verb.infinitive.toLowerCase().includes(normalizedSearch) ||
+    verb.translation.toLowerCase().includes(normalizedSearch)
   );
 
   // Expanded Tense Configuration to handle data variations
@@ -50,7 +58,10 @@ const VerbDisplayComponent = ({ verbs }) => {
 
   const getConjugation = (verb, tenseConfig, pronounConfig) => {
     // 1. Get Conjugation Object (handle legacy vs new structure)
-    const allConjugations = verb.conjugations || verb.conjugation || {};
+    const conjugationSource = verb.conjugations || verb.conjugation;
+    const allConjugations = conjugationSource && typeof conjugationSource === 'object' && !Array.isArray(conjugationSource)
+      ? conjugationSource
+      : {};
     
     // 2. Find the specific Tense Data Object using possible keys
     let tenseData = null;
@@ -61,11 +72,11 @@ const VerbDisplayComponent = ({ verbs }) => {
       }
     }
 
-    if (!tenseData) return '-';
+    if (!tenseData || typeof tenseData !== 'object' || Array.isArray(tenseData)) return '-';
 
     // 3. Find the specific Pronoun Value using possible keys
     for (const key of pronounConfig.keys) {
-      if (tenseData[key]) return tenseData[key];
+      if (typeof tenseData[key] === 'string' || typeof tenseData[key] === 'number') return String(tenseData[key]);
     }
     
     // 4. Special Fallback: If pronoun is 'Sie (Formal)' or 'sie (Plural)' and we only found 'sie/Sie' earlier
@@ -75,6 +86,16 @@ const VerbDisplayComponent = ({ verbs }) => {
     }
 
     return '-';
+  };
+
+  const getExampleText = (verb, tenseConfig) => {
+    if (!verb.examples || typeof verb.examples !== 'object' || Array.isArray(verb.examples)) return '';
+    const example = verb.examples[tenseConfig.id] || verb.examples[tenseConfig.dataKeys[0]];
+    if (typeof example === 'string' || typeof example === 'number') return String(example);
+    if (example && typeof example === 'object' && !Array.isArray(example)) {
+      return typeof example.de === 'string' ? example.de : '';
+    }
+    return '';
   };
 
   return (
@@ -146,9 +167,9 @@ const VerbDisplayComponent = ({ verbs }) => {
                                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                                 {tense.label}
                             </span>
-                            {verb.examples && (verb.examples[tense.id] || verb.examples[tense.dataKeys[0]]) && (
+                            {getExampleText(verb, tense) && (
                                 <span className="german-text hidden sm:inline-block text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 max-w-[200px] truncate">
-                                    Example: {verb.examples[tense.id]?.de || verb.examples[tense.id]}
+                                    Example: {getExampleText(verb, tense)}
                                 </span>
                             )}
                           </div>

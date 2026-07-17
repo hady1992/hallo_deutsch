@@ -3,9 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, AlertTriangle, Lightbulb, PlayCircle, Table, ChevronDown, List, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { normalizeGrammarRuleForDisplay } from '@/utils/grammarNormalizer';
 
 const ExpandedGrammarRules = ({ rule }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const normalizedRule = normalizeGrammarRuleForDisplay(rule);
+  const originalExplanation = rule?.explanation && typeof rule.explanation === 'object'
+    ? rule.explanation
+    : {};
+  const title = typeof rule?.title === 'string'
+    ? rule.title
+    : normalizedRule.title.ar || normalizedRule.title.de || 'قاعدة لغوية';
+  const tips = Array.isArray(rule?.tips) ? rule.tips.filter((tip) => typeof tip === 'string') : [];
 
   return (
     <Card className={`border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden ${isExpanded ? 'ring-1 ring-blue-100' : ''}`}>
@@ -16,14 +25,14 @@ const ExpandedGrammarRules = ({ rule }) => {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100">
-              {rule.level || 'Grammar'}
+              {rule?.level || 'Grammar'}
             </Badge>
             <h3 className="text-lg font-bold text-slate-800 leading-tight">
-              {rule.title}
+              {title}
             </h3>
           </div>
           <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed">
-            {rule.explanation?.ar?.substring(0, 100)}...
+            {normalizedRule.explanation.substring(0, 100)}{normalizedRule.explanation.length > 100 ? '...' : ''}
           </p>
         </div>
         <div className={`p-2 rounded-full bg-slate-50 transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-blue-50 text-blue-600' : 'text-slate-400'}`}>
@@ -48,12 +57,12 @@ const ExpandedGrammarRules = ({ rule }) => {
                 </h4>
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-slate-700 leading-loose text-lg font-arabic">
-                    {rule.explanation.ar}
+                    {normalizedRule.explanation || 'لا يوجد شرح تفصيلي لهذه القاعدة بعد.'}
                   </p>
-                  {rule.explanation.de && (
+                  {typeof originalExplanation.de === 'string' && originalExplanation.de && (
                     <div className="mt-4 pt-4 border-t border-slate-100">
                       <p className="german-text text-slate-500 italic text-sm font-medium bg-slate-50 inline-block px-3 py-1 rounded-lg">
-                        {rule.explanation.de}
+                        {originalExplanation.de}
                       </p>
                     </div>
                   )}
@@ -66,7 +75,7 @@ const ExpandedGrammarRules = ({ rule }) => {
                   <PlayCircle size={16} className="text-green-500" /> أمثلة تطبيقية
                 </h4>
                 <div className="grid gap-3">
-                  {rule.examples.map((ex, idx) => (
+                  {normalizedRule.examples.map((ex, idx) => (
                     <div key={idx} className="bg-white p-4 rounded-xl border-l-4 border-green-400 shadow-sm hover:translate-x-1 transition-transform duration-200">
                       <p className="german-text text-lg font-bold text-slate-800 mb-1">{ex.de}</p>
                       <p className="text-slate-600 font-medium">{ex.ar}</p>
@@ -94,13 +103,13 @@ const ExpandedGrammarRules = ({ rule }) => {
 
               {/* Tips & Warnings Grid */}
               <div className="grid md:grid-cols-2 gap-4">
-                {rule.notes && (
+                {normalizedRule.notes.length > 0 && (
                   <div className="bg-amber-50 p-5 rounded-xl border border-amber-100">
                     <h4 className="font-bold text-amber-800 flex items-center gap-2 mb-3 text-sm">
                       <AlertTriangle size={16} /> تنبيهات وملاحظات
                     </h4>
                     <ul className="space-y-2">
-                      {rule.notes.map((note, i) => (
+                      {normalizedRule.notes.map((note, i) => (
                         <li key={i} className="text-amber-900 text-sm flex items-start gap-2">
                           <span className="mt-1.5 w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0" />
                           <span className="leading-relaxed">{note}</span>
@@ -110,13 +119,13 @@ const ExpandedGrammarRules = ({ rule }) => {
                   </div>
                 )}
 
-                {rule.tips && (
+                {tips.length > 0 && (
                   <div className="bg-emerald-50 p-5 rounded-xl border border-emerald-100">
                     <h4 className="font-bold text-emerald-800 flex items-center gap-2 mb-3 text-sm">
                       <Lightbulb size={16} /> تلميحات ذكية
                     </h4>
                     <ul className="space-y-2">
-                      {rule.tips.map((tip, i) => (
+                      {tips.map((tip, i) => (
                         <li key={i} className="text-emerald-900 text-sm flex items-start gap-2">
                           <span className="mt-1.5 w-1.5 h-1.5 bg-emerald-400 rounded-full flex-shrink-0" />
                           <span className="leading-relaxed">{tip}</span>

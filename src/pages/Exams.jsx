@@ -25,14 +25,18 @@ function Exams() {
     // History
     const savedHistory = localStorage.getItem('exam_results');
     if (savedHistory) {
-      const parsed = JSON.parse(savedHistory);
-      const historyMap = {};
-      parsed.forEach(res => {
-        if (!historyMap[res.examId] || new Date(res.date) > new Date(historyMap[res.examId].date)) {
-          historyMap[res.examId] = res;
-        }
-      });
-      setUserHistory(historyMap);
+      try {
+        const parsed = JSON.parse(savedHistory);
+        const historyMap = {};
+        (Array.isArray(parsed) ? parsed : []).forEach(res => {
+          if (res?.examId && (!historyMap[res.examId] || new Date(res.date) > new Date(historyMap[res.examId].date))) {
+            historyMap[res.examId] = res;
+          }
+        });
+        setUserHistory(historyMap);
+      } catch (error) {
+        console.warn('[Exams] Ignoring invalid local exam history:', error);
+      }
     }
 
     const loadData = async () => {
@@ -40,8 +44,8 @@ function Exams() {
         try {
             const allData = await getExams();
             const grouped = { A1: [], A2: [], B1: [], B2: [] };
-            allData.forEach((exam) => {
-                if (grouped[exam.level]) grouped[exam.level].push(exam);
+            (Array.isArray(allData) ? allData : []).forEach((exam) => {
+                if (exam && grouped[exam.level] && Array.isArray(exam.questions)) grouped[exam.level].push(exam);
             });
             setAvailableExams(grouped);
             setCloudError(false);
