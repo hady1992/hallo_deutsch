@@ -1,72 +1,71 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const QUICK_LINKS = [
+  { label: 'الرئيسية', path: '/' },
+  { label: 'المستويات', path: '/levels' },
+  { label: 'المفردات', path: '/vocabulary' },
+  { label: 'القواعد', path: '/grammar' },
+];
+
+const LEARNING_LINKS = [
+  { label: 'التمارين', path: '/exercises' },
+  { label: 'الامتحانات', path: '/exams' },
+  { label: 'تحديد المستوى', path: '/placement-test' },
+  { label: 'قسم الأطفال', path: '/kids' },
+];
+
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12 md:py-16">
+    <footer className="border-t-4 border-[#d71920] bg-[#111111] py-12 text-white md:py-14">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 text-center md:text-right">
-          {/* Site Description */}
+        <div className="grid gap-10 md:grid-cols-[1.4fr_0.8fr_0.8fr]">
           <div>
-            <h3 className="german-text text-2xl font-black mb-4 text-blue-400">Hallo Deutsch</h3>
-            <p className="text-gray-400 leading-relaxed text-sm md:text-base max-w-sm mx-auto md:mx-0">
-              دليلك الشامل لتعلّم اللغة الألمانية من الصفر حتى الاحتراف. نوفر دروساً مبسطة ومنظمة، تمارين تفاعلية، ونماذج امتحانات رسمية لجميع المستويات.
+            <Link to="/" className="brand-focus inline-flex items-center gap-3 rounded-md">
+              <img
+                src="/brand/hallo-deutsch-mark.webp"
+                width="48"
+                height="48"
+                loading="lazy"
+                alt="Hallo Deutsch – تعلم اللغة الألمانية"
+                className="h-12 w-12 rounded-md bg-white object-contain"
+              />
+              <span dir="ltr" className="german-text text-xl font-black">
+                <span className="text-white">Hallo </span>
+                <span className="text-[#ef2b32]">Deutsch</span>
+              </span>
+            </Link>
+            <p className="mt-5 max-w-md text-sm leading-7 text-stone-400">
+              منصة عربية لتعلّم اللغة الألمانية عبر دروس منظمة، مفردات وقواعد، تمارين تفاعلية واختبارات حسب المستوى.
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-blue-400">روابط سريعة</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  الرئيسية
-                </Link>
-              </li>
-              <li>
-                <Link to="/levels" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  المستويات
-                </Link>
-              </li>
-              <li>
-                <Link to="/vocabulary" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  المفردات
-                </Link>
-              </li>
-              <li>
-                <Link to="/grammar" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  القواعد
-                </Link>
-              </li>
-              <li>
-                <Link to="/exercises" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  التمارين
-                </Link>
-              </li>
-              <li>
-                <Link to="/placement-test" className="text-gray-300 hover:text-blue-400 transition-colors block py-1">
-                  اختبار تحديد المستوى
-                </Link>
-              </li>
+            <h2 className="font-black text-[#e8b21e]">روابط سريعة</h2>
+            <ul className="mt-4 space-y-2">
+              {QUICK_LINKS.map(({ label, path }) => (
+                <li key={path}>
+                  <Link to={path} className="brand-focus inline-flex min-h-11 items-center rounded-md text-sm text-stone-300 transition-colors hover:text-white">{label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-blue-400">تواصل معنا</h3>
-            <p className="text-gray-400 leading-relaxed mb-4 text-sm md:text-base">
-              لأي استفسارات أو اقتراحات، نحن هنا لمساعدتك في رحلتك لتعلم اللغة الألمانية.
-            </p>
-            <div className="flex justify-center md:justify-start gap-4">
-                {/* Social icons could go here */}
-            </div>
+            <h2 className="font-black text-[#e8b21e]">ابدأ من هنا</h2>
+            <ul className="mt-4 space-y-2">
+              {LEARNING_LINKS.map(({ label, path }) => (
+                <li key={path}>
+                  <Link to={path} className="brand-focus inline-flex min-h-11 items-center rounded-md text-sm text-stone-300 transition-colors hover:text-white">{label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} <span className="german-text">Hallo Deutsch</span>. جميع الحقوق محفوظة.
-          </p>
+        <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-center text-xs text-stone-500 md:flex-row md:items-center md:justify-between md:text-right">
+          <p>© {new Date().getFullYear()} Hallo Deutsch. جميع الحقوق محفوظة.</p>
+          <p dir="ltr" className="german-text md:text-left">Deutsch lernen, Schritt für Schritt.</p>
         </div>
       </div>
     </footer>

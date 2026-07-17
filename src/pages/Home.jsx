@@ -1,153 +1,182 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { BookOpen, Brain, FileText, Target, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Baby,
+  BookOpen,
+  CheckCircle2,
+  Dumbbell,
+  Languages,
+  Layers,
+  LayoutGrid,
+  PenTool,
+  Target,
+  Trophy,
+} from 'lucide-react';
+
+const SECTION_CARDS = [
+  { title: 'المستويات', description: 'من A1 إلى B2', path: '/levels', icon: Layers, accent: 'red' },
+  { title: 'المفردات', description: 'تعلّم كلمات وأمثلة جديدة', path: '/vocabulary', icon: BookOpen, accent: 'gold' },
+  { title: 'القواعد', description: 'شرح منظم وأمثلة', path: '/grammar', icon: PenTool, accent: 'red' },
+  { title: 'التمارين', description: 'تدريب تفاعلي ونتائج فورية', path: '/exercises', icon: Dumbbell, accent: 'gold' },
+  { title: 'الامتحانات', description: 'نماذج واختبارات حسب المستوى', path: '/exams', icon: Trophy, accent: 'red' },
+  { title: 'الأطفال', description: 'محتوى وألعاب تعليمية', path: '/kids', icon: Baby, accent: 'gold' },
+];
+
+const BENEFITS = [
+  { title: 'مسار منظم حسب المستويات', description: 'انتقل بين A1 وA2 وB1 وB2 ضمن صفحات واضحة.', icon: LayoutGrid },
+  { title: 'شرح عربي وأمثلة ألمانية', description: 'افهم الفكرة بالعربية وطبّقها على أمثلة ألمانية.', icon: Languages },
+  { title: 'تعلّم وتدريب في مكان واحد', description: 'مفردات وقواعد وتمارين واختبارات ضمن تجربة واحدة.', icon: Target },
+  { title: 'مساحة مخصصة للأطفال', description: 'كلمات ومحادثات وألعاب تعليمية مناسبة للصغار.', icon: Baby },
+];
+
+const LEVELS = [
+  { level: 'A1', title: 'المبتدئ', status: 'متاح الآن', available: true, path: '/level/a1' },
+  { level: 'A2', title: 'ما قبل المتوسط', status: 'قيد التطوير', path: '/level/a2' },
+  { level: 'B1', title: 'المتوسط', status: 'قيد التطوير', path: '/level/b1' },
+  { level: 'B2', title: 'فوق المتوسط', status: 'قيد التطوير', path: '/level/b2' },
+];
+
 function Home() {
-  const navigate = useNavigate();
-  const features = [{
-    icon: <BookOpen className="w-8 h-8" />,
-    title: 'دروس مبسطة ومنظمة',
-    description: 'محتوى تعليمي منظم حسب المستويات من A1 إلى B2'
-  }, {
-    icon: <Brain className="w-8 h-8" />,
-    title: 'تمارين تفاعلية',
-    description: 'تمارين متنوعة وتفاعلية مع نتائج فورية'
-  }, {
-    icon: <FileText className="w-8 h-8" />,
-    title: 'نماذج امتحانات رسمية',
-    description: 'نماذج امتحانات حقيقية لجميع المستويات'
-  }, {
-    icon: <Target className="w-8 h-8" />,
-    title: 'تحديد مستوى دقيق',
-    description: 'اختبار شامل لتحديد مستواك الحالي بدقة'
-  }];
-  return <>
+  return (
+    <div className="bg-[#fcfaf6]" dir="rtl">
       <Helmet>
-        <title>{'Hallo Deutsch  - تعلم اللغة الألمانية'}</title>
-        <meta name="description" content="تعلم اللغة الألمانية من المبتدئ إلى المتقدم مع دروس مبسطة وتمارين تفاعلية ونماذج امتحانات رسمية." />
+        <title>Hallo Deutsch | تعلم اللغة الألمانية من A1 إلى B2</title>
+        <meta name="description" content="تعلم اللغة الألمانية بالعربية من المستوى A1 إلى B2 من خلال دروس منظمة، مفردات، قواعد، تمارين تفاعلية واختبارات." />
+        <link rel="canonical" href="https://hallodeutschpro.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://hallodeutschpro.com/" />
+        <meta property="og:title" content="Hallo Deutsch | تعلم اللغة الألمانية من A1 إلى B2" />
+        <meta property="og:description" content="تعلم اللغة الألمانية بالعربية من خلال دروس منظمة، مفردات، قواعد، تمارين تفاعلية واختبارات." />
+        <meta property="og:image" content="https://hallodeutschpro.com/brand/hallo-deutsch-logo.png" />
       </Helmet>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden group">
-        {/* Background Image */}
-        <div className="hero-bg absolute inset-0 z-0" style={{
-        backgroundImage: 'url(https://images.unsplash.com/photo-1694468693882-62b3be812a4a)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }} />
-        
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-blue-900/40 to-blue-950/75 z-0"></div>
+      <section className="relative mt-16 min-h-[650px] overflow-hidden md:mt-[72px] lg:h-[680px] lg:min-h-0">
+        <picture>
+          <source media="(max-width: 1280px)" srcSet="/home/academic-library-hero-1280.webp" />
+          <img
+            src="/home/academic-library-hero-1600.webp"
+            width="1600"
+            height="900"
+            alt="مكتبة أكاديمية مع كتب وكرة أرضية وعلم ألمانيا"
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover object-left"
+          />
+        </picture>
+        <div className="absolute inset-0 bg-black/65" aria-hidden="true" />
 
-        {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 text-center text-white pt-20">
-          <motion.div initial={{
-          opacity: 0,
-          y: 40
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.8,
-          ease: "easeOut"
-        }}>
-            <h1 className="german-text text-5xl md:text-7xl font-black mb-4 md:mb-6 leading-tight tracking-tight [text-shadow:0_2px_20px_rgba(0,0,0,0.5)]">
-              Hallo Deutsch
+        <div className="container relative z-10 mx-auto grid min-h-[650px] items-center gap-5 px-4 py-8 text-white md:px-8 lg:h-full lg:min-h-0 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10">
+          <div className="max-w-2xl justify-self-end text-center lg:text-right">
+            <p className="mb-3 text-sm font-bold text-[#f2c94c] md:text-base">Hallo Deutsch</p>
+            <h1 className="text-4xl font-black leading-[1.2] md:text-6xl">
+              بوابتك لإتقان
+              <span className="mt-1 block text-[#e8b21e]">اللغة الألمانية</span>
             </h1>
-            <h2 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 text-blue-100 [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]">
-              بوابتك لإتقان اللغة الألمانية
-            </h2>
-          </motion.div>
-          
-          <motion.p initial={{
-          opacity: 0,
-          y: 40
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.8,
-          delay: 0.3
-        }} className="text-lg md:text-2xl mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed text-gray-100 [text-shadow:0_1px_10px_rgba(0,0,0,0.5)]">
-            رحلة تعليمية متكاملة من الصفر حتى الاحتراف.. دروس تفاعلية، تمارين ذكية، وامتحانات تحاكي الواقع.
-          </motion.p>
-
-          <motion.div initial={{
-          opacity: 0,
-          y: 40
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.8,
-          delay: 0.6
-        }} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button onClick={() => navigate('/levels')} size="lg" className="bg-blue-600 hover:bg-blue-700 text-white min-h-[60px] px-10 text-lg md:text-xl rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 w-full sm:w-auto">
-              ابدأ التعلّم الآن 🚀
-            </Button>
-            <Button onClick={() => navigate('/placement-test')} variant="outline" size="lg" className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm min-h-[60px] px-10 text-lg md:text-xl rounded-full transition-all duration-300 w-full sm:w-auto">
-              اختبر مستواك
-            </Button>
-          </motion.div>
-        </div>
-
-        {/* Fallback Admin Button */}
-        <div className="fixed bottom-4 left-4 z-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="bg-slate-900/50 text-white/50 hover:bg-slate-900 hover:text-white backdrop-blur-sm" title="Admin Access (Hidden)">
-            <ShieldCheck size={16} />
-          </Button>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-14 md:py-20 bg-white">
-        <div className="container mx-auto px-4 md:px-8">
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} viewport={{
-          once: true
-        }} className="text-center mb-10 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-              لماذا تختار <span className="german-text text-blue-600">Hallo Deutsch</span>؟
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              نقدم لك تجربة تعليمية فريدة تجمع بين المتعة والفائدة
+            <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-stone-200 md:text-lg lg:mx-0">
+              رحلة تعليمية متكاملة من الصفر حتى المستويات المتقدمة. دروس منظمة، مفردات وقواعد، تمارين تفاعلية، واختبارات تساعدك على قياس تقدمك.
             </p>
-          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => <motion.div key={index} initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }} transition={{
-            delay: index * 0.1
-          }} whileHover={{
-            y: -10
-          }} className="bg-slate-50 p-8 rounded-3xl hover:bg-blue-50 transition-colors duration-300 border border-slate-100 hover:border-blue-100 shadow-sm hover:shadow-xl">
-                <div className="bg-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 shadow-md">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-gray-900">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </motion.div>)}
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+              <Link to="/levels" className="brand-focus inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-[#d71920] px-7 py-3 font-black text-white transition-colors hover:bg-[#b91218]">
+                ابدأ التعلم الآن
+                <ArrowLeft size={19} aria-hidden="true" />
+              </Link>
+              <Link to="/placement-test" className="brand-focus inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/55 bg-black/20 px-7 py-3 font-black text-white transition-colors hover:bg-white/10">
+                اختبر مستواك
+                <Target size={19} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <ul className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm text-stone-200 lg:justify-start">
+              {['مستويات من A1 إلى B2', 'شرح عربي واضح', 'تمارين بنتائج فورية'].map((feature) => (
+                <li key={feature} className="flex items-center gap-2">
+                  <CheckCircle2 size={17} className="text-[#e8b21e]" aria-hidden="true" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="order-first mx-auto w-full max-w-[190px] lg:order-none lg:max-w-[360px]">
+            <img
+              src="/brand/hallo-deutsch-logo.webp"
+              width="967"
+              height="1000"
+              alt="Hallo Deutsch – تعلم اللغة الألمانية"
+              className="h-auto w-full rounded-full bg-white object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]"
+            />
           </div>
         </div>
       </section>
-    </>;
+
+      <section aria-label="أقسام الموقع" className="border-b border-black/10 bg-[#fcfaf6] py-8 md:py-10">
+        <div className="container mx-auto grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 md:px-8 lg:grid-cols-3 xl:grid-cols-6">
+          {SECTION_CARDS.map(({ title, description, path, icon: Icon, accent }) => (
+            <Link key={path} to={path} className="brand-focus group relative min-h-[152px] rounded-lg border border-black/10 bg-white p-5 shadow-[0_8px_24px_rgba(28,25,23,0.06)] transition-transform hover:-translate-y-1">
+              <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-md ${accent === 'red' ? 'bg-red-50 text-[#d71920]' : 'bg-amber-50 text-[#b08000]'}`}>
+                <Icon size={23} aria-hidden="true" />
+              </span>
+              <h2 className="text-lg font-black text-[#111111]">{title}</h2>
+              <p className="mt-1 text-sm leading-6 text-[#5f6368]">{description}</p>
+              <span className={`absolute inset-x-5 bottom-0 h-0.5 ${accent === 'red' ? 'bg-[#d71920]' : 'bg-[#e8b21e]'}`} aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-white py-16 md:py-20">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="max-w-2xl">
+            <p className="font-bold text-[#b08000]">لماذا Hallo Deutsch؟</p>
+            <h2 className="mt-2 text-3xl font-black text-[#111111] md:text-4xl">تجربة تعليمية متكاملة</h2>
+            <p className="mt-4 leading-7 text-[#5f6368]">أدوات التعلّم الأساسية مرتبة في مسارات واضحة، لتنتقل من الشرح إلى التطبيق دون تشتت.</p>
+          </div>
+
+          <div className="mt-10 grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
+            {BENEFITS.map(({ title, description, icon: Icon }) => (
+              <div key={title} className="border-r-2 border-[#e8b21e] pr-4">
+                <Icon size={26} className="mb-4 text-[#d71920]" aria-hidden="true" />
+                <h3 className="text-lg font-black text-[#111111]">{title}</h3>
+                <p className="mt-2 text-sm leading-7 text-[#5f6368]">{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#fcfaf6] py-16 md:py-20">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div>
+              <p className="font-bold text-[#b08000]">مسارك الدراسي</p>
+              <h2 className="mt-2 text-3xl font-black text-[#111111] md:text-4xl">اختر المستوى المناسب</h2>
+              <p className="mt-3 max-w-2xl leading-7 text-[#5f6368]">ابدأ من الأساسيات في A1، وتابع الأقسام الأخرى بالتزامن مع توسّع المحتوى المنشور.</p>
+            </div>
+            <Link to="/levels" className="brand-focus inline-flex min-h-11 items-center gap-2 self-start rounded-md font-bold text-[#b91218] hover:text-[#8f0e13]">
+              عرض جميع المستويات
+              <ArrowLeft size={18} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {LEVELS.map(({ level, title, status, available, path }) => (
+              <Link key={level} to={path} className="brand-focus group rounded-lg border border-black/10 bg-white p-5 transition-colors hover:border-[#d71920]/40">
+                <div className="flex items-center justify-between gap-3">
+                  <span dir="ltr" className="german-text text-3xl font-black text-[#111111]">{level}</span>
+                  <span className={`rounded-md border px-2.5 py-1 text-xs font-bold ${available ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-amber-50 text-amber-800'}`}>
+                    {status}
+                  </span>
+                </div>
+                <h3 className="mt-7 font-black text-[#111111]">{title}</h3>
+                <span className="mt-5 block h-0.5 w-10 bg-[#e8b21e] transition-[width] group-hover:w-16" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
+
 export default Home;
