@@ -34,6 +34,7 @@ const normalizeDetailItems = (value, prefix) => asArray(value).map((item, index)
 
   return {
     ...item,
+    sourceId: asText(item.id),
     id: item.id || `${prefix}-${index}`,
     title: normalizeTitle(item.title || item.heading || item.name || item.germanTitle),
     text: firstText(

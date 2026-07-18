@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BookOpen, CheckCircle2, Target } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
+import LessonActivitiesStep from '@/components/course/LessonActivitiesStep';
 import LessonQuizStep from '@/components/course/LessonQuizStep';
 
 const hasArabic = (text) => /[\u0600-\u06ff]/.test(String(text || ''));
@@ -209,13 +210,22 @@ const ItemGrid = ({ items, tone = 'neutral' }) => (
   </div>
 );
 
-const LessonStepContent = ({ step, onResume, resumeTitle }) => {
+const LessonStepContent = ({ step, lessonId, onActivitiesCompletionChange, onResume, resumeTitle }) => {
   if (!step) return null;
   if (step.type === 'intro') return <IntroStep lesson={step.data} onResume={onResume} resumeTitle={resumeTitle} />;
   if (step.type === 'section') return <SectionStep item={step.data || {}} />;
   if (step.type === 'vocabulary') return <VocabularyStep items={step.data || []} />;
   if (step.type === 'conversation') return <ConversationStep items={step.data || []} />;
   if (step.type === 'quiz') return <LessonQuizStep questions={step.data || []} />;
+  if (step.type === 'exercises') {
+    return (
+      <LessonActivitiesStep
+        lessonId={lessonId}
+        activities={step.data || []}
+        onCompletionChange={onActivitiesCompletionChange}
+      />
+    );
+  }
   if (step.type === 'reading') return <ItemGrid items={step.data || []} />;
   if (step.type === 'grammar') return <ItemGrid items={step.data || []} tone="gold" />;
   return <ItemGrid items={step.data || []} />;

@@ -5,22 +5,28 @@ import { LessonRenderBoundary } from '@/components/SafeLessonRenderer';
 import LessonOutline from '@/components/course/LessonOutline';
 import LessonStepContent from '@/components/course/LessonStepContent';
 import LessonStepNavigation from '@/components/course/LessonStepNavigation';
-import { buildLessonSteps } from '@/utils/lessonSteps';
+import { buildLessonSteps, resolveLessonStepId } from '@/utils/lessonSteps';
 import { getLessonStepProgress, saveLessonStepProgress } from '@/utils/lessonStepProgress';
 
 const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }) => {
   const { lesson, steps } = useMemo(() => buildLessonSteps(rawLesson), [rawLesson]);
   const lessonKey = `${lesson.slug || lesson.supabaseId || lesson.id || 'lesson'}-lesson`;
+  const lessonActivityKey = lesson.id || lesson.supabaseId || lesson.slug || lessonKey;
   const initialProgress = useMemo(() => getLessonStepProgress(lessonKey), [lessonKey]);
   const validStepIds = useMemo(() => new Set(steps.map((step) => step.id)), [steps]);
+  const hiddenCompletedStepIds = useMemo(
+    () => initialProgress.completedStepIds.filter((stepId) => !validStepIds.has(stepId)),
+    [initialProgress, validStepIds]
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedStepId = searchParams.get('step');
-  const initialStepId = requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id;
+  const initialStepId = resolveLessonStepId(requestedStepId, steps);
   const [currentStepId, setCurrentStepId] = useState(initialStepId);
   const [completedStepIds, setCompletedStepIds] = useState(
     initialProgress.completedStepIds.filter((stepId) => validStepIds.has(stepId))
   );
   const [mobileOutlineOpen, setMobileOutlineOpen] = useState(false);
+  const [activitiesAllComplete, setActivitiesAllComplete] = useState(false);
   const [finished, setFinished] = useState(false);
   const contentRef = useRef(null);
 
@@ -29,31 +35,45 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
   const resumeStep = steps.find((step) => step.id === initialProgress.currentStepId && step.id !== 'intro');
   const progressPercent = finished ? 100 : Math.round(((currentIndex + 1) / Math.max(steps.length, 1)) * 100);
 
+  const persistProgress = (stepId, completedIds) => {
+    saveLessonStepProgress(lessonKey, {
+      currentStepId: stepId,
+      completedStepIds: [...new Set([...hiddenCompletedStepIds, ...completedIds])],
+    });
+  };
+
   useEffect(() => {
-    const nextStepId = requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id;
+    const nextStepId = resolveLessonStepId(requestedStepId, steps);
     if (nextStepId && nextStepId !== currentStepId) {
       setCurrentStepId(nextStepId);
       setFinished(false);
     }
-    if ((!requestedStepId || !validStepIds.has(requestedStepId)) && steps[0]?.id) {
+    if (nextStepId && requestedStepId !== nextStepId) {
       const nextParams = new URLSearchParams(searchParams);
-      nextParams.set('step', steps[0].id);
+      nextParams.set('step', nextStepId);
       setSearchParams(nextParams, { replace: true });
     }
   }, [currentStepId, requestedStepId, searchParams, setSearchParams, steps, validStepIds]);
 
   useEffect(() => {
     setCompletedStepIds(initialProgress.completedStepIds.filter((stepId) => validStepIds.has(stepId)));
-    setCurrentStepId(requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id);
+    setCurrentStepId(resolveLessonStepId(requestedStepId, steps));
+    setActivitiesAllComplete(false);
     setFinished(false);
   }, [lessonKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const persistProgress = (stepId, completedIds) => {
-    saveLessonStepProgress(lessonKey, {
-      currentStepId: stepId,
-      completedStepIds: completedIds,
+  useEffect(() => {
+    if (currentStep?.type !== 'exercises') return;
+    setCompletedStepIds((current) => {
+      const alreadyCompleted = current.includes(currentStep.id);
+      if (alreadyCompleted === activitiesAllComplete) return current;
+      const next = activitiesAllComplete
+        ? [...current, currentStep.id]
+        : current.filter((stepId) => stepId !== currentStep.id);
+      persistProgress(currentStepId, next);
+      return next;
     });
-  };
+  }, [activitiesAllComplete, currentStep, currentStepId, lessonKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateUrlStep = (stepId, replace = false) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -63,7 +83,12 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
 
   const goToStep = (stepId) => {
     if (!validStepIds.has(stepId) || stepId === currentStepId) return;
-    const nextCompleted = [...new Set([...completedStepIds, currentStepId])];
+    const shouldCompleteCurrent = currentStep.type !== 'exercises' || activitiesAllComplete;
+    const nextCompleted = shouldCompleteCurrent
+      ? [...new Set([...completedStepIds, currentStepId])]
+      : completedStepIds.filter((id) => id !== currentStepId);
+    const targetStep = steps.find((step) => step.id === stepId);
+    if (targetStep?.type === 'exercises') setActivitiesAllComplete(false);
     setCompletedStepIds(nextCompleted);
     setCurrentStepId(stepId);
     setFinished(false);
@@ -73,7 +98,10 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
   };
 
   const finishLesson = () => {
-    const nextCompleted = [...new Set([...completedStepIds, currentStepId])];
+    const shouldCompleteCurrent = currentStep.type !== 'exercises' || activitiesAllComplete;
+    const nextCompleted = shouldCompleteCurrent
+      ? [...new Set([...completedStepIds, currentStepId])]
+      : completedStepIds.filter((id) => id !== currentStepId);
     setCompletedStepIds(nextCompleted);
     setFinished(true);
     persistProgress(currentStepId, nextCompleted);
@@ -133,6 +161,8 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
               <LessonRenderBoundary key={currentStep.id}>
                 <LessonStepContent
                   step={currentStep}
+                  lessonId={lessonActivityKey}
+                  onActivitiesCompletionChange={setActivitiesAllComplete}
                   resumeTitle={currentStep.id === 'intro' ? resumeStep?.title : ''}
                   onResume={() => resumeStep && goToStep(resumeStep.id)}
                 />

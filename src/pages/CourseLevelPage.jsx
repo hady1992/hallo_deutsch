@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { ArrowLeft, BookOpen, Layers3, Loader2, Settings } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, BookOpen, Layers3, Loader2, Settings } from 'lucide-react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { getCourseLessons } from '@/services/contentRepository';
 import CourseProgress from '@/components/course/CourseProgress';
 import CourseUnitCard from '@/components/course/CourseUnitCard';
+import CourseUnitOverviewCard from '@/components/course/CourseUnitOverviewCard';
 import {
   getCourseProgress,
   getLessonProgressStatus,
@@ -12,6 +13,7 @@ import {
 } from '@/utils/courseProgress';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { isAuthorizedAdminEmail } from '@/components/AdminGate';
+import { groupLessonsByUnit } from '@/utils/courseUnits';
 
 const LEVEL_DETAILS = {
   A1: { title: 'المستوى الأول A1', description: 'الأساسيات اللازمة لبدء التواصل باللغة الألمانية.' },
@@ -20,30 +22,12 @@ const LEVEL_DETAILS = {
   B2: { title: 'المستوى الرابع B2', description: 'تعميق الفهم والتعبير في الموضوعات المتقدمة.' },
 };
 
-const groupLessonsByUnit = (lessons) => {
-  const units = new Map();
-  lessons.forEach((lesson) => {
-    const key = lesson.unit || 'general';
-    if (!units.has(key)) {
-      units.set(key, {
-        unit: key,
-        unitOrder: lesson.unitOrder || 0,
-        unitTitleAr: lesson.unitTitleAr || 'وحدة عامة',
-        unitTitleDe: lesson.unitTitleDe || '',
-        lessons: [],
-      });
-    }
-    units.get(key).lessons.push(lesson);
-  });
-
-  return [...units.values()].sort((a, b) => a.unitOrder - b.unitOrder || a.unit.localeCompare(b.unit));
-};
-
 const CourseLevelPage = () => {
   const { level: levelParam = '' } = useParams();
   const level = levelParam.toUpperCase();
   const details = LEVEL_DETAILS[level];
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const isAdmin = isAuthorizedAdminEmail(user?.email);
   const [lessons, setLessons] = useState([]);
   const [progress, setProgress] = useState(getCourseProgress);
@@ -78,6 +62,8 @@ const CourseLevelPage = () => {
   }, []);
 
   const units = useMemo(() => groupLessonsByUnit(lessons), [lessons]);
+  const selectedUnitKey = searchParams.get('unit') || '';
+  const selectedUnit = units.find((unit) => unit.unit === selectedUnitKey) || null;
   const progressPercent = getLevelProgressPercent(lessons, progress);
   const completedCount = lessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length;
   const lastLessonId = progress.lastLessonIdByLevel[level];
@@ -104,7 +90,7 @@ const CourseLevelPage = () => {
           <p className="font-bold text-[#b08000]">المسار الدراسي</p>
           <div className="mt-2 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
-              <h1 className="text-3xl font-black text-[#111111] md:text-5xl">{details.title}</h1>
+              <h1 className="text-3xl font-black text-[#111111] md:text-5xl">المستوى {level}</h1>
               <p className="mt-3 max-w-2xl leading-7 text-[#5f6368]">{details.description}</p>
             </div>
             {continueLesson && (
@@ -146,17 +132,37 @@ const CourseLevelPage = () => {
               <Link to="/admin" className="mx-auto mt-3 flex w-fit items-center gap-2 text-sm font-bold text-slate-600"><Settings size={16} /> إدارة الدروس</Link>
             )}
           </div>
-        ) : (
-          <div className="mt-9 space-y-12">
-            {units.map((unit) => (
-              <CourseUnitCard
-                key={unit.unit}
-                unit={unit}
-                level={level}
-                getStatus={(lessonId) => getLessonProgressStatus(lessonId, progress)}
-              />
-            ))}
+        ) : selectedUnit ? (
+          <div className="mt-9">
+            <Link
+              to={`/level/${level.toLowerCase()}`}
+              className="brand-focus mb-7 inline-flex min-h-11 items-center gap-2 rounded-md border border-black/15 bg-white px-4 font-black text-[#111111] hover:border-[#d71920]/50"
+            >
+              <ArrowRight size={18} /> العودة إلى الوحدات
+            </Link>
+            <CourseUnitCard
+              unit={selectedUnit}
+              level={level}
+              getStatus={(lessonId) => getLessonProgressStatus(lessonId, progress)}
+            />
           </div>
+        ) : (
+          <section className="mt-9">
+            <div className="mb-6">
+              <p className="font-bold text-[#b08000]">المستوى {level}</p>
+              <h2 className="mt-1 text-2xl font-black text-[#111111] md:text-3xl">اختر الوحدة التعليمية</h2>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {units.map((unit) => (
+                <CourseUnitOverviewCard
+                  key={unit.unit}
+                  unit={unit}
+                  level={level}
+                  completedCount={unit.lessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </main>
     </div>
