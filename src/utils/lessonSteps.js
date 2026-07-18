@@ -8,8 +8,19 @@ const STEP_TITLES = {
   examples: 'الأمثلة',
   conversation: 'الحوار',
   reading: 'القراءة',
-  exercises: 'أنشطة الدرس',
   quiz: 'الاختبار القصير',
+};
+
+const LEGACY_ACTIVITY_STEP_PATTERN = /(^|[-_])(activities?|exercises?)([-_]|$)/i;
+
+export const resolveLessonStepId = (requestedStepId, steps) => {
+  const safeSteps = asArray(steps);
+  const requested = String(requestedStepId || '').trim();
+  if (requested && safeSteps.some((step) => step.id === requested)) return requested;
+  if (requested && LEGACY_ACTIVITY_STEP_PATTERN.test(requested)) {
+    return safeSteps.find((step) => step.type === 'quiz')?.id || safeSteps[safeSteps.length - 1]?.id || '';
+  }
+  return safeSteps[0]?.id || '';
 };
 
 const uniqueStepId = (candidate, usedIds) => {
@@ -51,7 +62,6 @@ export const buildLessonSteps = (rawLesson) => {
     ['examples', lesson.examples],
     ['conversation', lesson.conversation],
     ['reading', lesson.reading],
-    ['exercises', lesson.exercises],
     ['quiz', lesson.shortQuiz],
   ];
 
@@ -67,4 +77,3 @@ export const buildLessonSteps = (rawLesson) => {
 
   return { lesson, steps };
 };
-

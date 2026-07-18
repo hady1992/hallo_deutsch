@@ -5,7 +5,7 @@ import { LessonRenderBoundary } from '@/components/SafeLessonRenderer';
 import LessonOutline from '@/components/course/LessonOutline';
 import LessonStepContent from '@/components/course/LessonStepContent';
 import LessonStepNavigation from '@/components/course/LessonStepNavigation';
-import { buildLessonSteps } from '@/utils/lessonSteps';
+import { buildLessonSteps, resolveLessonStepId } from '@/utils/lessonSteps';
 import { getLessonStepProgress, saveLessonStepProgress } from '@/utils/lessonStepProgress';
 
 const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }) => {
@@ -14,9 +14,13 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
   const lessonActivityKey = lesson.id || lesson.supabaseId || lesson.slug || lessonKey;
   const initialProgress = useMemo(() => getLessonStepProgress(lessonKey), [lessonKey]);
   const validStepIds = useMemo(() => new Set(steps.map((step) => step.id)), [steps]);
+  const hiddenCompletedStepIds = useMemo(
+    () => initialProgress.completedStepIds.filter((stepId) => !validStepIds.has(stepId)),
+    [initialProgress, validStepIds]
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedStepId = searchParams.get('step');
-  const initialStepId = requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id;
+  const initialStepId = resolveLessonStepId(requestedStepId, steps);
   const [currentStepId, setCurrentStepId] = useState(initialStepId);
   const [completedStepIds, setCompletedStepIds] = useState(
     initialProgress.completedStepIds.filter((stepId) => validStepIds.has(stepId))
@@ -31,22 +35,29 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
   const resumeStep = steps.find((step) => step.id === initialProgress.currentStepId && step.id !== 'intro');
   const progressPercent = finished ? 100 : Math.round(((currentIndex + 1) / Math.max(steps.length, 1)) * 100);
 
+  const persistProgress = (stepId, completedIds) => {
+    saveLessonStepProgress(lessonKey, {
+      currentStepId: stepId,
+      completedStepIds: [...new Set([...hiddenCompletedStepIds, ...completedIds])],
+    });
+  };
+
   useEffect(() => {
-    const nextStepId = requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id;
+    const nextStepId = resolveLessonStepId(requestedStepId, steps);
     if (nextStepId && nextStepId !== currentStepId) {
       setCurrentStepId(nextStepId);
       setFinished(false);
     }
-    if ((!requestedStepId || !validStepIds.has(requestedStepId)) && steps[0]?.id) {
+    if (nextStepId && requestedStepId !== nextStepId) {
       const nextParams = new URLSearchParams(searchParams);
-      nextParams.set('step', steps[0].id);
+      nextParams.set('step', nextStepId);
       setSearchParams(nextParams, { replace: true });
     }
   }, [currentStepId, requestedStepId, searchParams, setSearchParams, steps, validStepIds]);
 
   useEffect(() => {
     setCompletedStepIds(initialProgress.completedStepIds.filter((stepId) => validStepIds.has(stepId)));
-    setCurrentStepId(requestedStepId && validStepIds.has(requestedStepId) ? requestedStepId : steps[0]?.id);
+    setCurrentStepId(resolveLessonStepId(requestedStepId, steps));
     setActivitiesAllComplete(false);
     setFinished(false);
   }, [lessonKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -59,20 +70,10 @@ const LessonPlayer = ({ lesson: rawLesson, onLessonComplete, completionContent }
       const next = activitiesAllComplete
         ? [...current, currentStep.id]
         : current.filter((stepId) => stepId !== currentStep.id);
-      saveLessonStepProgress(lessonKey, {
-        currentStepId,
-        completedStepIds: next,
-      });
+      persistProgress(currentStepId, next);
       return next;
     });
-  }, [activitiesAllComplete, currentStep, currentStepId, lessonKey]);
-
-  const persistProgress = (stepId, completedIds) => {
-    saveLessonStepProgress(lessonKey, {
-      currentStepId: stepId,
-      completedStepIds: completedIds,
-    });
-  };
+  }, [activitiesAllComplete, currentStep, currentStepId, lessonKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateUrlStep = (stepId, replace = false) => {
     const nextParams = new URLSearchParams(searchParams);
