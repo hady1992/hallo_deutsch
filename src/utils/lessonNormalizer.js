@@ -65,6 +65,7 @@ const normalizeQuiz = (value) => {
 export const normalizeLessonForDisplay = (rawLesson = {}) => {
   const lesson = isRecord(rawLesson) ? rawLesson : {};
   const structuredContent = isRecord(lesson.content) ? lesson.content : {};
+  const metadata = isRecord(lesson.metadata) ? lesson.metadata : {};
   const rawExplanation = asText(lesson.explanation);
   const explanation = firstText(
     rawExplanation === '[object Object]' ? '' : rawExplanation,
@@ -92,6 +93,18 @@ export const normalizeLessonForDisplay = (rawLesson = {}) => {
     asArray(lesson.examples).length ? lesson.examples : structuredContent.examples,
     'example'
   );
+  const grammar = normalizeDetailItems(
+    asArray(lesson.grammar).length ? lesson.grammar : structuredContent.grammar,
+    'grammar'
+  );
+  const conversation = normalizeDetailItems(
+    asArray(lesson.conversation).length ? lesson.conversation : structuredContent.conversation,
+    'conversation'
+  );
+  const reading = normalizeDetailItems(
+    asArray(lesson.reading).length ? lesson.reading : structuredContent.reading,
+    'reading'
+  );
   const shortQuiz = normalizeQuiz(lesson.shortQuiz || structuredContent.shortQuiz);
 
   return {
@@ -99,13 +112,25 @@ export const normalizeLessonForDisplay = (rawLesson = {}) => {
     title: normalizeTitle(lesson.title) || firstText(lesson.slug, 'درس بدون عنوان'),
     description: asText(lesson.description),
     explanation,
-    content: null,
+    germanTitle: asText(lesson.germanTitle || structuredContent.germanTitle),
+    level: firstText(lesson.level, metadata.level).toUpperCase(),
+    slug: firstText(lesson.slug, lesson.id),
+    unit: firstText(lesson.unit, metadata.unit, lesson.topic, 'general'),
+    unitOrder: Number(lesson.unitOrder ?? metadata.unitOrder) || 0,
+    unitTitleAr: firstText(lesson.unitTitleAr, metadata.unitTitleAr, 'وحدة عامة'),
+    unitTitleDe: firstText(lesson.unitTitleDe, metadata.unitTitleDe),
+    order: Number(lesson.order ?? metadata.order) || 0,
+    estimatedMinutes: Number(lesson.estimatedMinutes ?? lesson.duration ?? metadata.estimatedMinutes) || 0,
+    content: structuredContent,
     objectives: normalizeStringList(lesson.objectives || structuredContent.objectives),
     resources: normalizeStringList(lesson.resources || structuredContent.resources),
     sections,
     vocabulary,
     exercises,
     examples,
+    grammar,
+    conversation,
+    reading,
     shortQuiz,
     introArabic: asText(structuredContent.introArabic),
     introGerman: asText(structuredContent.introGerman),
@@ -115,6 +140,10 @@ export const normalizeLessonForDisplay = (rawLesson = {}) => {
       || vocabulary.length
       || exercises.length
       || examples.length
+      || grammar.length
+      || conversation.length
+      || reading.length
+      || normalizeStringList(lesson.objectives || structuredContent.objectives).length
       || shortQuiz.length
     ),
   };

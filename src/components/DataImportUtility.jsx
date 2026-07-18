@@ -5,20 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { migrateVerbData } from '@/utils/verbDataMigration';
-import { nounsDatabase } from '@/data/nounsDatabase';
-import { vocabularyA1 } from '@/data/vocabularyA1';
-import { vocabularyA2 } from '@/data/vocabularyA2';
-import { vocabularyB1 } from '@/data/vocabularyB1';
-import { vocabularyB2 } from '@/data/vocabularyB2';
-import { dedupeByKey, getContentDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 import { publishContentItems } from '@/services/contentRepository';
-
-const DEFAULT_REFERENCES = {
-  nouns: nounsDatabase,
-  vocabulary: [...vocabularyA1, ...vocabularyA2, ...vocabularyB1, ...vocabularyB2],
-  verbs: [],
-  grammar: [],
-};
 
 export const parseImportCSV = (text) => {
   const rows = [];
@@ -365,20 +352,14 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
         // Validate & Migrate
         let validationResult;
-        let storageKey;
-
         if (contentType === 'verbs') {
             validationResult = validateVerbData(content);
-            storageKey = 'importedVerbs';
         } else if (contentType === 'nouns') {
             validationResult = validateNounData(content);
-            storageKey = 'importedNouns';
         } else if (contentType === 'vocabulary') {
             validationResult = validateVocabularyData(content);
-            storageKey = 'importedVocabulary';
         } else if (contentType === 'grammar') {
             validationResult = validateGrammarData(content);
-            storageKey = 'importedGrammarRules';
         } else {
             validationResult = { validItems: content, errors: [] };
         }
@@ -390,26 +371,12 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
         }
 
         if (validItems.length > 0) {
-            let existingData = [];
-            try {
-              const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
-              existingData = Array.isArray(storedData) ? storedData : [];
-            } catch {
-              existingData = [];
-            }
-
-            const dedupKey = (item) => getContentDedupKey(contentType, item);
-            const { unique: newItems, skipped: localDuplicates } = splitNewUniqueItems(
-              validItems,
-              DEFAULT_REFERENCES[contentType] || [],
-              dedupKey
-            );
-            const publishResult = await publishContentItems(contentType, newItems);
+            const publishResult = await publishContentItems(contentType, validItems);
 
             if (!publishResult.success) {
               setImportStats({
                 count: 0,
-                duplicates: localDuplicates,
+                duplicates: 0,
                 total: content.length,
                 errors: errors.length,
                 publication: 'failed',
@@ -424,13 +391,9 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
               return;
             }
 
-            // Local storage is an offline backup only after cloud publication succeeds.
-            const mergedData = dedupeByKey([...existingData, ...newItems], dedupKey, { prefer: 'last' });
-            localStorage.setItem(storageKey, JSON.stringify(mergedData));
-
             setImportStats({
                 count: publishResult.count,
-                duplicates: localDuplicates + publishResult.duplicates,
+                duplicates: publishResult.duplicates,
                 total: content.length,
                 errors: errors.length,
                 publication: 'published',
@@ -441,7 +404,7 @@ Genitiv,B1,"Indicates possession or belonging.","Das ist das Auto des Mannes.|Di
 
             toast({
                 title: "تم النشر للزوار",
-                description: `تم إضافة: ${publishResult.count}، تم تجاهل مكرر: ${localDuplicates + publishResult.duplicates}، أخطاء: ${errors.length}.`,
+                description: `تم إضافة: ${publishResult.count}، تم تجاهل مكرر: ${publishResult.duplicates}، أخطاء: ${errors.length}.`,
                 className: errors.length === 0
                   ? "bg-green-50 border-green-200 text-green-800"
                   : "bg-yellow-50 border-yellow-200 text-yellow-800"

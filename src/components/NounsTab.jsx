@@ -11,9 +11,19 @@ const NounsTab = () => {
   const [selectedGender, setSelectedGender] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
   const [allNouns, setAllNouns] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    const handleUpdate = async () => setAllNouns(await getNouns());
+    const handleUpdate = async () => {
+      setLoadError('');
+      try {
+        setAllNouns(await getNouns());
+      } catch (error) {
+        console.error('[NounsTab] Failed to load published nouns:', error);
+        setAllNouns([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      }
+    };
     handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
@@ -78,8 +88,9 @@ const NounsTab = () => {
         </div>
       </div>
 
+      {loadError && <div className="py-12 text-center font-bold text-red-700">{loadError}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredNouns.length > 0 ? (
+        {!loadError && filteredNouns.length > 0 ? (
           filteredNouns.map((noun, idx) => {
              const word = noun.noun || noun.word || noun.german;
              const article = noun.article;

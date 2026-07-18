@@ -1,180 +1,36 @@
-import { defaultData } from '@/data/defaultData';
-import {
-  dedupeByKey,
-  getExerciseDedupKey,
-  getPlacementQuestionDedupKey,
-} from '@/utils/contentDedupUtils';
+import { dedupeByKey, getExerciseDedupKey, getPlacementQuestionDedupKey } from '@/utils/contentDedupUtils';
 import { getPublishedContent, publishContentItems } from '@/services/contentRepository';
 
-// Storage Keys
 const LOCAL_STORAGE_KEYS = {
   PLACEMENT_TESTS: 'importedPlacementTests',
-  EXERCISES: 'importedExercises'
+  EXERCISES: 'importedExercises',
 };
 
-// Helper: Merge arrays by ID
-// Strategy: Cloud > Local > Default
-const mergeData = (local, remote, defaults = [], getKey = (item) => item?.id || item?.question || '') => {
-  const map = new Map();
-  
-  // 1. Start with defaults
-  if (Array.isArray(defaults)) {
-      defaults.forEach(item => {
-        if (item && (item.id || item.question)) {
-          // Use ID if available, otherwise hash or question text as key (fallback)
-          const key = getKey(item) || item.id || item.question;
-          map.set(key, { ...item, source: 'default' });
-        }
-      });
-  }
+export const getPersistentPlacementTestQuestions = async () => (
+  getPublishedContent('placement_tests')
+);
 
-  // 2. Apply LocalStorage (overrides defaults)
-  if (Array.isArray(local)) {
-      local.forEach(item => {
-        if (item && (item.id || item.question)) {
-          const key = getKey(item) || item.id || item.question;
-          if (!map.has(key)) map.set(key, { ...item, source: 'local' });
-        }
-      });
-  }
+export const savePlacementTestQuestions = async (questions) => (
+  publishContentItems(
+    'placement_tests',
+    dedupeByKey(questions, getPlacementQuestionDedupKey)
+  )
+);
 
-  // 3. Apply Remote (overrides local)
-  if (Array.isArray(remote)) {
-      remote.forEach(item => {
-        if (item && (item.id || item.content?.question)) {
-          // If remote item has content wrapper (common in Supabase jsonb patterns), unwrap it
-          // But ensure we keep the top-level ID from the DB
-          const content = item.content || item;
-          const merged = { 
-            ...content, 
-            id: item.id, // Ensure UUID from DB is used if available
-            level: item.level || content.level,
-            source: 'cloud' 
-          };
-          const key = getKey(merged) || item.id;
-          if (!map.has(key)) map.set(key, merged);
-        }
-      });
-  }
+export const getPersistentExercises = async () => getPublishedContent('exercises');
 
-  return dedupeByKey(Array.from(map.values()), getKey);
-};
+export const saveExercises = async (exercises) => (
+  publishContentItems('exercises', dedupeByKey(exercises, getExerciseDedupKey))
+);
 
-// --- Placement Tests ---
-
-export const getPersistentPlacementTestQuestions = async () => {
-  try {
-    // 1. Get Local Data
-    const localJson = localStorage.getItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS);
-    const localData = localJson ? JSON.parse(localJson) : [];
-
-    // 2. Get Remote Data (Supabase)
-    let remoteData = [];
-    try {
-        remoteData = await getPublishedContent('placement_tests');
-    } catch (dbError) {
-        console.warn('Supabase fetch warning (placement_tests):', dbError.message);
-        // Continue with local data only
-    }
-
-    // 3. Merge
-    const merged = mergeData(localData, remoteData, defaultData.placementTest || [], getPlacementQuestionDedupKey);
-    
-    // 4. Update Local Cache with "user added" items to keep localStorage in sync for offline
-    // We filter out 'default' so we don't bloat LS with hardcoded data
-    const userAdded = merged.filter(i => i.source !== 'default');
-    localStorage.setItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS, JSON.stringify(userAdded));
-
-    return merged;
-  } catch (err) {
-    console.error('Error in getPersistentPlacementTestQuestions:', err);
-    // Critical fallback: try to return whatever is in localStorage or defaults
-    try {
-        const localJson = localStorage.getItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS);
-        return localJson ? JSON.parse(localJson) : (defaultData.placementTest || []);
-    } catch {
-        return defaultData.placementTest || [];
-    }
-  }
-};
-
-export const savePlacementTestQuestions = async (questions) => {
-  try {
-    console.log(`Saving ${questions.length} placement questions...`);
-    const dedupedQuestions = dedupeByKey(questions, getPlacementQuestionDedupKey);
-    const result = await publishContentItems('placement_tests', dedupedQuestions);
-    if (!result.success) return result;
-    localStorage.setItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS, JSON.stringify(dedupedQuestions));
-    return result;
-  } catch (err) {
-    console.error('Error saving placement tests to Supabase:', err);
-    // Return success: false but the local save succeeded, so technically data isn't "lost" to the user immediately.
-    return { success: false, error: err.message };
-  }
-};
-
-// --- Exercises ---
-
-export const getPersistentExercises = async () => {
-  try {
-    const localJson = localStorage.getItem(LOCAL_STORAGE_KEYS.EXERCISES);
-    const localData = localJson ? JSON.parse(localJson) : [];
-
-    let remoteData = [];
-    try {
-        remoteData = await getPublishedContent('exercises');
-    } catch (dbError) {
-        console.warn('Supabase fetch warning (exercises):', dbError.message);
-    }
-
-    const merged = mergeData(localData, remoteData, defaultData.exercises || [], getExerciseDedupKey);
-    
-    // Update cache
-    const userAdded = merged.filter(i => i.source !== 'default');
-    localStorage.setItem(LOCAL_STORAGE_KEYS.EXERCISES, JSON.stringify(userAdded));
-
-    return merged;
-  } catch (err) {
-    console.error('Error in getPersistentExercises:', err);
-    try {
-        const localJson = localStorage.getItem(LOCAL_STORAGE_KEYS.EXERCISES);
-        return localJson ? JSON.parse(localJson) : (defaultData.exercises || []);
-    } catch {
-        return defaultData.exercises || [];
-    }
-  }
-};
-
-export const saveExercises = async (exercises) => {
-  try {
-    console.log(`Saving ${exercises.length} exercises...`);
-    const dedupedExercises = dedupeByKey(exercises, getExerciseDedupKey);
-    const result = await publishContentItems('exercises', dedupedExercises);
-    if (!result.success) return result;
-    localStorage.setItem(LOCAL_STORAGE_KEYS.EXERCISES, JSON.stringify(dedupedExercises));
-    return result;
-  } catch (err) {
-    console.error('Error saving exercises to Supabase:', err);
-    return { success: false, error: err.message };
-  }
-};
-
-// Helper to clear data (For debugging)
 export const clearPersistentData = async (type) => {
-    if (type === 'placement' || type === 'all') {
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS);
-    }
-    if (type === 'exercises' || type === 'all') {
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.EXERCISES);
-    }
-    return true;
+  const key = type === 'placement' ? LOCAL_STORAGE_KEYS.PLACEMENT_TESTS : LOCAL_STORAGE_KEYS.EXERCISES;
+  localStorage.removeItem(key);
+  return { success: true, localOnly: true };
 };
 
-// Helper to get raw local stats
-export const getStorageStats = () => {
-    return {
-        placementCount: (localStorage.getItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS) ? JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.PLACEMENT_TESTS)).length : 0),
-        exercisesCount: (localStorage.getItem(LOCAL_STORAGE_KEYS.EXERCISES) ? JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.EXERCISES)).length : 0),
-        totalLocalStorageSize: Math.round(JSON.stringify(localStorage).length / 1024) + ' KB'
-    };
-};
+export const getStorageStats = () => ({
+  placementCount: 0,
+  exercisesCount: 0,
+  storageMode: 'supabase-only',
+});

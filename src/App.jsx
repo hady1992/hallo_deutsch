@@ -8,15 +8,14 @@ import AdminErrorBoundary from '@/components/AdminErrorBoundary';
 import AppErrorBoundary from '@/components/AppErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/SupabaseAuthContext';
+import { runContentResetMigration } from '@/utils/contentResetMigration';
 
-const DEFAULT_DATA_VERSION = '2026-07-17-runtime-safety-v1';
+const DEFAULT_DATA_VERSION = '2026-07-18-kids-defaults-v1';
 const INITIALIZED_VERSION_KEY = 'halloDeutschDefaultDataVersion';
 
 const Levels = lazy(() => import('@/pages/Levels'));
-const LevelA1 = lazy(() => import('@/pages/LevelA1'));
-const LevelA2 = lazy(() => import('@/pages/LevelA2'));
-const LevelB1 = lazy(() => import('@/pages/LevelB1'));
-const LevelB2 = lazy(() => import('@/pages/LevelB2'));
+const CourseLevelPage = lazy(() => import('@/pages/CourseLevelPage'));
+const CourseLessonPage = lazy(() => import('@/pages/CourseLessonPage'));
 const Vocabulary = lazy(() => import('@/pages/Vocabulary'));
 const Grammar = lazy(() => import('@/pages/Grammar'));
 const Exercises = lazy(() => import('@/pages/Exercises'));
@@ -42,6 +41,7 @@ function App() {
     document.documentElement.dataset.appReady = 'true';
     if (window.__halloDeutschBootTimer) window.clearTimeout(window.__halloDeutschBootTimer);
 
+    runContentResetMigration();
     if (localStorage.getItem(INITIALIZED_VERSION_KEY) === DEFAULT_DATA_VERSION) return undefined;
 
     let cancelled = false;
@@ -76,10 +76,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/levels" element={<Levels />} />
-                <Route path="/level/a1" element={<LevelA1 />} />
-                <Route path="/level/a2" element={<LevelA2 />} />
-                <Route path="/level/b1" element={<LevelB1 />} />
-                <Route path="/level/b2" element={<LevelB2 />} />
+                <Route path="/level/:level" element={<CourseLevelPage />} />
+                <Route path="/level/:level/lesson/:lessonSlug" element={<CourseLessonPage />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/grammar" element={<Grammar />} />
                 <Route path="/kids" element={<Kids />} />

@@ -105,11 +105,18 @@ const normalizeNounItem = (item, source) => {
 };
 
 export const getKidNounsByTopic = async () => {
-  const [kidsItems, nouns, vocabulary] = await Promise.all([
+  const [kidsResult, nounsResult, vocabularyResult] = await Promise.allSettled([
     getKidsVocabulary(),
     getNouns(),
     getVocabulary(),
   ]);
+  const kidsItems = kidsResult.status === 'fulfilled' ? kidsResult.value : [];
+  const nouns = nounsResult.status === 'fulfilled' ? nounsResult.value : [];
+  const vocabulary = vocabularyResult.status === 'fulfilled' ? vocabularyResult.value : [];
+
+  if (kidsResult.status === 'rejected') {
+    console.error('[ArticleHunt] Failed to load protected kids vocabulary:', kidsResult.reason);
+  }
   const sources = [
     { name: 'kids', items: kidsItems },
     { name: 'nouns', items: nouns },

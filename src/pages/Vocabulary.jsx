@@ -16,11 +16,19 @@ import { getGrammarRules, getVocabulary } from '@/services/contentRepository';
 const GrammarRulesView = () => {
   const [rules, setRules] = useState([]);
   const [filterLevel, setFilterLevel] = useState('All');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const handleUpdate = async () => {
-      const allRules = await getGrammarRules();
-      setRules((Array.isArray(allRules) ? allRules : []).filter((rule) => rule?.source === 'cloud'));
+      setLoadError('');
+      try {
+        const allRules = await getGrammarRules();
+        setRules(Array.isArray(allRules) ? allRules : []);
+      } catch (error) {
+        console.error('[Vocabulary] Failed to load grammar rules:', error);
+        setRules([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      }
     };
     handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
@@ -51,7 +59,9 @@ const GrammarRulesView = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {filtered.length === 0 ? (
+         {loadError ? (
+            <div className="col-span-full py-12 text-center font-bold text-red-700">{loadError}</div>
+         ) : filtered.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-dashed border-slate-200">
                 <GraduationCap size={48} className="mx-auto mb-3 opacity-20" />
                 <p>لا توجد قواعد مضافة لهذا المستوى.</p>
@@ -80,13 +90,22 @@ function Vocabulary() {
   const { toast } = useToast();
   const [allVocabulary, setAllVocabulary] = useState([]);
   const [cloudLoading, setCloudLoading] = useState(true);
+  const [cloudError, setCloudError] = useState('');
 
   useEffect(() => {
     const loadVocab = async () => {
       setCloudLoading(true);
-      const vocabulary = await getVocabulary();
-      setAllVocabulary(Array.isArray(vocabulary) ? vocabulary : []);
-      setCloudLoading(false);
+      setCloudError('');
+      try {
+        const vocabulary = await getVocabulary();
+        setAllVocabulary(Array.isArray(vocabulary) ? vocabulary : []);
+      } catch (error) {
+        console.error('[Vocabulary] Failed to load published vocabulary:', error);
+        setAllVocabulary([]);
+        setCloudError('تعذر تحميل المحتوى حاليًا');
+      } finally {
+        setCloudLoading(false);
+      }
     };
     loadVocab();
 
@@ -171,6 +190,7 @@ function Vocabulary() {
                     <Loader2 className="animate-spin w-4 h-4" /> جاري مزامنة المكتبة...
                 </div>
             )}
+            {cloudError && <p className="mb-4 text-center font-bold text-red-700">{cloudError}</p>}
           </div>
 
           <Tabs defaultValue="vocabulary" className="w-full space-y-8">

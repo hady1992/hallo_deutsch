@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import {
-  Archive,
   Baby,
   BookOpen,
   BookPlus,
@@ -18,14 +17,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DataImportUtility from '@/components/DataImportUtility';
-import GrammarRulesImporter from '@/components/GrammarRulesImporter';
-import ExamModelsImporter from '@/components/ExamModelsImporter';
 import ExerciseImporter from '@/components/ExerciseImporter';
 import ExamUploaderPlacementTest from '@/components/ExamUploaderPlacementTest';
 import ExamUploader from '@/components/ExamUploader';
 import AdminDataManager from '@/components/AdminDataManager';
-import DataSyncStatus from '@/components/DataSyncStatus';
-import StorageDebugPanel from '@/components/StorageDebugPanel';
 import AdminGate from '@/components/AdminGate';
 import AdminErrorBoundary from '@/components/AdminErrorBoundary';
 import KidsVocabularyImporter from '@/components/KidsVocabularyImporter';
@@ -130,7 +125,6 @@ const AdminPanel = () => {
     tests: false,
     system: false,
   });
-  const [showLegacyGrammarTool, setShowLegacyGrammarTool] = useState(false);
   const [lessonLevel, setLessonLevel] = useState('A1');
 
   const toggleSection = (sectionId) => {
@@ -305,26 +299,6 @@ const AdminPanel = () => {
               </div>
             </div>
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-dashed border-slate-300">
-              <button
-                type="button"
-                onClick={() => setShowLegacyGrammarTool(v => !v)}
-                className="flex w-full items-center justify-between bg-slate-50 px-6 py-4 text-slate-500 transition-colors hover:bg-slate-100"
-              >
-                <span className="flex items-center gap-2 text-sm font-bold">
-                  <Archive size={16} /> أداة استيراد قواعد قديمة، مطوية للتوافق فقط
-                </span>
-                <ChevronDown size={16} className={cn('transition-transform', showLegacyGrammarTool && 'rotate-180')} />
-              </button>
-              {showLegacyGrammarTool && (
-                <div className="bg-white p-6">
-                  <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                    هذه الأداة تكتب لنفس بيانات القواعد، لذلك استخدم أداة الرفع أعلاه عند الإمكان.
-                  </p>
-                  <GrammarRulesImporter />
-                </div>
-              )}
-            </div>
           </AdminSection>
 
           <AdminSection
@@ -456,12 +430,6 @@ const AdminPanel = () => {
                   ))}
                 </div>
               </div>
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-xl font-black text-slate-800">
-                  <GraduationCap className="text-red-600" /> نماذج الامتحانات
-                </h3>
-                <ExamModelsImporter />
-              </div>
             </div>
           </AdminSection>
 
@@ -470,12 +438,10 @@ const AdminPanel = () => {
             isOpen={openSections.system}
             onToggle={() => toggleSection('system')}
           >
-            <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+            <div className="flex items-center gap-2 rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm font-bold text-green-800">
               <Database size={18} />
-              المزامنة السحابية غير مفعلة بالكامل بعد
+              المحتوى التعليمي العام يُقرأ ويُحفظ في Supabase فقط. لا توجد مزامنة من المحتوى المحلي القديم.
             </div>
-            <DataSyncStatus />
-            <StorageDebugPanel />
           </AdminSection>
         </div>
       </div>

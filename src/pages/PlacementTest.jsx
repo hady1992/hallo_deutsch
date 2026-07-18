@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PlayCircle, GraduationCap, CheckCircle, ArrowRight, ArrowLeft, RefreshCw, BarChart, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { placementTestQuestions } from '@/data/placementTestQuestions';
 import { getPlacementTests } from '@/services/contentRepository';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
@@ -15,16 +14,22 @@ const PlacementTest = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
-  const [questions, setQuestions] = useState(placementTestQuestions || []);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  // تحميل أسئلة اختبار تحديد المستوى المستوردة عبر لوحة التحكم، ودمجها مع
-  // الأسئلة الثابتة الأصلية دون تعديل بنية placementTestQuestions.js نفسها.
   useEffect(() => {
     const loadImported = async () => {
+      setLoading(true);
+      setLoadError('');
       try {
         setQuestions(await getPlacementTests());
       } catch (e) {
-        console.error('تعذر تحميل أسئلة اختبار تحديد المستوى المستوردة:', e);
+        console.error('[PlacementTest] Failed to load published questions:', e);
+        setQuestions([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      } finally {
+        setLoading(false);
       }
     };
     loadImported();
@@ -93,7 +98,7 @@ const PlacementTest = () => {
     setResult(null);
   };
 
-  if (!questions || questions.length === 0) {
+  if (loading) {
       return (
         <div className="min-h-screen pt-24 pb-12 bg-slate-50 px-4 flex items-center justify-center">
             <div className="text-center text-slate-500">
@@ -102,6 +107,14 @@ const PlacementTest = () => {
             </div>
         </div>
       );
+  }
+
+  if (loadError || !questions || questions.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 pb-12 pt-24" dir="rtl">
+        <p className="font-bold text-red-700">{loadError || 'لا يوجد اختبار منشور حاليًا'}</p>
+      </div>
+    );
   }
 
   if (completed && result) {

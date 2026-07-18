@@ -1,3 +1,4 @@
+import { defaultData } from '@/data/defaultData';
 import { supabase } from '@/lib/customSupabaseClient';
 import {
   dedupeByKey,
@@ -204,8 +205,12 @@ export const syncLocalStorageToSupabase = async () => {
 export const getImportedExercises = () => {
   try {
     const data = localStorage.getItem(EXERCISES_KEY);
-    return dedupeByKey(data ? JSON.parse(data) : [], getExerciseDedupKey);
-  } catch { return []; }
+    const stored = data ? JSON.parse(data) : [];
+    const defaults = (defaultData && defaultData.exercises) ? defaultData.exercises : [];
+    return mergeDataWithDefaults(stored, defaults, getExerciseDedupKey);
+  } catch (e) {
+    return (defaultData && defaultData.exercises) ? defaultData.exercises : [];
+  }
 };
 
 export const saveImportedExercises = (exercises) => {
@@ -282,8 +287,12 @@ export const getImportedExams = (level) => {
     try {
         const key = `${CUSTOM_EXAMS_KEY_PREFIX}${level}`;
         const data = localStorage.getItem(key);
-        return dedupeByKey(data ? JSON.parse(data) : [], getExamDedupKey);
-    } catch { return []; }
+        const stored = data ? JSON.parse(data) : [];
+        const defaults = (defaultData && defaultData.exams) ? defaultData.exams.filter(e => e.level === level) : [];
+        return mergeDataWithDefaults(stored, defaults, getExamDedupKey);
+    } catch (e) {
+         return (defaultData && defaultData.exams) ? defaultData.exams.filter(e => e.level === level) : [];
+    }
 };
 
 export const saveImportedExams = (level, exams) => {
@@ -314,8 +323,12 @@ export const deleteImportedExam = (level, id) => {
 export const getCustomPlacementTestQuestions = () => {
     try {
         const data = localStorage.getItem(CUSTOM_PLACEMENT_TEST_KEY);
-        return dedupeByKey(data ? JSON.parse(data) : [], getPlacementQuestionDedupKey);
-    } catch { return []; }
+        const stored = data ? JSON.parse(data) : [];
+        const defaults = (defaultData && defaultData.placementTest) ? defaultData.placementTest : [];
+        return mergeDataWithDefaults(stored, defaults, getPlacementQuestionDedupKey);
+    } catch (e) {
+        return (defaultData && defaultData.placementTest) ? defaultData.placementTest : [];
+    }
 };
 
 export const saveCustomPlacementTestQuestions = (questions) => {

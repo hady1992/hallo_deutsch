@@ -9,9 +9,19 @@ const VerbsTabExtended = () => {
   const [filterType, setFilterType] = useState('All');
   const [expandedVerb, setExpandedVerb] = useState(null);
   const [allVerbs, setAllVerbs] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    const handleUpdate = async () => setAllVerbs(await getVerbs());
+    const handleUpdate = async () => {
+      setLoadError('');
+      try {
+        setAllVerbs(await getVerbs());
+      } catch (error) {
+        console.error('[VerbsTabExtended] Failed to load published verbs:', error);
+        setAllVerbs([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      }
+    };
     handleUpdate();
     window.addEventListener('dataImported', handleUpdate);
     return () => window.removeEventListener('dataImported', handleUpdate);
@@ -86,8 +96,9 @@ const VerbsTabExtended = () => {
       </div>
 
       {/* Verbs List */}
+      {loadError && <div className="py-12 text-center font-bold text-red-700">{loadError}</div>}
       <div className="grid grid-cols-1 gap-4">
-        {filteredVerbs.length > 0 ? (
+        {!loadError && filteredVerbs.length > 0 ? (
           filteredVerbs.map((verb) => (
             <motion.div
               layout

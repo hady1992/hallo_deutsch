@@ -9,6 +9,7 @@ export default [
 			'node_modules/**',
 			'dist/**',
 			'build/**',
+			'legacy-content-backup/**',
 			'vite.config.js',
 			'src/components/ui/accordion.jsx',
 			'src/components/ui/aspect-ratio.jsx',

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { getPersistentExercises, saveExercises } from '@/utils/persistentDataStorage';
 import { Badge } from '@/components/ui/badge';
 import { getExerciseDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { deletePublishedContentItem } from '@/services/contentRepository';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة (سبب رفض
 // كل عنصر بالضبط) تُسجَّل بالـ Console فقط عبر console.error.
@@ -350,9 +351,12 @@ const ExerciseImporter = () => {
   const handleDelete = async (id) => {
     if(window.confirm("حذف هذا التمرين؟")) {
         const current = await getPersistentExercises();
-        const filtered = current.filter(ex => ex.id !== id && ex.source !== 'default');
-
-        await saveExercises(filtered);
+        const exercise = current.find(ex => ex.id === id || ex.supabaseId === id);
+        const result = await deletePublishedContentItem('exercises', exercise || id);
+        if (!result.success) {
+          toast({ title: 'فشل الحذف', description: result.error, variant: 'destructive' });
+          return;
+        }
         loadData();
         window.dispatchEvent(new Event('exercisesUpdated'));
 
@@ -362,8 +366,13 @@ const ExerciseImporter = () => {
 
   const handleClearAll = async () => {
     if(window.confirm("تحذير: هل أنت متأكد من حذف جميع التمارين المستوردة؟")) {
-        // Clear only custom
-        await saveExercises([]);
+        const current = await getPersistentExercises();
+        const results = await Promise.all(current.map((exercise) => deletePublishedContentItem('exercises', exercise)));
+        const failed = results.find((result) => !result.success);
+        if (failed) {
+          toast({ title: 'تعذر مسح كل التمارين', description: failed.error, variant: 'destructive' });
+          return;
+        }
         loadData();
         window.dispatchEvent(new Event('exercisesUpdated'));
         toast({ title: "تم مسح الكل محلياً", className: "bg-red-50 border-red-200 text-red-800" });

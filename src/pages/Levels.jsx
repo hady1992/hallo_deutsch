@@ -1,109 +1,100 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import LevelCard from '@/components/LevelCard';
-import { getLessons } from '@/services/contentRepository';
-import { dedupeByKey, getLessonDedupKey } from '@/utils/contentDedupUtils';
-import { getStaticLessonEntries, STATIC_LESSON_CATALOG } from '@/data/staticLessonCatalog';
+import { getCourseLessons } from '@/services/contentRepository';
+
+const LEVEL_NAMES = ['A1', 'A2', 'B1', 'B2'];
+
+const LEVEL_CONFIG = {
+  A1: {
+    name: 'المستوى الأول',
+    description: 'مستوى المبتدئين - تعلم الأساسيات والتعبيرات البسيطة',
+    color: 'from-[#d71920] to-[#a90f16]',
+  },
+  A2: {
+    name: 'المستوى الثاني',
+    description: 'مستوى ما قبل المتوسط - بناء المهارات الأساسية',
+    color: 'from-[#e8b21e] to-[#8a6500]',
+  },
+  B1: {
+    name: 'المستوى الثالث',
+    description: 'المستوى المتوسط - تطوير القدرة على التواصل',
+    color: 'from-[#2f2f2f] to-[#111111]',
+  },
+  B2: {
+    name: 'المستوى الرابع',
+    description: 'المستوى فوق المتوسط - إتقان اللغة بشكل متقدم',
+    color: 'from-[#7a0d12] to-[#111111]',
+  },
+};
 
 function Levels() {
-  const fallbackCounts = useMemo(() => Object.fromEntries(
-    Object.entries(STATIC_LESSON_CATALOG).map(([level, lessons]) => [level, lessons.length])
-  ), []);
-  const [lessonCounts, setLessonCounts] = useState(fallbackCounts);
+  const [lessonCounts, setLessonCounts] = useState({});
+  const [failedLevels, setFailedLevels] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadLessonCounts = useCallback(async () => {
+    setLoading(true);
+    const results = await Promise.all(LEVEL_NAMES.map(async (level) => {
+      try {
+        const lessons = await getCourseLessons(level);
+        return { level, count: lessons.length, failed: false };
+      } catch (error) {
+        console.error(`[Levels] Failed to load ${level} lesson count:`, error);
+        return { level, count: null, failed: true };
+      }
+    }));
+
+    setLessonCounts(Object.fromEntries(results.map(({ level, count }) => [level, count])));
+    setFailedLevels(results.filter(({ failed }) => failed).map(({ level }) => level));
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    let active = true;
-    const loadLessonCounts = async () => {
-      const levelNames = Object.keys(STATIC_LESSON_CATALOG);
-      const results = await Promise.all(levelNames.map(async (level) => {
-        try {
-          const publishedLessons = await getLessons(level);
-          const lessons = dedupeByKey(
-            [...getStaticLessonEntries(level), ...publishedLessons],
-            getLessonDedupKey,
-            { prefer: 'last' }
-          );
-          return [level, lessons.length];
-        } catch (error) {
-          console.warn(`[Levels] Failed to load ${level} lesson count:`, error);
-          return [level, fallbackCounts[level]];
-        }
-      }));
-
-      if (active) setLessonCounts(Object.fromEntries(results));
-    };
-
     loadLessonCounts();
     window.addEventListener('lessonsUpdated', loadLessonCounts);
-    return () => {
-      active = false;
-      window.removeEventListener('lessonsUpdated', loadLessonCounts);
-    };
-  }, [fallbackCounts]);
+    return () => window.removeEventListener('lessonsUpdated', loadLessonCounts);
+  }, [loadLessonCounts]);
 
-  const levels = [
-    {
-      level: 'A1',
-      name: 'المستوى الأول',
-      description: 'مستوى المبتدئين - تعلم الأساسيات والتعبيرات البسيطة',
-      statusText: `${lessonCounts.A1 ?? fallbackCounts.A1} دروس متاحة`,
-      color: 'from-[#d71920] to-[#a90f16]',
-      path: '/level/a1'
-    },
-    {
-      level: 'A2',
-      name: 'المستوى الثاني',
-      description: 'مستوى ما قبل المتوسط - بناء المهارات الأساسية',
-      statusText: `${lessonCounts.A2 ?? fallbackCounts.A2} دروس متاحة`,
-      color: 'from-[#e8b21e] to-[#8a6500]',
-      path: '/level/a2'
-    },
-    {
-      level: 'B1',
-      name: 'المستوى الثالث',
-      description: 'المستوى المتوسط - تطوير القدرة على التواصل',
-      statusText: `${lessonCounts.B1 ?? fallbackCounts.B1} دروس متاحة`,
-      color: 'from-[#2f2f2f] to-[#111111]',
-      path: '/level/b1'
-    },
-    {
-      level: 'B2',
-      name: 'المستوى الرابع',
-      description: 'المستوى فوق المتوسط - إتقان اللغة بشكل متقدم',
-      statusText: `${lessonCounts.B2 ?? fallbackCounts.B2} دروس متاحة`,
-      color: 'from-[#7a0d12] to-[#111111]',
-      path: '/level/b2'
-    }
-  ];
+  const levels = LEVEL_NAMES.map((level) => {
+    const count = lessonCounts[level];
+    let statusText = 'جاري تحميل الدروس...';
+    if (!loading && failedLevels.includes(level)) statusText = 'تعذر تحميل المحتوى حاليًا';
+    else if (!loading && count === 0) statusText = 'قيد الإعداد';
+    else if (!loading) statusText = `${count} دروس متاحة`;
+
+    return {
+      level,
+      ...LEVEL_CONFIG[level],
+      statusText,
+      path: `/level/${level.toLowerCase()}`,
+    };
+  });
 
   return (
     <>
       <Helmet>
-        <title>{'المستويات الدراسية - Hallo Deutsch'}</title>
+        <title>المستويات الدراسية - Hallo Deutsch</title>
         <meta name="description" content="اختر مستواك من A1 إلى B2 وابدأ رحلتك في تعلم اللغة الألمانية" />
       </Helmet>
 
-      <div className="min-h-screen bg-brand-ivory py-16 md:mt-0 md:py-24 mt-8" dir="rtl">
+      <div className="mt-8 min-h-screen bg-brand-ivory py-16 md:mt-0 md:py-24" dir="rtl">
         <div className="container mx-auto px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10 md:mb-16"
+            className="mb-10 text-center md:mb-16"
           >
-            <h1 className="text-4xl md:text-5xl font-black mb-4 text-gray-900 tracking-tight">مستويات التعلّم</h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+            <h1 className="mb-4 text-4xl font-black tracking-tight text-gray-900 md:text-5xl">مستويات التعلّم</h1>
+            <p className="mx-auto max-w-2xl px-4 text-lg text-gray-600 md:text-xl">
               اختر المستوى المناسب لك وابدأ رحلتك في تعلم اللغة الألمانية
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
             {levels.map((level, index) => (
-              <LevelCard
-                key={level.level}
-                {...level}
-                index={index}
-              />
+              <LevelCard key={level.level} {...level} index={index} />
             ))}
           </div>
         </div>

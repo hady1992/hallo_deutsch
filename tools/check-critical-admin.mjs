@@ -15,6 +15,9 @@ const app = readProjectFile('src/App.jsx');
 const grammarPage = readProjectFile('src/pages/Grammar.jsx');
 const grammarDisplay = readProjectFile('src/components/GrammarDisplayComponent.jsx');
 const appErrorBoundary = readProjectFile('src/components/AppErrorBoundary.jsx');
+const levelPage = readProjectFile('src/pages/CourseLevelPage.jsx');
+const lessonPage = readProjectFile('src/pages/CourseLessonPage.jsx');
+const levelsPage = readProjectFile('src/pages/Levels.jsx');
 
 const requireText = (source, text, message) => {
   if (!source.includes(text)) throw new Error(message);
@@ -40,21 +43,34 @@ requireText(adminPanel, 'templateFormat="json"', 'The admin lesson uploader must
 requireText(adminPanel, 'ملفات الدروس تُرفع من هنا فقط، وليس من قسم الأسماء أو المفردات.', 'Lesson upload guidance is missing.');
 requireText(lessonUploader, "getPublishedContent('lessons'", 'Published lessons list is not connected to content_items.');
 requireText(lessonUploader, 'data-testid="lesson-import-report"', 'Lesson import report is missing.');
-requireText(lessonUploader, 'محلي فقط — لن يظهر للزوار', 'Cloud failure status is missing from LessonUploader.');
+requireText(lessonUploader, 'فشل الحفظ السحابي — لن يظهر للزوار', 'Cloud failure status is missing from LessonUploader.');
 requireText(lessonUploader, 'unpublishLesson(lesson)', 'Supabase lesson unpublish action is missing.');
-requireText(lessonUploader, 'deleteImportedLesson(lesson.id)', 'Local lesson delete action is missing.');
-requireText(lessonUploader, 'هل أنت متأكد من حذف هذا الدرس؟ لن يظهر للزوار بعد الحذف.', 'Lesson unpublish confirmation is missing.');
+requireText(lessonUploader, "deletePublishedContentItem('lessons'", 'Supabase lesson delete action is missing.');
+requireText(lessonUploader, 'updateLesson(', 'Lesson editing or reordering is missing.');
+requireText(lessonUploader, 'saveLesson(', 'Manual lesson creation is missing.');
+requireText(lessonUploader, 'يوجد درس بنفس slug', 'Duplicate lesson protection is missing.');
+rejectText(lessonUploader, 'deleteImportedLesson', 'Lessons must not use localStorage deletion.');
+rejectText(lessonUploader, 'getImportedLessons', 'Lessons must not read localStorage content.');
 requireText(contentRepository, ".update({ is_published: false })", 'Lessons must use soft delete through is_published=false.');
 requireText(contentRepository, "dispatchContentEvents('lessons')", 'Lesson unpublish must refresh public lesson views and counts.');
+requireText(contentRepository, "from('content_items')", 'Content repository must use content_items.');
+rejectText(contentRepository, "import('@/data/vocabulary", 'Production repository must not import legacy vocabulary.');
+rejectText(contentRepository, "import('@/data/grammar", 'Production repository must not import legacy grammar.');
 
 requireText(app, "lazy(() => import('@/pages/AdminPanel'))", 'AdminPanel must remain route-lazy.');
 requireText(app, "lazy(() => import('@/pages/Grammar'))", 'Grammar must remain route-lazy.');
 requireText(app, "lazy(() => import('@/pages/Kids'))", 'Kids must remain route-lazy.');
+requireText(app, 'path="/level/:level"', 'Reusable level route is missing.');
+requireText(app, 'path="/level/:level/lesson/:lessonSlug"', 'Reusable lesson route is missing.');
 rejectText(app, 'syncLocalStorageToSupabase', 'Visitor boot must not start the admin Supabase sync.');
 requireText(app, '<AppErrorBoundary>', 'The global app error boundary is missing.');
 requireText(appErrorBoundary, 'تعذر عرض هذه الصفحة', 'The Arabic global crash fallback is missing.');
 requireText(grammarPage, 'getGrammarRules(activeLevel)', 'Grammar must request only the active level.');
 requireText(grammarDisplay, 'normalizeGrammarRuleForDisplay(rule)', 'Grammar display must normalize imported rule shapes.');
+requireText(levelPage, 'getCourseLessons(level)', 'Course level page must load published lesson summaries.');
+requireText(lessonPage, 'getLessonBySlug(level, lessonSlug)', 'Course lesson page must load only the selected lesson.');
+requireText(levelsPage, 'getCourseLessons(level)', 'Level counts must come from published lessons.');
+rejectText(levelsPage, 'STATIC_LESSON_CATALOG', 'Level counts must not use the legacy static catalog.');
 
 const { normalizeGrammarRuleForDisplay } = await import(
   new URL('../src/utils/grammarNormalizer.js', import.meta.url)

@@ -10,6 +10,7 @@ import {
     getPersistentPlacementTestQuestions
 } from '@/utils/persistentDataStorage';
 import { getPlacementQuestionDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import { deletePublishedContentItem } from '@/services/contentRepository';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة تُسجَّل
 // بالـ Console فقط عبر console.error.
@@ -141,10 +142,12 @@ const ExamUploaderPlacementTest = () => {
   const handleDelete = async (id) => {
     if (window.confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
       const current = await getPersistentPlacementTestQuestions();
-      // Only allow deleting custom ones usually, but let's assume admin can delete any 'local/cloud' copy
-      const updated = current.filter(q => q.id !== id && q.source !== 'default');
-
-      await savePlacementTestQuestions(updated);
+      const question = current.find(q => q.id === id || q.supabaseId === id);
+      const result = await deletePublishedContentItem('placement_tests', question || id);
+      if (!result.success) {
+        toast({ title: 'فشل حذف السؤال', description: result.error, variant: 'destructive' });
+        return;
+      }
       loadData();
       window.dispatchEvent(new Event('placementTestsUpdated'));
       toast({ title: "تم الحذف", className: "bg-red-50 border-red-200 text-red-800" });

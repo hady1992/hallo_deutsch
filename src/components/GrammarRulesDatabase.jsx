@@ -1,18 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Bookmark, BookOpen, Share2, Printer, X, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ExpandedGrammarRules from '@/components/ExpandedGrammarRules';
-import { grammarA1Complete } from '@/data/grammarA1Complete';
-import { grammarA2Complete } from '@/data/grammarA2Complete';
-import { grammarB1Complete } from '@/data/grammarB1Complete';
-import { grammarB2Complete } from '@/data/grammarB2Complete';
+import { getGrammarRules } from '@/services/contentRepository';
 
 const GrammarRulesDatabase = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [allRules, setAllRules] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const [bookmarked, setBookmarked] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('grammar_bookmarks') || '[]');
@@ -23,13 +22,21 @@ const GrammarRulesDatabase = () => {
     }
   });
 
-  // Combine all rules
-  const allRules = useMemo(() => [
-    ...grammarA1Complete,
-    ...grammarA2Complete,
-    ...grammarB1Complete,
-    ...grammarB2Complete
-  ], []);
+  useEffect(() => {
+    const loadRules = async () => {
+      setLoadError('');
+      try {
+        setAllRules(await getGrammarRules());
+      } catch (error) {
+        console.error('[GrammarRulesDatabase] Failed to load published rules:', error);
+        setAllRules([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      }
+    };
+    loadRules();
+    window.addEventListener('grammarUpdated', loadRules);
+    return () => window.removeEventListener('grammarUpdated', loadRules);
+  }, []);
 
   const categories = useMemo(() =>
     ['All', ...new Set(allRules.map(r => r.category).filter(Boolean))],
@@ -164,7 +171,9 @@ Genitiv,B1,حالة الإضافة,Das Buch des Mannes,تستخدم للملكي
       {/* Rules Grid */}
       <div className="container mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-6">
-          {filteredRules.length > 0 ? (
+          {loadError ? (
+            <div className="py-16 text-center font-bold text-red-700">{loadError}</div>
+          ) : filteredRules.length > 0 ? (
             filteredRules.map((rule, idx) => (
               <div key={idx} className="relative group">
                 <ExpandedGrammarRules rule={rule} />

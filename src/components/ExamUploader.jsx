@@ -3,8 +3,7 @@ import { FileUp, Trash2, FileText, FileDown, Check, AlertTriangle, Loader2, File
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { getImportedExams, saveImportedExams, deleteImportedExam } from '@/utils/storageManager';
-import { publishContentItems } from '@/services/contentRepository';
+import { deletePublishedContentItem, getPublishedContent, publishContentItems } from '@/services/contentRepository';
 import { getExamDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا (بدل أي نص تقني إنجليزي طويل).
@@ -23,9 +22,13 @@ const ExamUploader = ({ level }) => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    const loadData = () => {
-      const data = getImportedExams(level);
-      setExams(data);
+    const loadData = async () => {
+      try {
+        setExams(await getPublishedContent('exams', level));
+      } catch (error) {
+        console.error('[ExamUploader] Failed to load published exams:', error);
+        setExams([]);
+      }
     };
     loadData();
     window.addEventListener('dataImported', loadData);
@@ -165,10 +168,8 @@ question,optionA,optionB,optionC,optionD,correctAnswer
       uploadedAt: new Date().toISOString()
     };
 
-    const currentExams = getImportedExams(level);
     const publishResult = await publishContentItems('exams', [newExam]);
     if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
-    saveImportedExams(level, [...currentExams, newExam]);
 
     return { successCount: questions.length, skipped, examsAdded: 1 };
   };
@@ -261,14 +262,13 @@ question,optionA,optionB,optionC,optionD,correctAnswer
     let duplicateExams = 0;
     let addedExams = 0;
     for (const [lvl, newExams] of Object.entries(byLevel)) {
-      const current = getImportedExams(lvl);
+      const current = await getPublishedContent('exams', lvl);
       const { unique, skipped } = splitNewUniqueItems(newExams, current, getExamDedupKey);
       duplicateExams += skipped;
       addedExams += unique.length;
       if (unique.length > 0) {
         const publishResult = await publishContentItems('exams', unique);
         if (!publishResult.success) throw new Error('فشل الحفظ السحابي، لن يظهر المحتوى للزوار');
-        saveImportedExams(lvl, [...current, ...unique]);
       }
     }
 
@@ -317,9 +317,15 @@ question,optionA,optionB,optionC,optionD,correctAnswer
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("حذف هذا الامتحان؟")) {
-      deleteImportedExam(level, id);
+      const exam = exams.find((item) => item.id === id || item.supabaseId === id);
+      const result = await deletePublishedContentItem('exams', exam || id);
+      if (!result.success) {
+        toast({ title: 'فشل حذف الامتحان', description: result.error, variant: 'destructive' });
+        return;
+      }
+      setExams(await getPublishedContent('exams', level));
       toast({ title: "تم الحذف", description: "تم حذف الامتحان بنجاح", className: "bg-red-50 border-red-200 text-red-800" });
     }
   };

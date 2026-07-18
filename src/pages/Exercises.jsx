@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dumbbell, ArrowRight, Layers, ListFilter, Hash } from 'lucide-react';
+import { Dumbbell, ArrowRight, Layers, ListFilter, Hash, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { exercisesData } from '@/data/exercisesData';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getExercises } from '@/services/contentRepository';
 import { getExerciseCategoryKey, getCategoryLabel, getExerciseAudioText } from '@/utils/exerciseAudio';
 import AudioButton from '@/components/AudioButton';
@@ -15,9 +15,14 @@ import confetti from 'canvas-confetti';
 const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20, 'all'];
 
 const Exercises = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedLevel = (searchParams.get('level') || '').toUpperCase();
+  const requestedUnit = searchParams.get('unit') || '';
+  const requestedLesson = searchParams.get('lesson') || searchParams.get('lessonId') || '';
   // selection: 'level' -> 'options' (category + count) -> running -> results
-  const [selectionStep, setSelectionStep] = useState('level');
-  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [selectionStep, setSelectionStep] = useState(requestedLevel ? 'options' : 'level');
+  const [selectedLevel, setSelectedLevel] = useState(requestedLevel || null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCount, setSelectedCount] = useState('all');
 
@@ -26,12 +31,14 @@ const Exercises = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
-  const [allExercises, setAllExercises] = useState(exercisesData);
+  const [allExercises, setAllExercises] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  // تحميل التمارين المستوردة عبر لوحة التحكم (محليًا أو سحابيًا)، ودمجها مع
-  // التمارين الثابتة الأصلية دون تعديل بنية exercisesData.js نفسها.
   useEffect(() => {
     const loadImported = async () => {
+      setLoading(true);
+      setLoadError('');
       try {
         const persistent = await getExercises();
         // توحيد شكل الإجابة الصحيحة للعرض فقط: بعض التمارين المستوردة قديمًا قد
@@ -50,7 +57,11 @@ const Exercises = () => {
           });
         setAllExercises(normalized);
       } catch (e) {
-        console.error('تعذر تحميل التمارين المستوردة:', e);
+        console.error('[Exercises] Failed to load published exercises:', e);
+        setAllExercises([]);
+        setLoadError('تعذر تحميل المحتوى حاليًا');
+      } finally {
+        setLoading(false);
       }
     };
     loadImported();
@@ -62,10 +73,17 @@ const Exercises = () => {
   const getLevelCount = (level) => allExercises.filter(ex => ex.level === level).length;
 
   // تمارين المستوى المختار فقط (تُستخدم لبناء قائمة الفئات المتاحة فعليًا)
-  const levelExercises = useMemo(
-    () => (selectedLevel ? allExercises.filter(ex => ex.level === selectedLevel) : []),
-    [allExercises, selectedLevel]
-  );
+  const levelExercises = useMemo(() => {
+    if (!selectedLevel) return [];
+    return allExercises.filter((exercise) => {
+      if (exercise.level !== selectedLevel) return false;
+      const exerciseUnit = String(exercise.unit || exercise.unitId || exercise.topic || '');
+      const exerciseLesson = String(exercise.lessonId || exercise.lesson || exercise.lessonSlug || '');
+      if (requestedUnit && exerciseUnit !== requestedUnit) return false;
+      if (requestedLesson && exerciseLesson !== requestedLesson) return false;
+      return true;
+    });
+  }, [allExercises, requestedLesson, requestedUnit, selectedLevel]);
 
   // بناء قائمة الفئات ديناميكيًا من البيانات الفعلية الموجودة بهذا المستوى فقط
   // (متوافق تمامًا مع أي تمرين قديم أو مستورد، بغض النظر عن اسم الحقل المستخدم).
@@ -158,6 +176,23 @@ const Exercises = () => {
   const questionArabic = currentQuestion
     ? (currentQuestion.questionArabic || currentQuestion.translation || currentQuestion.arabic || '')
     : '';
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center gap-3 bg-slate-50 px-4 pb-12 pt-24" dir="rtl">
+        <Loader2 className="animate-spin text-red-600" />
+        <span className="font-bold text-slate-600">جاري تحميل التمارين...</span>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 pb-12 pt-24" dir="rtl">
+        <p className="font-bold text-red-700">{loadError}</p>
+      </div>
+    );
+  }
 
   // Render Logic
   return (
@@ -297,7 +332,14 @@ const Exercises = () => {
                 ابدأ التمرين
             </Button>
             {categoryFilteredExercises.length === 0 && (
-                <p className="text-center text-red-500 text-sm mt-3">لا توجد تمارين متاحة بهذه الفئة حاليًا.</p>
+                <div className="mt-3 text-center">
+                  <p className="text-sm font-bold text-red-600">لا توجد تمارين مرتبطة بهذا الدرس أو الوحدة حاليًا.</p>
+                  {(requestedLesson || requestedUnit) && (
+                    <Button type="button" variant="link" onClick={() => navigate(-1)} className="mt-1 text-red-700">
+                      العودة إلى الدرس
+                    </Button>
+                  )}
+                </div>
             )}
         </div>
       )}
