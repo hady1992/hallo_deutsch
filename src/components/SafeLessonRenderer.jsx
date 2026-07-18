@@ -11,7 +11,7 @@ import { normalizeLessonForDisplay } from '@/utils/lessonNormalizer';
 
 const INCOMPLETE_LESSON_MESSAGE = 'هذا الدرس منشور لكنه لا يحتوي تفاصيل كاملة بعد.';
 
-class LessonRenderBoundary extends React.Component {
+export class LessonRenderBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };

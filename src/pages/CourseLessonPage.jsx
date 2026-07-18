@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { BookOpen, Clock3, Loader2, Target } from 'lucide-react';
+import { BookOpen, Clock3, Loader2 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { getCourseLessons, getLessonBySlug } from '@/services/contentRepository';
-import SafeLessonRenderer from '@/components/SafeLessonRenderer';
-import LessonSidebar from '@/components/course/LessonSidebar';
+import LessonPlayer from '@/components/course/LessonPlayer';
 import LessonNavigation from '@/components/course/LessonNavigation';
 import {
   getCourseProgress,
@@ -56,10 +55,6 @@ const CourseLessonPage = () => {
   const nextLesson = currentIndex >= 0 && currentIndex < lessonIndex.length - 1 ? lessonIndex[currentIndex + 1] : null;
   const unit = lesson?.unit || currentSummary?.unit || 'general';
   const unitTitle = lesson?.unitTitleAr || currentSummary?.unitTitleAr || 'وحدة عامة';
-  const unitLessons = useMemo(
-    () => lessonIndex.filter((item) => (item.unit || 'general') === unit),
-    [lessonIndex, unit]
-  );
   const completed = Boolean(lessonId && progress.completedLessonIds.includes(lessonId));
 
   const handleComplete = () => {
@@ -98,11 +93,10 @@ const CourseLessonPage = () => {
           <span className="text-[#111111]">{lesson.title}</span>
         </nav>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <article className="min-w-0">
-            <header className="border-b border-black/10 pb-6">
+        <article className="min-w-0">
+            <header className="mb-6 border-b border-black/10 pb-5">
               <p dir="ltr" className="german-text font-bold text-[#b08000]">{lesson.unitTitleDe || currentSummary?.unitTitleDe || unit}</p>
-              <h1 className="mt-2 text-3xl font-black leading-tight text-[#111111] md:text-5xl">{lesson.title}</h1>
+              <h1 className="mt-2 text-3xl font-black leading-tight text-[#111111] md:text-4xl">{lesson.title}</h1>
               {lesson.germanTitle && <p dir="ltr" className="german-text mt-2 text-xl font-bold text-[#b91218]">{lesson.germanTitle}</p>}
               <div className="mt-4 flex flex-wrap gap-4 text-sm font-bold text-slate-500">
                 <span>{unitTitle}</span>
@@ -112,38 +106,21 @@ const CourseLessonPage = () => {
               </div>
             </header>
 
-            {lesson.objectives?.length > 0 && (
-              <section className="border-b border-black/10 py-7">
-                <h2 className="mb-4 flex items-center gap-2 text-xl font-black text-[#111111]"><Target size={20} className="text-[#d71920]" /> أهداف الدرس</h2>
-                <ul className="grid gap-2 md:grid-cols-2">
-                  {lesson.objectives.map((objective, index) => (
-                    <li key={`${objective}-${index}`} className="border-r-2 border-[#e8b21e] pr-3 leading-7 text-slate-700">{objective}</li>
-                  ))}
-                </ul>
-              </section>
+          <LessonPlayer
+            lesson={lesson}
+            onLessonComplete={handleComplete}
+            completionContent={(
+              <LessonNavigation
+                previousLesson={previousLesson}
+                nextLesson={nextLesson}
+                level={level}
+                lesson={{ ...lesson, id: lessonId, exerciseLessonId: lesson.id || lesson.slug, unit }}
+                completed={completed}
+                onComplete={handleComplete}
+              />
             )}
-
-            <div className="py-7">
-              <SafeLessonRenderer lesson={lesson} />
-            </div>
-
-            <LessonNavigation
-              previousLesson={previousLesson}
-              nextLesson={nextLesson}
-              level={level}
-              lesson={{ ...lesson, id: lessonId, exerciseLessonId: lesson.id || lesson.slug, unit }}
-              completed={completed}
-              onComplete={handleComplete}
-            />
-          </article>
-
-          <LessonSidebar
-            lessons={unitLessons}
-            currentLessonId={lessonId}
-            level={level}
-            unitTitle={unitTitle}
           />
-        </div>
+        </article>
       </main>
     </div>
   );

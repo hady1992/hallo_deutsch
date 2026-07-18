@@ -2,6 +2,12 @@ const isRecord = (value) => Boolean(value) && typeof value === 'object' && !Arra
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
+const asCollection = (value) => {
+  if (Array.isArray(value)) return value;
+  if (!isRecord(value)) return [];
+  return asArray(value.items || value.lines || value.entries || value.content);
+};
+
 const asText = (value) => {
   if (typeof value === 'string') return value.trim();
   if (typeof value === 'number') return String(value);
@@ -78,31 +84,31 @@ export const normalizeLessonForDisplay = (rawLesson = {}) => {
     structuredContent.explanation
   );
   const sections = normalizeDetailItems(
-    asArray(lesson.sections).length ? lesson.sections : structuredContent.sections,
+    asCollection(lesson.sections).length ? asCollection(lesson.sections) : asCollection(structuredContent.sections),
     'section'
   );
   const vocabulary = normalizeDetailItems(
-    asArray(lesson.vocabulary).length ? lesson.vocabulary : structuredContent.vocabulary,
+    asCollection(lesson.vocabulary).length ? asCollection(lesson.vocabulary) : asCollection(structuredContent.vocabulary),
     'vocabulary'
   );
   const exercises = normalizeDetailItems(
-    asArray(lesson.exercises).length ? lesson.exercises : structuredContent.exercises,
+    asCollection(lesson.exercises).length ? asCollection(lesson.exercises) : asCollection(structuredContent.exercises),
     'exercise'
   );
   const examples = normalizeDetailItems(
-    asArray(lesson.examples).length ? lesson.examples : structuredContent.examples,
+    asCollection(lesson.examples).length ? asCollection(lesson.examples) : asCollection(structuredContent.examples),
     'example'
   );
   const grammar = normalizeDetailItems(
-    asArray(lesson.grammar).length ? lesson.grammar : structuredContent.grammar,
+    asCollection(lesson.grammar).length ? asCollection(lesson.grammar) : asCollection(structuredContent.grammar),
     'grammar'
   );
   const conversation = normalizeDetailItems(
-    asArray(lesson.conversation).length ? lesson.conversation : structuredContent.conversation,
+    asCollection(lesson.conversation).length ? asCollection(lesson.conversation) : asCollection(structuredContent.conversation),
     'conversation'
   );
   const reading = normalizeDetailItems(
-    asArray(lesson.reading).length ? lesson.reading : structuredContent.reading,
+    asCollection(lesson.reading).length ? asCollection(lesson.reading) : asCollection(structuredContent.reading),
     'reading'
   );
   const shortQuiz = normalizeQuiz(lesson.shortQuiz || structuredContent.shortQuiz);
