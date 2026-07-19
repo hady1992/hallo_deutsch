@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import VocabularyCardSimple from '@/components/VocabularyCardSimple';
 import VocabularyFilter from '@/components/VocabularyFilter';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -221,24 +221,24 @@ function Vocabulary() {
             <div className="flex justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0">
                 <TabsList className="bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm h-auto flex flex-nowrap md:flex-wrap gap-2 min-w-max md:min-w-0">
                     <TabsTrigger value="words" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                      <a href="/vocabulary?tab=words">
+                      <Link to="/vocabulary?tab=words">
                         <Book size={18} /> المفردات
-                      </a>
+                      </Link>
                     </TabsTrigger>
                     <TabsTrigger value="nouns" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                      <a href="/vocabulary?tab=nouns">
+                      <Link to="/vocabulary?tab=nouns">
                         <FileText size={18} /> الأسماء
-                      </a>
+                      </Link>
                     </TabsTrigger>
                     <TabsTrigger value="verbs" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                      <a href="/vocabulary?tab=verbs">
+                      <Link to="/vocabulary?tab=verbs">
                         <LayoutList size={18} /> الأفعال
-                      </a>
+                      </Link>
                     </TabsTrigger>
                     <TabsTrigger value="grammar" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                      <a href="/vocabulary?tab=grammar">
+                      <Link to="/vocabulary?tab=grammar">
                         <GraduationCap size={18} /> القواعد
-                      </a>
+                      </Link>
                     </TabsTrigger>
                 </TabsList>
             </div>
