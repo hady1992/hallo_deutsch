@@ -1,5 +1,5 @@
 import { dedupeByKey, getExerciseDedupKey, getPlacementQuestionDedupKey } from '@/utils/contentDedupUtils';
-import { getPublishedContent, publishContentItems } from '@/services/contentRepository';
+import { getPublishedContent, publishContentItems, replacePublishedContentItems } from '@/services/contentRepository';
 
 const LOCAL_STORAGE_KEYS = {
   PLACEMENT_TESTS: 'importedPlacementTests',
@@ -12,6 +12,13 @@ export const getPersistentPlacementTestQuestions = async () => (
 
 export const savePlacementTestQuestions = async (questions) => (
   publishContentItems(
+    'placement_tests',
+    dedupeByKey(questions, getPlacementQuestionDedupKey)
+  )
+);
+
+export const replacePlacementTestQuestions = async (questions) => (
+  replacePublishedContentItems(
     'placement_tests',
     dedupeByKey(questions, getPlacementQuestionDedupKey)
   )

@@ -231,6 +231,63 @@ export const publishContentItems = async (contentType, items) => {
 
 export const publishContentItem = (contentType, item) => publishContentItems(contentType, [item]);
 
+export const replacePublishedContentItems = async (contentType, items) => {
+  const incoming = dedupeByKey(
+    asArray(items).map((item, index) => ensureItemId(contentType, item, index)),
+    (item) => getContentDedupKey(contentType, item)
+  );
+  if (incoming.length === 0) return { success: false, count: 0, error: 'Replacement content is empty.' };
+
+  try {
+    const user = await requireAdminSession();
+    const { data: previousRows, error: readError } = await supabase
+      .from('content_items')
+      .select('*')
+      .eq('content_type', contentType)
+      .eq('is_published', true);
+    if (readError) throw readError;
+
+    const previousIds = asArray(previousRows).map((row) => row.id).filter(Boolean);
+    if (previousIds.length > 0) {
+      const { error: unpublishError } = await supabase
+        .from('content_items')
+        .update({ is_published: false })
+        .in('id', previousIds)
+        .eq('content_type', contentType);
+      if (unpublishError) throw unpublishError;
+    }
+
+    const { data, error: insertError } = await supabase
+      .from('content_items')
+      .insert(buildUnifiedPayload(contentType, incoming, user.id))
+      .select();
+
+    if (insertError) {
+      if (previousIds.length > 0) {
+        const { error: rollbackError } = await supabase
+          .from('content_items')
+          .update({ is_published: true })
+          .in('id', previousIds)
+          .eq('content_type', contentType);
+        if (rollbackError) console.error(`[ContentRepository] Failed to roll back ${contentType}:`, rollbackError);
+      }
+      throw insertError;
+    }
+
+    dispatchContentEvents(contentType);
+    return {
+      success: true,
+      count: incoming.length,
+      unpublished: previousIds.length,
+      storageTable: 'content_items',
+      items: asArray(data).map((row) => unwrapRow(row, contentType)),
+    };
+  } catch (error) {
+    console.error(`[ContentRepository] Failed to replace ${contentType}:`, error);
+    return { success: false, count: 0, error: error.message };
+  }
+};
+
 export const getPublishedContent = async (contentType, level = null) => (
   normalizeContent(contentType, await fetchCloudContent(contentType, level))
 );
