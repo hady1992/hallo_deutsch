@@ -85,7 +85,7 @@ const VerbConjugationExplorer = () => {
                <p className="text-slate-500 mb-6 max-w-lg">
                 لا توجد أفعال مستوردة أو قاعدة افتراضية متاحة حاليًا. يمكن للمدير إضافة ملف أفعال من لوحة التحكم، وباقي صفحات القواعد والمفردات تعمل بشكل طبيعي.
                </p>
-               <Button variant="outline" onClick={() => window.location.href = '/grammar'}>العودة إلى القواعد</Button>
+               <Button variant="outline" onClick={() => window.location.href = '/vocabulary?tab=verbs'}>العودة إلى الأفعال</Button>
           </div>
       );
   }

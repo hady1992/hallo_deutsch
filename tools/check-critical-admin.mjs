@@ -58,7 +58,7 @@ rejectText(contentRepository, "import('@/data/vocabulary", 'Production repositor
 rejectText(contentRepository, "import('@/data/grammar", 'Production repository must not import legacy grammar.');
 
 requireText(app, "lazy(() => import('@/pages/AdminPanel'))", 'AdminPanel must remain route-lazy.');
-requireText(app, "lazy(() => import('@/pages/Grammar'))", 'Grammar must remain route-lazy.');
+requireText(app, '<Navigate to="/vocabulary?tab=grammar" replace />', 'Grammar must redirect to the unified library tab.');
 requireText(app, "lazy(() => import('@/pages/Kids'))", 'Kids must remain route-lazy.');
 requireText(app, 'path="/level/:level"', 'Reusable level route is missing.');
 requireText(app, 'path="/level/:level/lesson/:lessonSlug"', 'Reusable lesson route is missing.');
@@ -67,7 +67,7 @@ requireText(app, '<AppErrorBoundary>', 'The global app error boundary is missing
 requireText(appErrorBoundary, 'تعذر عرض هذه الصفحة', 'The Arabic global crash fallback is missing.');
 requireText(grammarPage, 'getGrammarRules(activeLevel)', 'Grammar must request only the active level.');
 requireText(grammarDisplay, 'normalizeGrammarRuleForDisplay(rule)', 'Grammar display must normalize imported rule shapes.');
-requireText(levelPage, 'getCourseLessons(level)', 'Course level page must load published lesson summaries.');
+requireText(levelPage, 'getLessons(level)', 'Course level page must load full published lessons for the learning path.');
 requireText(lessonPage, 'getLessonBySlug(level, lessonSlug)', 'Course lesson page must load only the selected lesson.');
 requireText(levelsPage, 'getCourseLessons(level)', 'Level counts must come from published lessons.');
 rejectText(levelsPage, 'STATIC_LESSON_CATALOG', 'Level counts must not use the legacy static catalog.');

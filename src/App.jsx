@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Layout from '@/components/Layout';
 import Home from '@/pages/Home';
@@ -17,7 +17,6 @@ const Levels = lazy(() => import('@/pages/Levels'));
 const CourseLevelPage = lazy(() => import('@/pages/CourseLevelPage'));
 const CourseLessonPage = lazy(() => import('@/pages/CourseLessonPage'));
 const Vocabulary = lazy(() => import('@/pages/Vocabulary'));
-const Grammar = lazy(() => import('@/pages/Grammar'));
 const Exercises = lazy(() => import('@/pages/Exercises'));
 const Exams = lazy(() => import('@/pages/Exams'));
 const PlacementTest = lazy(() => import('@/pages/PlacementTest'));
@@ -79,7 +78,7 @@ function App() {
                 <Route path="/level/:level" element={<CourseLevelPage />} />
                 <Route path="/level/:level/lesson/:lessonSlug" element={<CourseLessonPage />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
-                <Route path="/grammar" element={<Grammar />} />
+                <Route path="/grammar" element={<Navigate to="/vocabulary?tab=grammar" replace />} />
                 <Route path="/kids" element={<Kids />} />
                 <Route
                   path="/admin"

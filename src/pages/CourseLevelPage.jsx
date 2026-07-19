@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { ArrowLeft, ArrowRight, BookOpen, Layers3, Loader2, Settings } from 'lucide-react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { getCourseLessons } from '@/services/contentRepository';
+import { getLessons } from '@/services/contentRepository';
 import CourseProgress from '@/components/course/CourseProgress';
 import CourseUnitCard from '@/components/course/CourseUnitCard';
 import CourseUnitOverviewCard from '@/components/course/CourseUnitOverviewCard';
 import {
   getCourseProgress,
-  getLessonProgressStatus,
+  getCourseLessonId,
   getLevelProgressPercent,
 } from '@/utils/courseProgress';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
@@ -39,7 +39,7 @@ const CourseLevelPage = () => {
     setLoading(true);
     setError('');
     try {
-      setLessons(await getCourseLessons(level));
+      setLessons(await getLessons(level));
     } catch (loadError) {
       console.error(`[CourseLevelPage] Failed to load ${level}:`, loadError);
       setError('تعذر تحميل المحتوى حاليًا');
@@ -65,9 +65,9 @@ const CourseLevelPage = () => {
   const selectedUnitKey = searchParams.get('unit') || '';
   const selectedUnit = units.find((unit) => unit.unit === selectedUnitKey) || null;
   const progressPercent = getLevelProgressPercent(lessons, progress);
-  const completedCount = lessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length;
+  const completedCount = lessons.filter((lesson) => progress.completedLessonIds.includes(getCourseLessonId(lesson))).length;
   const lastLessonId = progress.lastLessonIdByLevel[level];
-  const continueLesson = lessons.find((lesson) => lesson.id === lastLessonId) || lessons[0];
+  const continueLesson = lessons.find((lesson) => getCourseLessonId(lesson) === lastLessonId) || lessons[0];
 
   if (!details) {
     return (
@@ -143,7 +143,7 @@ const CourseLevelPage = () => {
             <CourseUnitCard
               unit={selectedUnit}
               level={level}
-              getStatus={(lessonId) => getLessonProgressStatus(lessonId, progress)}
+              progress={progress}
             />
           </div>
         ) : (
@@ -158,7 +158,7 @@ const CourseLevelPage = () => {
                   key={unit.unit}
                   unit={unit}
                   level={level}
-                  completedCount={unit.lessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length}
+                  completedCount={unit.lessons.filter((lesson) => progress.completedLessonIds.includes(getCourseLessonId(lesson))).length}
                 />
               ))}
             </div>

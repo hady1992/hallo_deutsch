@@ -17,8 +17,8 @@ import {
 
 const SECTION_CARDS = [
   { title: 'المستويات', description: 'من A1 إلى B2', path: '/levels', icon: Layers, accent: 'red' },
-  { title: 'المفردات', description: 'تعلّم كلمات وأمثلة جديدة', path: '/vocabulary', icon: BookOpen, accent: 'gold' },
-  { title: 'القواعد', description: 'شرح منظم وأمثلة', path: '/grammar', icon: PenTool, accent: 'red' },
+  { title: 'المفردات', description: 'تعلّم كلمات وأمثلة جديدة', path: '/vocabulary?tab=words', icon: BookOpen, accent: 'gold' },
+  { title: 'القواعد', description: 'شرح منظم وأمثلة', path: '/vocabulary?tab=grammar', icon: PenTool, accent: 'red' },
   { title: 'التمارين', description: 'تدريب تفاعلي ونتائج فورية', path: '/exercises', icon: Dumbbell, accent: 'gold' },
   { title: 'الامتحانات', description: 'نماذج واختبارات حسب المستوى', path: '/exams', icon: Trophy, accent: 'red' },
   { title: 'الأطفال', description: 'محتوى وألعاب تعليمية', path: '/kids', icon: Baby, accent: 'gold' },
