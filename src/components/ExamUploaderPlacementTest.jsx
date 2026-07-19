@@ -1,520 +1,358 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Plus, Save, Target, ListOrdered, CheckCircle, RefreshCw, AlertTriangle, FileUp, FileJson, Loader2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  FileJson,
+  FileUp,
+  Loader2,
+  RefreshCw,
+  ShieldAlert,
+  Target,
+  Trash2,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    savePlacementTestQuestions,
-    getPersistentPlacementTestQuestions
-} from '@/utils/persistentDataStorage';
+import { useToast } from '@/components/ui/use-toast';
 import { getPlacementQuestionDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
+import {
+  getPersistentPlacementTestQuestions,
+  replacePlacementTestQuestions,
+  savePlacementTestQuestions,
+} from '@/utils/persistentDataStorage';
 import { deletePublishedContentItem } from '@/services/contentRepository';
+import { PLACEMENT_TEST_VERSION } from '@/utils/placementTestNormalizer';
+import { validatePlacementQuestionBank } from '@/utils/placementTestValidator';
 
-// رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة تُسجَّل
-// بالـ Console فقط عبر console.error.
-const FRIENDLY_ERRORS = {
-  BAD_FORMAT: 'صيغة الملف غير صحيحة',
-  NO_VALID_ITEMS: 'الملف لا يحتوي على أسئلة صالحة',
-  PARTIAL_SKIPPED: 'تم استيراد بعض العناصر وتجاهل العناصر الناقصة',
+const downloadJson = (content, filename) => {
+  const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 };
+
+const createTemplate = () => ([{
+  id: 'pt-a1-use-core-001',
+  testVersion: PLACEMENT_TEST_VERSION,
+  level: 'A1',
+  skill: 'language_use',
+  stage: 'core',
+  difficulty: 1,
+  question: 'Ich ___ aus Syrien.',
+  stimulus: null,
+  options: ['komme', 'kommt', 'kommst', 'kommen'],
+  correctAnswer: 0,
+  explanation: 'مع ich نستخدم komme.',
+  descriptor: 'Can give basic personal information.',
+}]);
+
+const SummaryCell = ({ label, value }) => (
+  <div className="rounded-md border border-black/10 bg-white px-3 py-2">
+    <p className="text-xs font-bold text-slate-500">{label}</p>
+    <p className="mt-1 text-lg font-black text-[#111111]">{value}</p>
+  </div>
+);
 
 const ExamUploaderPlacementTest = () => {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [questionsList, setQuestionsList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importStats, setImportStats] = useState(null);
-
-  // Manual Entry State
-  const [newQuestion, setNewQuestion] = useState({
-      question: '',
-      option1: '',
-      option2: '',
-      option3: '',
-      option4: '',
-      correctAnswer: '0',
-      level: 'A1'
-  });
+  const [importing, setImporting] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [preview, setPreview] = useState(null);
+  const [operationReport, setOperationReport] = useState(null);
+  const [showReplacement, setShowReplacement] = useState(false);
+  const [replacementWord, setReplacementWord] = useState('');
+  const [backupDownloaded, setBackupDownloaded] = useState(false);
 
   const loadData = async () => {
-      setLoading(true);
-      try {
-        const data = await getPersistentPlacementTestQuestions();
-        // Filter out duplicates if any in view
-        setQuestionsList(data || []);
-      } catch (e) {
-        console.error("Load error:", e);
-        toast({ title: "Error loading data", variant: "destructive" });
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      setQuestionsList(await getPersistentPlacementTestQuestions());
+    } catch (error) {
+      console.error('[PlacementAdmin] Failed to load questions:', error);
+      toast({ title: 'تعذر تحميل أسئلة تحديد المستوى', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
-    window.addEventListener('placementTestsUpdated', loadData);
-    return () => {
-        window.removeEventListener('placementTestsUpdated', loadData);
-    };
-  }, []);
+    window.addEventListener('placement_testsUpdated', loadData);
+    return () => window.removeEventListener('placement_testsUpdated', loadData);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleManualAdd = async () => {
-      if (!newQuestion.question || !newQuestion.option1 || !newQuestion.option2 || !newQuestion.option3 || !newQuestion.option4) {
-          toast({
-              title: "حقول ناقصة",
-              description: "يرجى ملء السؤال وجميع الخيارات.",
-              variant: "destructive"
-          });
-          return;
-      }
+  const existingDuplicateCount = useMemo(() => {
+    if (!preview) return 0;
+    return splitNewUniqueItems(
+      preview.validation.validQuestions,
+      questionsList,
+      getPlacementQuestionDedupKey
+    ).skipped;
+  }, [preview, questionsList]);
 
-      setSaving(true);
-      try {
-          // Robust UUID generation
-          const newId = crypto.randomUUID ? crypto.randomUUID() : `pt_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-
-          const formattedQuestion = {
-              id: newId,
-              question: newQuestion.question,
-              options: [newQuestion.option1, newQuestion.option2, newQuestion.option3, newQuestion.option4],
-              correctAnswer: parseInt(newQuestion.correctAnswer),
-              level: newQuestion.level,
-              source: 'local' // Mark as local initially
-          };
-
-          // 1. Get FRESH current data to ensure we don't overwrite concurrent updates from this session
-          const current = await getPersistentPlacementTestQuestions();
-
-          // 2. Append new
-          // We only save the "User Added" or "Modified" ones typically, but our saver handles the full list logic for LS
-          // Filter out defaults if we only want to save custom, BUT getPersistent.. returns ALL.
-          // IMPORTANT: We should only pass user-modifiable data to save if we want to avoid saving defaults to DB
-          // For now, let's assume we save everything that isn't flagged 'default' OR we just append to the custom list.
-
-          // Actually, `getPersistentPlacementTestQuestions` merges default + local.
-          // If we save `[...current, new]`, we might re-save defaults as custom.
-          // Better: Get current, filter to only non-default, add new, then save.
-          const customOnly = current.filter(q => q.source !== 'default');
-          const updatedList = [...customOnly, formattedQuestion];
-
-          const result = await savePlacementTestQuestions(updatedList);
-
-          if (result.success) {
-            toast({
-                title: "تم الحفظ بنجاح",
-                description: "تم حفظ السؤال ومزامنته.",
-                className: "bg-green-50 border-green-200 text-green-800"
-            });
-            // Reset form
-            setNewQuestion({
-                question: '',
-                option1: '',
-                option2: '',
-                option3: '',
-                option4: '',
-                correctAnswer: '0',
-                level: 'A1'
-            });
-            // Refresh list
-            loadData();
-            // Dispatch event
-            window.dispatchEvent(new Event('placementTestsUpdated'));
-          } else {
-             toast({
-                title: "فشل النشر",
-                description: "فشل الحفظ السحابي، لن يظهر المحتوى للزوار",
-                variant: "destructive"
-            });
-          }
-
-      } catch (err) {
-          console.error(err);
-          toast({ title: "Error saving question", description: err.message, variant: "destructive" });
-      } finally {
-          setSaving(false);
-      }
+  const resetSelection = () => {
+    setSelectedFileName('');
+    setPreview(null);
+    setShowReplacement(false);
+    setReplacementWord('');
+    setBackupDownloaded(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
-      const current = await getPersistentPlacementTestQuestions();
-      const question = current.find(q => q.id === id || q.supabaseId === id);
-      const result = await deletePublishedContentItem('placement_tests', question || id);
-      if (!result.success) {
-        toast({ title: 'فشل حذف السؤال', description: result.error, variant: 'destructive' });
-        return;
-      }
-      loadData();
-      window.dispatchEvent(new Event('placementTestsUpdated'));
-      toast({ title: "تم الحذف", className: "bg-red-50 border-red-200 text-red-800" });
-    }
-  };
-
-  // تحويل الإجابة الصحيحة إلى رقم موضع الخيار (index):
-  // - رقم أصلًا → يُترك كما هو.
-  // - نص مطابق لأحد عناصر options → يُحوَّل لرقم موضعه.
-  // - تعذّر المطابقة → يُرجع -1 (يُعتبر السؤال غير صالح ويُستبعد).
-  const normalizeCorrectAnswer = (options, correctAnswer) => {
-    if (typeof correctAnswer === 'number') {
-      return (correctAnswer >= 0 && correctAnswer < options.length) ? correctAnswer : -1;
-    }
-    const idx = options.findIndex(o => String(o).trim() === String(correctAnswer).trim());
-    return idx;
-  };
-
-  const validatePlacementQuestion = (item) => {
-    const errors = [];
-    if (!item.question || typeof item.question !== 'string') errors.push('question مطلوب');
-    if (!Array.isArray(item.options) || item.options.length === 0) errors.push('options يجب أن تكون قائمة (array)');
-    if (item.correctAnswer === undefined || item.correctAnswer === null || item.correctAnswer === '') errors.push('correctAnswer مطلوب');
-    return errors;
-  };
-
-  const downloadJsonTemplate = () => {
-    const jsonContent = JSON.stringify([
-      {
-        id: "pt-101",
-        question: "Wie ___ du?",
-        options: ["heißt", "heißen", "hast", "heiße"],
-        correctAnswer: 0,
-        level: "A1"
-      },
-      {
-        id: "pt-102",
-        question: "___ Frau ist Lehrerin.",
-        options: ["Der", "Die", "Das", "Den"],
-        correctAnswer: 1,
-        level: "A1"
-      }
-    ], null, 2);
-
-    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "placement_test_template.json");
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast({
-      title: "تم التحميل",
-      description: "تم تحميل قالب اختبار تحديد المستوى (JSON) بنجاح.",
-      className: "bg-green-50 border-green-200 text-green-800"
-    });
-  };
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) processJsonFile(file);
-    e.target.value = '';
-  };
-
-  const processJsonFile = async (file) => {
-    setIsImporting(true);
-    setImportStats(null);
-
+  const handleFileSelect = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedFileName(file.name);
+    setOperationReport(null);
+    setShowReplacement(false);
+    setReplacementWord('');
+    setBackupDownloaded(false);
     try {
-      const text = await file.text();
-      let parsed;
-      try {
-        parsed = JSON.parse(text);
-      } catch (e) {
-        console.error('JSON parse error:', e);
-        throw new Error(FRIENDLY_ERRORS.BAD_FORMAT);
-      }
-
-      const itemsArray = Array.isArray(parsed) ? parsed : [parsed];
-      if (itemsArray.length === 0) throw new Error(FRIENDLY_ERRORS.NO_VALID_ITEMS);
-
-      const validQuestions = [];
-      let errors = 0;
-
-      itemsArray.forEach((item, idx) => {
-        const itemErrors = validatePlacementQuestion(item);
-        if (itemErrors.length > 0) {
-          console.error(`سؤال ${idx + 1} غير صالح:`, itemErrors, item);
-          errors++;
-          return;
-        }
-
-        const correctIdx = normalizeCorrectAnswer(item.options, item.correctAnswer);
-        if (correctIdx < 0) {
-          console.error(`تعذر مطابقة الإجابة الصحيحة للسؤال ${idx + 1}:`, item.correctAnswer, item.options);
-          errors++;
-          return;
-        }
-
-        const id = item.id || (crypto.randomUUID ? crypto.randomUUID() : `pt_${Date.now()}_${idx}`);
-        validQuestions.push({
-          id,
-          question: item.question,
-          options: item.options,
-          correctAnswer: correctIdx,
-          level: item.level || item.targetLevel || 'A1', // level أو targetLevel اختياري
-          explanation: item.explanation || '', // explanation اختياري
-          source: 'local'
-        });
-      });
-
-      if (validQuestions.length === 0) throw new Error(FRIENDLY_ERRORS.NO_VALID_ITEMS);
-
-      const current = await getPersistentPlacementTestQuestions();
-      const { unique, skipped: duplicates } = splitNewUniqueItems(
-        validQuestions,
-        current,
-        getPlacementQuestionDedupKey
-      );
-
-      if (unique.length === 0 && errors === 0) {
-        setImportStats({ success: 0, duplicates, errors });
-        toast({
-          title: "لم تتم إضافة أسئلة جديدة",
-          description: `تم تجاهل مكرر: ${duplicates}.`,
-          variant: "warning"
-        });
-        return;
-      }
-
-      const customOnly = current.filter(q => q.source !== 'default');
-      const updatedList = [...customOnly, ...unique];
-      const result = await savePlacementTestQuestions(updatedList);
-
-      setImportStats({ success: unique.length, duplicates, errors });
-      loadData();
-      window.dispatchEvent(new Event('placementTestsUpdated'));
-
-      if (result.success) {
-        toast({
-          title: "تم الاستيراد بنجاح",
-          description: `تمت إضافة ${unique.length} سؤال، وتم تجاهل مكرر: ${duplicates}، أخطاء: ${errors}.`,
-          className: "bg-green-50 border-green-200 text-green-800"
-        });
-      } else {
-        toast({
-          title: "تم الحفظ محلياً",
-          description: "فشلت المزامنة مع السحابة، لكن تم الحفظ محليًا بنجاح.",
-          variant: "warning"
-        });
-      }
-
+      const parsed = JSON.parse(await file.text());
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      const validation = validatePlacementQuestionBank(items, { requireComplete: false });
+      const fullValidation = validatePlacementQuestionBank(items, { requireComplete: true });
+      setPreview({ validation, fullValidation });
     } catch (error) {
-      console.error('خطأ استيراد أسئلة تحديد المستوى:', error);
-      toast({
-        title: "خطأ في الاستيراد",
-        description: error.message || FRIENDLY_ERRORS.BAD_FORMAT,
-        variant: "destructive"
-      });
-    } finally {
-      setIsImporting(false);
+      console.error('[PlacementAdmin] Invalid JSON file:', error);
+      setPreview(null);
+      toast({ title: 'صيغة ملف JSON غير صحيحة', variant: 'destructive' });
     }
   };
+
+  const handleAddQuestions = async () => {
+    if (!preview?.validation.validQuestions.length) return;
+    const { unique, skipped } = splitNewUniqueItems(
+      preview.validation.validQuestions,
+      questionsList,
+      getPlacementQuestionDedupKey
+    );
+    setImporting(true);
+    try {
+      const saveResult = await savePlacementTestQuestions(unique);
+      if (!saveResult.success) throw new Error(saveResult.error || 'Cloud save failed.');
+      setOperationReport({
+        type: 'add',
+        added: saveResult.count,
+        duplicates: skipped + (saveResult.duplicates || 0),
+        errors: preview.validation.itemErrors.length,
+      });
+      resetSelection();
+      await loadData();
+      toast({ title: 'تم نشر الأسئلة الجديدة بنجاح' });
+    } catch (error) {
+      console.error('[PlacementAdmin] Add failed:', error);
+      toast({ title: 'فشل الحفظ السحابي، لم يتم نشر الأسئلة', variant: 'destructive' });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleDownloadBackup = () => {
+    downloadJson(questionsList, `placement-test-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    setBackupDownloaded(true);
+  };
+
+  const handleReplace = async () => {
+    if (!preview?.fullValidation.complete || replacementWord.trim() !== 'استبدال' || !backupDownloaded) return;
+    setImporting(true);
+    try {
+      const replaceResult = await replacePlacementTestQuestions(preview.fullValidation.validQuestions);
+      if (!replaceResult.success) throw new Error(replaceResult.error || 'Cloud replacement failed.');
+      setOperationReport({
+        type: 'replace',
+        added: replaceResult.count,
+        unpublished: replaceResult.unpublished,
+        duplicates: 0,
+        errors: 0,
+      });
+      resetSelection();
+      await loadData();
+      toast({ title: 'تم استبدال اختبار تحديد المستوى ونشر البنك الجديد' });
+    } catch (error) {
+      console.error('[PlacementAdmin] Replacement failed:', error);
+      toast({ title: 'فشل استبدال الاختبار أو حفظ البنك الجديد', variant: 'destructive' });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleDelete = async (question) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا السؤال؟')) return;
+    const deletion = await deletePublishedContentItem('placement_tests', question);
+    if (!deletion.success) {
+      console.error('[PlacementAdmin] Delete failed:', deletion.error);
+      toast({ title: 'فشل حذف السؤال من التخزين السحابي', variant: 'destructive' });
+      return;
+    }
+    await loadData();
+    toast({ title: 'تم حذف السؤال' });
+  };
+
+  const summary = preview?.validation.summary;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="bg-slate-50 p-6 border-b border-slate-200 flex items-center justify-between">
+    <section className="overflow-hidden rounded-md border border-black/10 bg-white" dir="rtl">
+      <header className="flex flex-col gap-4 border-b border-black/10 bg-[#fcfaf6] p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h3 className="font-bold text-slate-800 flex items-center gap-2 text-xl">
-                <Target className="text-amber-600" size={24} />
-                إدارة اختبار تحديد المستوى
-            </h3>
-            <p className="text-slate-500 text-sm mt-1">أضف وعدل الأسئلة التي تظهر في اختبار تحديد المستوى.</p>
+          <h3 className="flex items-center gap-2 text-xl font-black text-[#111111]"><Target className="text-[#d71920]" /> إدارة اختبار تحديد المستوى</h3>
+          <p className="mt-2 text-sm text-slate-600">إدارة بنك {PLACEMENT_TEST_VERSION} داخل content_items.</p>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            </Button>
-            <Badge variant="outline" className="bg-white border-slate-200 shadow-sm">
-            {questionsList.length} سؤال
-            </Badge>
+          <Badge variant="outline" className="bg-white">{questionsList.length} سؤال منشور</Badge>
+          <Button type="button" size="icon" variant="outline" onClick={loadData} disabled={loading} title="تحديث القائمة">
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </Button>
         </div>
-      </div>
+      </header>
 
       <div className="p-6">
-          {/* Bulk JSON Import Section */}
-          <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
-              <h4 className="font-bold text-slate-700 mb-1 flex items-center gap-2">
-                  <FileJson className="w-5 h-5 text-amber-600" /> رفع دفعة أسئلة (JSON)
-              </h4>
-              <p className="text-slate-500 text-sm mb-4">
-                  بدل إضافة سؤال واحد يدويًا، يمكنك رفع ملف JSON يحتوي عدة أسئلة دفعة واحدة.
+        <div className="rounded-md border border-black/10 bg-[#fcfaf6] p-5">
+          <h4 className="flex items-center gap-2 font-black text-[#111111]"><FileJson size={19} className="text-[#b08000]" /> رفع بنك أسئلة JSON</h4>
+          <p className="mt-2 text-sm leading-6 text-slate-600">يتم فحص الحقول والتوزيع والمكررات قبل إتاحة أي عملية حفظ.</p>
+          <input ref={fileInputRef} type="file" accept=".json,application/json" onChange={handleFileSelect} className="hidden" />
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={importing} className="min-h-11 gap-2 bg-[#111111] text-white hover:bg-black">
+              <FileUp size={18} /> اختيار ملف JSON
+            </Button>
+            <Button type="button" variant="outline" onClick={() => downloadJson(createTemplate(), 'cefr-placement-question-template.json')} className="min-h-11 gap-2">
+              <Download size={18} /> تحميل قالب سؤال
+            </Button>
+          </div>
+          {selectedFileName && <p className="mt-3 text-sm font-bold text-slate-700">الملف المختار: <span dir="ltr">{selectedFileName}</span></p>}
+        </div>
+
+        {preview && summary && (
+          <section className="mt-6 rounded-md border border-[#d7a900]/40 bg-[#fffaf0] p-5" aria-labelledby="placement-import-report">
+            <h4 id="placement-import-report" className="font-black text-[#111111]">تقرير التحقق قبل الحفظ</h4>
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <SummaryCell label="الإجمالي الصالح" value={summary.total} />
+              {Object.entries(summary.levels).map(([level, count]) => <SummaryCell key={level} label={level} value={count} />)}
+              <SummaryCell label="Core" value={summary.stages.core} />
+              <SummaryCell label="Tiebreaker" value={summary.stages.tiebreaker} />
+              <SummaryCell label="القواعد والمفردات" value={summary.skills.language_use} />
+              <SummaryCell label="القراءة" value={summary.skills.reading} />
+              <SummaryCell label="الاستماع" value={summary.skills.listening} />
+              <SummaryCell label="أخطاء البنية" value={preview.validation.itemErrors.length} />
+              <SummaryCell label="مكرر داخل الملف" value={preview.validation.duplicates} />
+              <SummaryCell label="مكرر منشور" value={existingDuplicateCount} />
+            </div>
+
+            {preview.validation.itemErrors.length > 0 && (
+              <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                <p className="font-black">أخطاء يجب مراجعتها</p>
+                <ul className="mt-2 list-inside list-disc space-y-1">
+                  {preview.validation.itemErrors.slice(0, 8).map((item) => (
+                    <li key={`${item.index}-${item.id || 'unknown'}`}>العنصر {item.index + 1}: {item.errors.join('، ')}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {!preview.fullValidation.complete && (
+              <p className="mt-4 flex items-start gap-2 rounded-md border border-amber-300 bg-white p-4 text-sm font-bold text-amber-900">
+                <AlertTriangle className="mt-0.5 shrink-0" size={18} />
+                الملف ليس بنكًا كاملًا من 60 سؤالًا بالتوزيع المطلوب، لذلك يمكن إضافة أسئلته الصالحة فقط ولا يمكن استخدامه للاستبدال الكامل.
               </p>
-              <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  accept=".json"
-                  className="hidden"
-              />
-              <div className="flex flex-col md:flex-row gap-3">
-                  <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isImporting}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2"
-                  >
-                      {isImporting ? <Loader2 className="animate-spin w-4 h-4" /> : <FileUp className="w-4 h-4" />}
-                      رفع ملف أسئلة (JSON)
+            )}
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <Button
+                type="button"
+                onClick={handleAddQuestions}
+                disabled={importing || preview.validation.validQuestions.length === 0}
+                className="min-h-11 gap-2 bg-[#d71920] text-white hover:bg-[#b91218]"
+              >
+                {importing ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
+                إضافة أسئلة جديدة
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowReplacement(true)}
+                disabled={importing || !preview.fullValidation.complete}
+                className="min-h-11 gap-2 border-red-300 text-red-800"
+              >
+                <ShieldAlert size={18} /> استبدال الاختبار بالكامل
+              </Button>
+            </div>
+          </section>
+        )}
+
+        {showReplacement && preview?.fullValidation.complete && (
+          <section className="mt-6 rounded-md border-2 border-red-300 bg-red-50 p-5" aria-labelledby="replace-placement-heading">
+            <h4 id="replace-placement-heading" className="flex items-center gap-2 font-black text-red-900"><ShieldAlert size={20} /> تأكيد الاستبدال الكامل</h4>
+            <p className="mt-3 leading-7 text-red-900">سيتم إلغاء نشر جميع أسئلة تحديد المستوى الحالية ثم نشر البنك الجديد. إذا فشل الرفع، يحاول النظام إعادة نشر البنك السابق تلقائيًا.</p>
+            <Button type="button" variant="outline" onClick={handleDownloadBackup} className="mt-4 min-h-11 gap-2 border-red-300 bg-white">
+              <Download size={18} /> تنزيل نسخة JSON احتياطية
+            </Button>
+            <div className="mt-4 max-w-md">
+              <Label htmlFor="placement-replace-word">اكتب كلمة «استبدال» للتأكيد</Label>
+              <Input id="placement-replace-word" value={replacementWord} onChange={(event) => setReplacementWord(event.target.value)} className="mt-2 bg-white" autoComplete="off" />
+            </div>
+            <Button
+              type="button"
+              onClick={handleReplace}
+              disabled={importing || !backupDownloaded || replacementWord.trim() !== 'استبدال'}
+              className="mt-4 min-h-11 gap-2 bg-red-700 text-white hover:bg-red-800"
+            >
+              {importing ? <Loader2 className="animate-spin" size={18} /> : <ShieldAlert size={18} />}
+              تنفيذ الاستبدال
+            </Button>
+            {!backupDownloaded && <p className="mt-3 text-sm font-bold text-red-800">نزّل النسخة الاحتياطية أولًا لتفعيل زر التنفيذ.</p>}
+          </section>
+        )}
+
+        {operationReport && (
+          <section className="mt-6 rounded-md border border-green-200 bg-green-50 p-5 text-green-900" aria-live="polite">
+            <h4 className="flex items-center gap-2 font-black"><CheckCircle2 size={19} /> تقرير العملية</h4>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm font-bold">
+              <span>تمت إضافة: {operationReport.added}</span>
+              <span>مكرر تم تجاهله: {operationReport.duplicates}</span>
+              <span>أخطاء: {operationReport.errors}</span>
+              {operationReport.type === 'replace' && <span>تم إلغاء نشر القديم: {operationReport.unpublished}</span>}
+              <span>حالة النشر: تم النشر للزوار</span>
+            </div>
+          </section>
+        )}
+
+        <section className="mt-8" aria-labelledby="published-placement-heading">
+          <h4 id="published-placement-heading" className="font-black text-[#111111]">الأسئلة المنشورة حاليًا</h4>
+          {questionsList.length === 0 ? (
+            <p className="mt-4 rounded-md border border-dashed border-black/15 p-8 text-center text-slate-500">لا توجد أسئلة منشورة.</p>
+          ) : (
+            <div className="mt-4 max-h-[520px] space-y-3 overflow-y-auto pl-1">
+              {questionsList.map((question, index) => (
+                <article key={question.supabaseId || question.id || index} className="flex items-start justify-between gap-4 rounded-md border border-black/10 p-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">{question.testVersion || 'إصدار قديم'}</Badge>
+                      <Badge variant="outline">{question.level || 'بلا مستوى'}</Badge>
+                      {question.skill && <Badge variant="outline">{question.skill}</Badge>}
+                      {question.stage && <Badge variant="outline">{question.stage}</Badge>}
+                    </div>
+                    <p className="mt-3 font-bold leading-7 text-slate-800" dir="auto">{question.question}</p>
+                  </div>
+                  <Button type="button" size="icon" variant="ghost" onClick={() => handleDelete(question)} className="shrink-0 text-red-700" title="حذف السؤال">
+                    <Trash2 size={18} />
                   </Button>
-                  <Button
-                      onClick={downloadJsonTemplate}
-                      variant="outline"
-                      className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50 flex items-center justify-center gap-2"
-                  >
-                      <FileJson className="w-4 h-4" />
-                      تحميل قالب JSON
-                  </Button>
-              </div>
-              {importStats && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-100 rounded-lg flex items-center justify-between text-sm flex-wrap gap-2">
-                      <span className="text-green-800 flex items-center gap-2">
-                          <Check size={16} /> تم إضافة {importStats.success} سؤال
-                      </span>
-                      {importStats.duplicates > 0 && (
-                          <span className="text-yellow-700 flex items-center gap-2">
-                              <AlertTriangle size={16} /> مكرر تم تجاهله: {importStats.duplicates}
-                          </span>
-                      )}
-                      {importStats.errors > 0 && (
-                          <span className="text-amber-600 flex items-center gap-2">
-                              <AlertTriangle size={16} /> {FRIENDLY_ERRORS.PARTIAL_SKIPPED} ({importStats.errors} عنصر)
-                          </span>
-                      )}
-                  </div>
-              )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Form Section */}
-              <div className="lg:col-span-1 space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-100 h-fit">
-                  <h4 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
-                      <Plus className="w-5 h-5 text-red-500" /> إضافة سؤال جديد
-                  </h4>
-
-                  <div className="space-y-3">
-                      <div>
-                          <Label className="text-xs text-slate-500 mb-1.5 block">نص السؤال</Label>
-                          <Input
-                              value={newQuestion.question}
-                              onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
-                              placeholder="اكتب السؤال بالألمانية..."
-                              className="bg-white border-slate-200 focus:border-red-400"
-                              dir="ltr"
-                          />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        {[1, 2, 3, 4].map((num, idx) => (
-                             <div key={idx}>
-                                <Label className="text-xs text-slate-500 mb-1.5 block">خيار {num}</Label>
-                                <Input
-                                    value={newQuestion[`option${num}`]}
-                                    onChange={(e) => setNewQuestion({...newQuestion, [`option${num}`]: e.target.value})}
-                                    placeholder={`Option ${num}`}
-                                    className="bg-white text-sm"
-                                    dir="ltr"
-                                />
-                             </div>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                          <div>
-                              <Label className="text-xs text-slate-500 mb-1.5 block">الإجابة الصحيحة</Label>
-                              <select
-                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
-                                  value={newQuestion.correctAnswer}
-                                  onChange={(e) => setNewQuestion({...newQuestion, correctAnswer: e.target.value})}
-                              >
-                                  <option value="0">الخيار 1</option>
-                                  <option value="1">الخيار 2</option>
-                                  <option value="2">الخيار 3</option>
-                                  <option value="3">الخيار 4</option>
-                              </select>
-                          </div>
-
-                          <div>
-                              <Label className="text-xs text-slate-500 mb-1.5 block">المستوى</Label>
-                              <select
-                                  className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
-                                  value={newQuestion.level}
-                                  onChange={(e) => setNewQuestion({...newQuestion, level: e.target.value})}
-                              >
-                                  <option value="A1">A1 (مبتدئ)</option>
-                                  <option value="A2">A2 (أساسي)</option>
-                                  <option value="B1">B1 (متوسط)</option>
-                                  <option value="B2">B2 (متقدم)</option>
-                              </select>
-                          </div>
-                      </div>
-
-                      <Button onClick={handleManualAdd} disabled={saving} className="w-full bg-red-600 hover:bg-red-700 text-white mt-4">
-                          {saving ? <RefreshCw className="animate-spin w-4 h-4 mr-2"/> : <Save className="w-4 h-4 mr-2" />}
-                          {saving ? "جاري الحفظ..." : "حفظ السؤال"}
-                      </Button>
-                  </div>
-              </div>
-
-              {/* List Section */}
-              <div className="lg:col-span-2">
-                  <h4 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
-                      <ListOrdered className="w-5 h-5 text-slate-500" /> قائمة الأسئلة
-                  </h4>
-
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
-                      {questionsList.length === 0 ? (
-                          <div className="text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                              <p className="text-slate-400">لا توجد أسئلة مضافة حتى الآن.</p>
-                          </div>
-                      ) : (
-                          questionsList.map((q, idx) => (
-                              <div key={q.id || idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow relative group">
-                                  {q.source !== 'default' && (
-                                      <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
-                                              onClick={() => handleDelete(q.id)}
-                                          >
-                                              <Trash2 size={16} />
-                                          </Button>
-                                      </div>
-                                  )}
-
-                                  <div className="flex items-start gap-3 mb-2 pr-8">
-                                      <Badge variant="secondary" className={`${
-                                          q.level === 'A1' ? 'bg-green-100 text-green-800' :
-                                          q.level === 'A2' ? 'bg-red-100 text-red-800' :
-                                          q.level === 'B1' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                                      }`}>
-                                          {q.level}
-                                      </Badge>
-                                      {q.source === 'default' && <Badge variant="outline" className="text-xs text-slate-400">افتراضي</Badge>}
-                                      {q.source === 'cloud' && <Badge variant="outline" className="text-xs text-red-400 border-red-200 bg-red-50">سحابي</Badge>}
-                                      <h5 className="font-bold text-slate-800 text-lg" dir="ltr">{q.question}</h5>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm pl-2 border-r-2 border-slate-100 mr-1" dir="ltr">
-                                      {q.options && q.options.map((opt, i) => (
-                                          <div key={i} className={`flex items-center gap-2 ${i === parseInt(q.correctAnswer) ? 'text-green-600 font-bold bg-green-50 px-2 rounded' : 'text-slate-600 px-2'}`}>
-                                              <span className="text-xs opacity-50">{i + 1}.</span> {opt}
-                                              {i === parseInt(q.correctAnswer) && <CheckCircle size={12} />}
-                                          </div>
-                                      ))}
-                                  </div>
-                              </div>
-                          ))
-                      )}
-                  </div>
-              </div>
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </section>
   );
 };
 

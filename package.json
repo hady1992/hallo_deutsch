@@ -7,6 +7,7 @@
     "dev": "vite --host :: --port 3000",
     "build": "vite build --configLoader native && npm run check:dist",
     "preview": "vite preview --host :: --port 3000",
+    "check:placement": "node scripts/check-placement-test.mjs",
     "check:critical": "node tools/check-critical-admin.mjs",
     "check:dist": "node tools/check-dist.mjs",
     "lint": "eslint . --quiet",
