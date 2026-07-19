@@ -6,6 +6,7 @@ import AudioSpeedControl from '@/components/AudioSpeedControl';
 import AudioButton from '@/components/AudioButton';
 import { motion } from 'framer-motion';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import BidiText from '@/components/common/BidiText';
 
 const CustomQuizRunner = ({ quiz, onBack }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -147,9 +148,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
              className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border-b-8 border-slate-100"
           >
               <div className="text-center mb-10">
-                  <h2 className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-6" dir="ltr">
-                      {currentQuestion.q}
-                  </h2>
+                  <BidiText as="h2" text={currentQuestion.q} className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-6" />
 
                   {currentQuestion.icon && (
                       <div className="text-8xl my-6 filter drop-shadow-md animate-in zoom-in duration-300">
@@ -200,7 +199,7 @@ const CustomQuizRunner = ({ quiz, onBack }) => {
                                 ${btnClass}
                             `}
                           >
-                              <span>{opt}</span>
+                              <BidiText as="span" text={opt} className="flex-1" />
                               <div className="flex items-center">
                                 {isSelected && answerStatus === 'correct' && <CheckCircle2 size={28} className="text-white" />}
                                 {isSelected && answerStatus === 'incorrect' && <XCircle size={28} className="text-white" />}

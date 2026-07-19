@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BidiText from '@/components/common/BidiText';
 
 const QuestionList = ({ questions, onEdit, onDelete }) => {
   if (!questions || questions.length === 0) {
@@ -32,7 +33,7 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
                 <span className="bg-slate-100 text-slate-600 font-bold h-8 w-8 flex items-center justify-center rounded-full text-sm flex-shrink-0">
                   {index + 1}
                 </span>
-                <h3 className="font-semibold text-lg text-slate-800" dir="auto">{q.question}</h3>
+                <BidiText as="h3" text={q.question} className="font-semibold text-lg text-slate-800 flex-1" />
               </div>
               <div className="flex gap-2">
                 <Button variant="ghost" size="icon" onClick={() => onEdit(q)} className="text-red-600 hover:bg-red-50">
@@ -54,7 +55,6 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
                       ? "bg-green-50 border-green-200 text-green-800 font-medium"
                       : "bg-white border-slate-100 text-slate-600"
                   )}
-                  dir="auto"
                 >
                   <span className={cn(
                     "text-xs font-bold px-2 py-0.5 rounded",
@@ -62,7 +62,7 @@ const QuestionList = ({ questions, onEdit, onDelete }) => {
                   )}>
                     {String.fromCharCode(65 + i)}
                   </span>
-                  {opt}
+                  <BidiText as="span" text={opt} className="flex-1" />
                   {i === q.correctAnswer && <Badge variant="outline" className="ml-auto bg-green-100 text-green-800 border-green-200 text-[10px]">Correct</Badge>}
                 </div>
               ))}

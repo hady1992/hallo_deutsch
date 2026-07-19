@@ -8,6 +8,7 @@ import {
   ScrollText,
 } from 'lucide-react';
 import { normalizeLessonForDisplay } from '@/utils/lessonNormalizer';
+import BidiText from '@/components/common/BidiText';
 
 const INCOMPLETE_LESSON_MESSAGE = 'هذا الدرس منشور لكنه لا يحتوي تفاصيل كاملة بعد.';
 
@@ -111,7 +112,7 @@ const SafeLessonContent = ({ lesson }) => {
         items={normalized.shortQuiz}
         renderItem={(item, index) => (
           <div key={item.id || index} className="rounded-md bg-emerald-50 p-3">
-            <p className="font-bold text-emerald-900">{item.question || item.title || item.text}</p>
+            <BidiText as="p" text={item.question || item.title || item.text} className="font-bold text-emerald-900" />
           </div>
         )}
       />
@@ -122,7 +123,7 @@ const SafeLessonContent = ({ lesson }) => {
         items={normalized.exercises}
         renderItem={(item, index) => (
           <div key={item.id || index} className="rounded-md bg-slate-50 p-3 text-slate-700">
-            {item.question || item.title || item.text}
+            <BidiText as="div" text={item.question || item.title || item.text} />
           </div>
         )}
       />

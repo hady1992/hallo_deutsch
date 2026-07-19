@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2, Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BidiText from '@/components/common/BidiText';
 
 const ExerciseList = ({ exercises, onEdit, onDelete }) => {
   if (!exercises || exercises.length === 0) {
@@ -42,7 +43,7 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
                   {index + 1}
                 </span>
                 <div>
-                  <h3 className="font-semibold text-lg text-slate-800 mb-1" dir="auto">{ex.question}</h3>
+                  <BidiText as="h3" text={ex.question} className="font-semibold text-lg text-slate-800 mb-1" />
                   <Badge variant="outline" className={cn("text-xs font-medium border", getDifficultyColor(ex.difficulty))}>
                     {ex.difficulty}
                   </Badge>
@@ -68,7 +69,6 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
                       ? "bg-green-50 border-green-200 text-green-800 font-medium"
                       : "bg-white border-slate-100 text-slate-600"
                   )}
-                  dir="auto"
                 >
                   <span className={cn(
                     "text-xs font-bold px-2 py-0.5 rounded",
@@ -76,7 +76,7 @@ const ExerciseList = ({ exercises, onEdit, onDelete }) => {
                   )}>
                     {String.fromCharCode(65 + i)}
                   </span>
-                  {opt}
+                  <BidiText as="span" text={opt} className="flex-1" />
                   {i === ex.correctAnswer && <Badge variant="outline" className="ml-auto bg-green-100 text-green-800 border-green-200 text-[10px]">Correct</Badge>}
                 </div>
               ))}

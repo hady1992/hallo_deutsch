@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
+import BidiText from '@/components/common/BidiText';
 
 const ExerciseRunner = ({ exercises, onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -97,9 +98,7 @@ const ExerciseRunner = ({ exercises, onBack }) => {
 
       <Card className="shadow-lg border-slate-200 overflow-hidden">
         <CardContent className="p-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8 leading-relaxed" dir="auto">
-            {currentExercise.question}
-          </h2>
+          <BidiText as="h2" text={currentExercise.question} className="text-2xl font-bold text-slate-800 mb-8 leading-relaxed" />
 
           <div className="space-y-3">
             {currentExercise.options.map((option, index) => (
@@ -114,9 +113,8 @@ const ExerciseRunner = ({ exercises, onBack }) => {
                   answered && index === selectedAnswer && index !== currentExercise.correctAnswer && "border-red-500 bg-red-50 text-red-800",
                   answered && index !== currentExercise.correctAnswer && index !== selectedAnswer && "opacity-50 border-slate-100"
                 )}
-                dir="auto"
               >
-                <span className="font-medium text-lg">{option}</span>
+                <BidiText as="span" text={option} className="font-medium text-lg flex-1" />
                 {answered && index === currentExercise.correctAnswer && <CheckCircle className="text-green-600" />}
                 {answered && index === selectedAnswer && index !== currentExercise.correctAnswer && <XCircle className="text-red-600" />}
               </button>

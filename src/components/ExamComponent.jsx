@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import AudioButton from '@/components/AudioButton';
 import { useToast } from '@/components/ui/use-toast';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import BidiText from '@/components/common/BidiText';
 
 const ExamComponent = ({ exam, onComplete }) => {
   const durationMinutes = Number.isFinite(Number(exam?.duration)) ? Number(exam.duration) : 30;
@@ -161,9 +162,11 @@ const ExamComponent = ({ exam, onComplete }) => {
           <AudioButton text={currentQuestion.question} />
         </div>
 
-        <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-8 leading-relaxed" dir="auto">
-          {currentQuestion.question}
-        </h3>
+        <BidiText
+          as="h3"
+          text={currentQuestion.question}
+          className="text-2xl md:text-3xl font-bold text-slate-800 mb-8 leading-relaxed"
+        />
 
         <div className="grid grid-cols-1 gap-4 mb-8">
           {(Array.isArray(currentQuestion.options) ? currentQuestion.options : []).map((option, idx) => (
@@ -177,7 +180,7 @@ const ExamComponent = ({ exam, onComplete }) => {
                 }
               `}
             >
-              <span className="relative z-10">{option}</span>
+              <BidiText as="span" text={option} className="relative z-10 flex-1" />
               {answers[currentQuestionIndex] === idx && (
                 <motion.div
                   initial={{ scale: 0 }}

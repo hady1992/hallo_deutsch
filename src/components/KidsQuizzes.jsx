@@ -7,6 +7,7 @@ import AudioButton from '@/components/AudioButton';
 import { motion } from 'framer-motion';
 import { shuffleAnswers } from '@/utils/answerShuffler';
 import { getCustomQuizzes } from '@/services/contentRepository';
+import BidiText from '@/components/common/BidiText';
 
 const KidsQuizzes = () => {
   const [activeQuizId, setActiveQuizId] = useState(null);
@@ -182,9 +183,7 @@ const KidsQuizzes = () => {
              className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border-b-8 border-slate-100"
           >
               <div className="text-center mb-10">
-                  <h2 className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-6" dir="ltr">
-                      {currentQuestion.q}
-                  </h2>
+                  <BidiText as="h2" text={currentQuestion.q} className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-6" />
 
                   {/* Icon separated from question text */}
                   {currentQuestion.icon && (
@@ -242,7 +241,7 @@ const KidsQuizzes = () => {
                             `}
                           >
                               {/* Option text without speaker icons */}
-                              <span>{opt}</span>
+                              <BidiText as="span" text={opt} className="flex-1" />
                               <div className="flex items-center">
                                 {isSelected && answerStatus === 'correct' && <CheckCircle2 size={28} className="text-white" />}
                                 {isSelected && answerStatus === 'incorrect' && <XCircle size={28} className="text-white" />}

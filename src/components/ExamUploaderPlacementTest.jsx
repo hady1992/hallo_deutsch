@@ -25,6 +25,7 @@ import {
 import { deletePublishedContentItem } from '@/services/contentRepository';
 import { PLACEMENT_TEST_VERSION } from '@/utils/placementTestNormalizer';
 import { validatePlacementQuestionBank } from '@/utils/placementTestValidator';
+import BidiText from '@/components/common/BidiText';
 
 const downloadJson = (content, filename) => {
   const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json;charset=utf-8' });
@@ -341,7 +342,7 @@ const ExamUploaderPlacementTest = () => {
                       {question.skill && <Badge variant="outline">{question.skill}</Badge>}
                       {question.stage && <Badge variant="outline">{question.stage}</Badge>}
                     </div>
-                    <p className="mt-3 font-bold leading-7 text-slate-800" dir="auto">{question.question}</p>
+                    <BidiText as="p" text={question.question} className="mt-3 font-bold leading-7 text-slate-800" />
                   </div>
                   <Button type="button" size="icon" variant="ghost" onClick={() => handleDelete(question)} className="shrink-0 text-red-700" title="حذف السؤال">
                     <Trash2 size={18} />

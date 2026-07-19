@@ -4,6 +4,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AudioButton from '@/components/AudioButton';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import BidiText from '@/components/common/BidiText';
 
 function QuestionComponent({ question, options, correct, index, onAnswer }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -46,9 +47,10 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
       className="bg-white p-6 rounded-xl shadow-md"
     >
       <div className="flex items-start justify-between gap-4 mb-4">
-        <h3 className="text-xl font-bold text-gray-800">
-          {index + 1}. {question}
-        </h3>
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          <span className="shrink-0 text-xl font-bold text-gray-800">{index + 1}.</span>
+          <BidiText as="h3" text={question} className="text-xl font-bold text-gray-800 flex-1" />
+        </div>
         <AudioButton text={question} size={20} />
       </div>
 
@@ -77,7 +79,7 @@ function QuestionComponent({ question, options, correct, index, onAnswer }) {
               className="ml-3"
             />
             <div className="flex items-center gap-2 flex-grow">
-               <span className="text-gray-800">{option}</span>
+               <BidiText as="span" text={option} className="text-gray-800 flex-1" />
                <AudioButton text={option} size={16} />
             </div>
 

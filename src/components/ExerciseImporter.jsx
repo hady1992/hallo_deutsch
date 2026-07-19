@@ -8,6 +8,7 @@ import { getPersistentExercises, saveExercises } from '@/utils/persistentDataSto
 import { Badge } from '@/components/ui/badge';
 import { getExerciseDedupKey, splitNewUniqueItems } from '@/utils/contentDedupUtils';
 import { deletePublishedContentItem } from '@/services/contentRepository';
+import BidiText from '@/components/common/BidiText';
 
 // رسائل عربية مبسّطة تُعرض للمستخدم دائمًا. التفاصيل التقنية الكاملة (سبب رفض
 // كل عنصر بالضبط) تُسجَّل بالـ Console فقط عبر console.error.
@@ -512,7 +513,7 @@ const ExerciseImporter = () => {
                                 )}>{ex.difficulty}</Badge>
                                 {ex.source === 'default' && <Badge variant="outline" className="text-[10px] text-slate-400">افتراضي</Badge>}
                                 {ex.source === 'cloud' && <Badge variant="outline" className="text-[10px] text-red-400 border-red-200 bg-red-50">سحابي</Badge>}
-                                <span className="font-medium text-slate-800 text-sm line-clamp-1 mr-2">{ex.question}</span>
+                                <BidiText as="span" text={ex.question} className="font-medium text-slate-800 text-sm line-clamp-1 mr-2 flex-1" />
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
@@ -544,12 +545,13 @@ const ExerciseImporter = () => {
                                             "p-1.5 rounded text-xs text-center border",
                                             i === ex.correctAnswer ? "bg-green-100 border-green-200 text-green-800 font-bold" : "bg-white border-slate-200 text-slate-600"
                                         )}>
-                                            {opt}
+                                            <BidiText as="span" text={opt} />
                                         </div>
                                     ))}
                                 </div>
                                 <div className="text-xs text-slate-400">
-                                    الإجابة الصحيحة: {ex.options?.[ex.correctAnswer] ?? ex.correctAnswer}
+                                    <span>الإجابة الصحيحة:</span>
+                                    <BidiText as="span" text={ex.options?.[ex.correctAnswer] ?? ex.correctAnswer} className="mt-1" />
                                 </div>
                             </motion.div>
                         )}

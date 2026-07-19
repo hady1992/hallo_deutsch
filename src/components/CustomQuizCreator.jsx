@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { getAvailableQuestions } from '@/utils/getAvailableQuestions';
 import { saveCustomQuiz } from '@/utils/storageManager';
 import { publishContentItem } from '@/services/contentRepository';
+import BidiText from '@/components/common/BidiText';
 
 const CustomQuizCreator = ({ onCancel, onSave }) => {
     const [quizName, setQuizName] = useState('');
@@ -108,8 +109,11 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">{question.icon}</span>
                                     <div>
-                                        <p className="font-bold text-slate-800 text-sm">{question.q}</p>
-                                        <p className="text-xs text-slate-500">{question.source} • الجواب: {question.a}</p>
+                                        <BidiText as="p" text={question.q} className="font-bold text-slate-800 text-sm" />
+                                        <div className="text-xs text-slate-500">
+                                          <span>{question.source} • الجواب:</span>
+                                          <BidiText as="span" text={question.a} className="mt-1" />
+                                        </div>
                                     </div>
                                 </div>
                                 <Plus className="text-red-500 opacity-0 group-hover:opacity-100" size={20} />
@@ -136,7 +140,7 @@ const CustomQuizCreator = ({ onCancel, onSave }) => {
                                     <div className="flex items-center gap-3">
                                         <span className="bg-red-100 text-red-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">{idx + 1}</span>
                                         <span className="text-xl">{question.icon}</span>
-                                        <p className="font-bold text-slate-800 text-sm">{question.q}</p>
+                                        <BidiText as="p" text={question.q} className="font-bold text-slate-800 text-sm" />
                                     </div>
                                     <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleRemoveQuestion(question.id)}>
                                         <Trash2 size={16} />

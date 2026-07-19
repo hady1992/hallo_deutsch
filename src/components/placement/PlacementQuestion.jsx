@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { PLACEMENT_SKILL_LABELS } from '@/utils/placementTestScoring';
 import PlacementAudioPlayer from './PlacementAudioPlayer';
 import PlacementTimer from './PlacementTimer';
+import BidiText from '@/components/common/BidiText';
 
 const skillIcons = {
   language_use: Languages,
@@ -53,9 +54,7 @@ const PlacementQuestion = ({
       <section className="rounded-md border border-black/10 bg-white shadow-sm">
         <div className="space-y-5 border-b border-black/10 p-5 md:p-8">
           {question.skill === 'reading' && question.stimulus?.text && (
-            <article className="whitespace-pre-line rounded-md border-r-4 border-[#e0b21b] bg-[#fffaf0] p-5 text-left leading-8 text-slate-800" dir="ltr">
-              {question.stimulus.text}
-            </article>
+            <BidiText as="article" text={question.stimulus.text} fallbackDirection="ltr" className="whitespace-pre-line rounded-md border-r-4 border-[#e0b21b] bg-[#fffaf0] p-5 leading-8 text-slate-800" />
           )}
 
           {question.skill === 'listening' && (
@@ -67,9 +66,7 @@ const PlacementQuestion = ({
             />
           )}
 
-          <h1 className="text-xl font-black leading-9 text-[#111111] md:text-2xl" dir="auto">
-            {question.question}
-          </h1>
+          <BidiText as="h1" text={question.question} className="text-xl font-black leading-9 text-[#111111] md:text-2xl" />
         </div>
 
         <fieldset className="grid gap-3 p-5 md:p-8">
@@ -94,7 +91,7 @@ const PlacementQuestion = ({
                   onChange={() => onSelectAnswer(optionIndex)}
                   className="h-5 w-5 shrink-0 accent-[#d71920]"
                 />
-                <span className="min-w-0 text-base font-bold leading-7" dir="auto">{option}</span>
+                <BidiText text={option} className="min-w-0 flex-1 text-base font-bold leading-7" />
               </label>
             );
           })}

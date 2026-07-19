@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import KidsFileUploader from './KidsFileUploader';
 import { saveKidsExercises, getKidsProgress, saveKidsProgress } from '@/utils/storageManager';
 import { getKidsExercises } from '@/services/contentRepository';
+import BidiText from '@/components/common/BidiText';
 
 const defaultExercises = [
   {
@@ -107,9 +108,7 @@ const KidsExercises = ({ isAdmin }) => {
                   <span>نقاطك: {currentIdx * 10}</span>
               </div>
 
-              <h3 className="text-2xl md:text-3xl font-black text-slate-800 text-center mb-8">
-                  {currentExercise.question}
-              </h3>
+              <BidiText as="h3" text={currentExercise.question} className="text-2xl md:text-3xl font-black text-slate-800 mb-8" />
 
               <div className="grid gap-4 max-w-md mx-auto">
                   {currentExercise.options.map((opt, i) => (
@@ -124,7 +123,7 @@ const KidsExercises = ({ isAdmin }) => {
                                 : 'bg-slate-100 text-slate-700 hover:bg-red-100 hover:text-red-700'}
                         `}
                       >
-                          {opt}
+                          <BidiText as="span" text={opt} />
                       </button>
                   ))}
               </div>

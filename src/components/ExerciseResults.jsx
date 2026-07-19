@@ -5,6 +5,7 @@ import { Trophy, ArrowLeft, RefreshCw, XCircle, CheckCircle, PieChart, Info } fr
 import { motion } from 'framer-motion';
 import AudioButton from '@/components/AudioButton';
 import { getExerciseCategoryKey, getCategoryLabel, getExerciseAudioText } from '@/utils/exerciseAudio';
+import BidiText from '@/components/common/BidiText';
 
 const ExerciseResults = ({ results, onRetake, onBack }) => {
   const { score, total, answers, questions } = results;
@@ -115,7 +116,7 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
                                 <span className="bg-red-100 text-red-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-sm">
                                     {idx + 1}
                                 </span>
-                                <h4 className="german-text font-semibold text-slate-800 text-lg leading-snug flex-1">{question.question}</h4>
+                                <BidiText as="h4" text={question.question} className="flex-1 text-lg font-semibold leading-snug text-slate-800" />
                                 <AudioButton
                                     text={getExerciseAudioText(question)}
                                     lang="de-DE"
@@ -126,20 +127,18 @@ const ExerciseResults = ({ results, onRetake, onBack }) => {
                             <div className="grid md:grid-cols-2 gap-4 mb-4 pr-11">
                                 <div className="p-3 rounded-lg border-2 border-red-100 bg-red-50">
                                     <div className="text-xs text-red-500 font-bold mb-1 uppercase">إجابتك</div>
-                                    <div className="german-text text-red-900 font-medium">
-                                        {userAnswerIdx !== undefined ? question.options[userAnswerIdx] : '—'}
-                                    </div>
+                                    <BidiText as="div" text={userAnswerIdx !== undefined ? question.options[userAnswerIdx] : '—'} className="font-medium text-red-900" />
                                 </div>
                                 <div className="p-3 rounded-lg border-2 border-green-100 bg-green-50">
                                     <div className="text-xs text-green-600 font-bold mb-1 uppercase">الإجابة الصحيحة</div>
-                                    <div className="german-text text-green-900 font-medium">{question.options[question.correctAnswer]}</div>
+                                    <BidiText as="div" text={question.options[question.correctAnswer]} className="font-medium text-green-900" />
                                 </div>
                             </div>
 
                             {question.explanation && (
                                 <div className="mr-11 flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
                                     <Info className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                    <span>{question.explanation}</span>
+                                    <BidiText text={question.explanation} className="min-w-0 flex-1" />
                                 </div>
                             )}
                         </div>

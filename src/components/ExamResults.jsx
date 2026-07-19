@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, RotateCcw, Home, Eye, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import BidiText from '@/components/common/BidiText';
 
 const ExamResults = ({ results, examData, onReview, onRetake }) => {
   const navigate = useNavigate();
@@ -78,27 +79,29 @@ const ExamResults = ({ results, examData, onReview, onRetake }) => {
                   <span className="bg-slate-200 text-slate-700 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
                     {item.questionIndex}
                   </span>
-                  <h4 className="text-lg font-bold text-slate-800 leading-relaxed">{item.question}</h4>
+                  <BidiText as="h4" text={item.question} className="text-lg font-bold text-slate-800 leading-relaxed flex-1" />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4 mb-4 mr-12">
                   <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                     <span className="text-xs font-bold text-red-500 uppercase block mb-1">إجابتك</span>
                     <div className="flex items-center gap-2 text-red-700 font-medium">
-                      <XCircle size={18} /> {item.userAnswer || "لم يتم الاختيار"}
+                      <XCircle size={18} className="shrink-0" />
+                      <BidiText as="span" text={item.userAnswer || 'لم يتم الاختيار'} className="flex-1" />
                     </div>
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                     <span className="text-xs font-bold text-green-600 uppercase block mb-1">الإجابة الصحيحة</span>
                     <div className="flex items-center gap-2 text-green-800 font-medium">
-                      <CheckCircle size={18} /> {item.correctAnswerText}
+                      <CheckCircle size={18} className="shrink-0" />
+                      <BidiText as="span" text={item.correctAnswerText} className="flex-1" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mr-12 bg-red-50 rounded-xl p-4 text-sm text-red-800 leading-relaxed">
                   <span className="font-bold block mb-1">الشرح:</span>
-                  {item.explanation}
+                  <BidiText as="span" text={item.explanation} />
                 </div>
               </div>
             ))}
