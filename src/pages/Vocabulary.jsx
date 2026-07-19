@@ -1,26 +1,33 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
+import { Link, useSearchParams } from 'react-router-dom';
 import VocabularyCardSimple from '@/components/VocabularyCardSimple';
 import VocabularyFilter from '@/components/VocabularyFilter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Inbox, Book, FileText, GraduationCap, LayoutList, Loader2 } from 'lucide-react';
+import { Inbox, Book, FileText, GraduationCap, LayoutList, Loader2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VerbsTabExtended from '@/components/VerbsTabExtended';
 import NounsTab from '@/components/NounsTab';
-import { Badge } from '@/components/ui/badge';
 import { getGrammarRules, getVocabulary } from '@/services/contentRepository';
+import GrammarDisplayComponent from '@/components/GrammarDisplayComponent';
+import { normalizeGrammarRuleForDisplay } from '@/utils/grammarNormalizer';
+
+const LIBRARY_TABS = ['words', 'nouns', 'verbs', 'grammar'];
 
 // Grammar Rules View (Internal Component)
 const GrammarRulesView = () => {
   const [rules, setRules] = useState([]);
   const [filterLevel, setFilterLevel] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const handleUpdate = async () => {
       setLoadError('');
+      setLoading(true);
       try {
         const allRules = await getGrammarRules();
         setRules(Array.isArray(allRules) ? allRules : []);
@@ -28,6 +35,8 @@ const GrammarRulesView = () => {
         console.error('[Vocabulary] Failed to load grammar rules:', error);
         setRules([]);
         setLoadError('تعذر تحميل المحتوى حاليًا');
+      } finally {
+        setLoading(false);
       }
     };
     handleUpdate();
@@ -35,51 +44,63 @@ const GrammarRulesView = () => {
     return () => window.removeEventListener('dataImported', handleUpdate);
   }, []);
 
-  const filtered = (Array.isArray(rules) ? rules : []).filter(r => filterLevel === 'All' || r?.level === filterLevel);
+  const filtered = useMemo(() => {
+    const query = searchTerm.trim().toLocaleLowerCase('de-DE');
+    return (Array.isArray(rules) ? rules : []).filter((rule) => {
+      if (filterLevel !== 'All' && String(rule?.level || '').toUpperCase() !== filterLevel) return false;
+      if (!query) return true;
+      const normalized = normalizeGrammarRuleForDisplay(rule);
+      const searchable = [
+        normalized.title.ar,
+        normalized.title.de,
+        normalized.explanation,
+        ...normalized.examples.flatMap((example) => [example.de, example.ar]),
+      ].filter(Boolean).join(' ').toLocaleLowerCase('de-DE');
+      return searchable.includes(query);
+    });
+  }, [filterLevel, rules, searchTerm]);
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-slate-500 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-        هذه قواعد أضافها فريق الموقع عبر لوحة التحكم، منفصلة عن قواعد صفحة
-        <span className="font-bold text-amber-700 mx-1">"القواعد"</span>
-        الرئيسية.
-      </div>
-      <div className="flex justify-start md:justify-end overflow-x-auto pb-2 scrollbar-hide">
-         <div className="bg-white p-1 rounded-lg border border-slate-200 inline-flex min-w-max">
+      <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+        <div className="relative">
+          <Search className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="ابحث في القواعد بالعربية أو الألمانية"
+            className="brand-focus min-h-11 w-full rounded-md border border-slate-300 bg-white py-2 pl-3 pr-10 text-slate-800"
+          />
+        </div>
+        <div className="overflow-x-auto pb-1 scrollbar-hide md:pb-0">
+         <div className="inline-flex min-w-max gap-1 rounded-md bg-slate-50 p-1">
              {['All', 'A1', 'A2', 'B1', 'B2'].map(lvl => (
                  <button
                     key={lvl}
+                    type="button"
                     onClick={() => setFilterLevel(lvl)}
-                    className={`px-4 py-2 text-sm rounded-md transition-all ${filterLevel === lvl ? 'bg-amber-100 text-amber-800 font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
+                    className={`brand-focus min-h-10 rounded-md px-4 text-sm transition-colors ${filterLevel === lvl ? 'bg-[#111111] text-white font-bold' : 'text-slate-600 hover:bg-white'}`}
                  >
                     {lvl === 'All' ? 'الكل' : lvl}
                  </button>
              ))}
          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {loadError ? (
-            <div className="col-span-full py-12 text-center font-bold text-red-700">{loadError}</div>
+      <div>
+         {loading ? (
+            <div role="status" className="flex min-h-48 items-center justify-center gap-2 font-bold text-slate-600"><Loader2 className="h-5 w-5 animate-spin text-[#d71920]" /> جاري تحميل القواعد...</div>
+         ) : loadError ? (
+            <div className="py-12 text-center font-bold text-red-700">{loadError}</div>
          ) : filtered.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-dashed border-slate-200">
+            <div className="rounded-lg border border-dashed border-slate-300 bg-white py-12 text-center text-slate-400">
                 <GraduationCap size={48} className="mx-auto mb-3 opacity-20" />
-                <p>لا توجد قواعد مضافة لهذا المستوى.</p>
+                <p>{searchTerm ? 'لا توجد قواعد مطابقة لبحثك.' : 'لا توجد قواعد منشورة لهذا المستوى.'}</p>
             </div>
          ) : (
-            filtered.map(rule => (
-                <div key={rule.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
-                    <div className="p-5 border-b border-slate-50">
-                        <div className="flex justify-between items-start mb-2">
-                             <h3 className="font-bold text-lg text-slate-800">
-                               {typeof rule.title === 'string' ? rule.title : rule.title?.ar || rule.title?.de || 'قاعدة لغوية'}
-                             </h3>
-                             <Badge variant="outline" className="bg-slate-50">{rule.level}</Badge>
-                        </div>
-                        <p className="text-slate-600 text-sm">{rule.description || rule.explanation || 'لا يوجد وصف إضافي.'}</p>
-                    </div>
-                </div>
-            ))
+            filtered.map((rule) => <GrammarDisplayComponent key={rule.id || `${rule.level}-${String(rule.title)}`} rule={rule} />)
          )}
       </div>
     </div>
@@ -88,6 +109,9 @@ const GrammarRulesView = () => {
 
 function Vocabulary() {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') || 'words';
+  const activeTab = LIBRARY_TABS.includes(requestedTab) ? requestedTab : 'words';
   const [allVocabulary, setAllVocabulary] = useState([]);
   const [cloudLoading, setCloudLoading] = useState(true);
   const [cloudError, setCloudError] = useState('');
@@ -193,25 +217,33 @@ function Vocabulary() {
             {cloudError && <p className="mb-4 text-center font-bold text-red-700">{cloudError}</p>}
           </div>
 
-          <Tabs defaultValue="vocabulary" className="w-full space-y-8">
+          <Tabs value={activeTab} className="w-full space-y-8">
             <div className="flex justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0">
                 <TabsList className="bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm h-auto flex flex-nowrap md:flex-wrap gap-2 min-w-max md:min-w-0">
-                    <TabsTrigger value="vocabulary" className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                    <TabsTrigger value="words" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                      <Link to="/vocabulary?tab=words">
                         <Book size={18} /> المفردات
+                      </Link>
                     </TabsTrigger>
-                    <TabsTrigger value="verbs" className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                        <LayoutList size={18} /> الأفعال
-                    </TabsTrigger>
-                    <TabsTrigger value="nouns" className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                    <TabsTrigger value="nouns" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                      <Link to="/vocabulary?tab=nouns">
                         <FileText size={18} /> الأسماء
+                      </Link>
                     </TabsTrigger>
-                    <TabsTrigger value="grammar" className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
-                        <GraduationCap size={18} />قواعد مستوردة
+                    <TabsTrigger value="verbs" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                      <Link to="/vocabulary?tab=verbs">
+                        <LayoutList size={18} /> الأفعال
+                      </Link>
+                    </TabsTrigger>
+                    <TabsTrigger value="grammar" asChild className="px-5 md:px-6 py-2.5 rounded-xl transition-all flex gap-2 items-center text-sm md:text-base">
+                      <Link to="/vocabulary?tab=grammar">
+                        <GraduationCap size={18} /> القواعد
+                      </Link>
                     </TabsTrigger>
                 </TabsList>
             </div>
 
-            <TabsContent value="vocabulary" className="outline-none">
+            <TabsContent value="words" className="outline-none">
                 <VocabularyFilter
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}

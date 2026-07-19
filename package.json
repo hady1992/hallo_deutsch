@@ -8,8 +8,9 @@
     "build": "vite build --configLoader native && npm run check:dist",
     "preview": "vite preview --host :: --port 3000",
     "check:placement": "node scripts/check-placement-test.mjs",
-    "check:critical": "node tools/check-critical-admin.mjs && node tools/check-content-pagination-bidi.mjs && node tools/check-exercise-taxonomy.mjs",
+    "check:critical": "node tools/check-critical-admin.mjs && node tools/check-content-pagination-bidi.mjs && node tools/check-exercise-taxonomy.mjs && node tools/check-learning-path.mjs",
     "check:exercises-ui": "node tools/check-exercise-taxonomy.mjs",
+    "check:learning-path": "node tools/check-learning-path.mjs",
     "check:dist": "node tools/check-dist.mjs",
     "lint": "eslint . --quiet",
     "lint:warn": "eslint ."

@@ -64,8 +64,10 @@ export const getLessonProgressStatus = (lessonId, progress = getCourseProgress()
   return 'not-started';
 };
 
+export const getCourseLessonId = (lesson) => lesson?.supabaseId || lesson?.id || '';
+
 export const getLevelProgressPercent = (lessons, progress = getCourseProgress()) => {
-  const lessonIds = (Array.isArray(lessons) ? lessons : []).map((lesson) => lesson.id).filter(Boolean);
+  const lessonIds = (Array.isArray(lessons) ? lessons : []).map(getCourseLessonId).filter(Boolean);
   if (lessonIds.length === 0) return 0;
   const completed = lessonIds.filter((id) => progress.completedLessonIds.includes(id)).length;
   return Math.round((completed / lessonIds.length) * 100);

@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 const QUICK_LINKS = [
   { label: 'الرئيسية', path: '/' },
   { label: 'المستويات', path: '/levels' },
-  { label: 'المفردات', path: '/vocabulary' },
-  { label: 'القواعد', path: '/grammar' },
+  { label: 'المفردات', path: '/vocabulary?tab=words' },
+  { label: 'القواعد', path: '/vocabulary?tab=grammar' },
 ];
 
 const LEARNING_LINKS = [
