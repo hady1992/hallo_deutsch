@@ -9,6 +9,7 @@ import { saveKidsVerbs } from '@/utils/storageManager';
 import { getKidsVerbs } from '@/services/contentRepository';
 import { useToast } from '@/components/ui/use-toast';
 import confetti from 'canvas-confetti';
+import BidiText from '@/components/common/BidiText';
 
 const KidsVerbs = ({ isAdmin }) => {
   const [verbs, setVerbs] = useState([]);
@@ -190,9 +191,7 @@ const KidsVerbs = ({ isAdmin }) => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-4xl font-black text-slate-800">
-                {quizQuestions[currentQuestionIndex].verb.infinitive}
-              </h2>
+              <BidiText as="h2" text={quizQuestions[currentQuestionIndex].verb.infinitive} className="text-4xl font-black text-slate-800" />
               <div className="flex justify-center">
                  <AudioButton
                     text={quizQuestions[currentQuestionIndex].verb.infinitive}
@@ -220,7 +219,7 @@ const KidsVerbs = ({ isAdmin }) => {
                     ${selectedAnswer && option === quizQuestions[currentQuestionIndex].correctAnswer && 'bg-green-100 border-green-400 text-green-700 ring-2 ring-green-200'}
                   `}
                 >
-                  {option}
+                  <BidiText as="span" text={option} />
                 </motion.button>
               ))}
             </div>

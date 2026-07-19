@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PLACEMENT_SKILL_LABELS } from '@/utils/placementTestScoring';
+import BidiText from '@/components/common/BidiText';
 
 const filters = [
   { id: 'all', label: 'الكل' },
@@ -78,31 +79,29 @@ const PlacementReview = ({ result, preparedQuestions, onBack }) => {
               </div>
 
               {question.skill === 'reading' && question.stimulus?.text && (
-                <p className="mt-5 whitespace-pre-line rounded-md bg-[#fffaf0] p-4 text-left leading-8" dir="ltr">
-                  {question.stimulus.text}
-                </p>
+                <BidiText as="p" text={question.stimulus.text} fallbackDirection="ltr" className="mt-5 whitespace-pre-line rounded-md bg-[#fffaf0] p-4 leading-8" />
               )}
               {question.skill === 'listening' && question.stimulus?.audioText && (
                 <div className="mt-5 rounded-md bg-[#fffaf0] p-4">
                   <p className="text-xs font-bold text-slate-500">نص الاستماع</p>
-                  <p className="mt-2 text-left leading-8" dir="ltr">{question.stimulus.audioText}</p>
+                  <BidiText as="p" text={question.stimulus.audioText} fallbackDirection="ltr" className="mt-2 leading-8" />
                 </div>
               )}
 
-              <h2 className="mt-5 text-lg font-black leading-8 text-[#111111]" dir="auto">{question.question}</h2>
+              <BidiText as="h2" text={question.question} className="mt-5 text-lg font-black leading-8 text-[#111111]" />
               <dl className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className={cn('rounded-md border p-4', isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50')}>
                   <dt className="text-xs font-bold text-slate-500">إجابتك</dt>
-                  <dd className="mt-2 font-black" dir="auto">{question.options[selectedIndex] ?? 'لم تتم الإجابة'}</dd>
+                  <BidiText as="dd" text={question.options[selectedIndex] ?? 'لم تتم الإجابة'} className="mt-2 font-black" />
                 </div>
                 <div className="rounded-md border border-green-200 bg-green-50 p-4">
                   <dt className="text-xs font-bold text-slate-500">الإجابة الصحيحة</dt>
-                  <dd className="mt-2 font-black text-green-900" dir="auto">{question.options[question.correctAnswer]}</dd>
+                  <BidiText as="dd" text={question.options[question.correctAnswer]} className="mt-2 font-black text-green-900" />
                 </div>
               </dl>
               <div className="mt-4 border-r-4 border-[#e0b21b] bg-[#fffaf0] p-4">
                 <p className="text-xs font-bold text-slate-500">الشرح</p>
-                <p className="mt-2 leading-7 text-slate-700" dir="auto">{question.explanation}</p>
+                <BidiText as="p" text={question.explanation} className="mt-2 leading-7 text-slate-700" />
               </div>
             </article>
           );

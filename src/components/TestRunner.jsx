@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle, XCircle, RefreshCw, Home } from 'lucide-react'
 import confetti from 'canvas-confetti';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import BidiText from '@/components/common/BidiText';
 
 const TestRunner = ({ questions, onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -96,9 +97,7 @@ const TestRunner = ({ questions, onBack }) => {
 
       <Card className="shadow-lg border-slate-200 overflow-hidden">
         <CardContent className="p-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8 leading-relaxed" dir="auto">
-            {currentQuestion.question}
-          </h2>
+          <BidiText as="h2" text={currentQuestion.question} className="text-2xl font-bold text-slate-800 mb-8 leading-relaxed" />
 
           <div className="space-y-3">
             {currentQuestion.options.map((option, index) => (
@@ -113,9 +112,8 @@ const TestRunner = ({ questions, onBack }) => {
                   answered && index === selectedAnswer && index !== currentQuestion.correctAnswer && "border-red-500 bg-red-50 text-red-800",
                   answered && index !== currentQuestion.correctAnswer && index !== selectedAnswer && "opacity-50 border-slate-100"
                 )}
-                dir="auto"
               >
-                <span className="font-medium text-lg">{option}</span>
+                <BidiText as="span" text={option} className="font-medium text-lg flex-1" />
                 {answered && index === currentQuestion.correctAnswer && <CheckCircle className="text-green-600" />}
                 {answered && index === selectedAnswer && index !== currentQuestion.correctAnswer && <XCircle className="text-red-600" />}
               </button>

@@ -6,6 +6,7 @@ import { kidsGamesQuestionsData } from '@/data/kidsGamesQuestionsData';
 import confetti from 'canvas-confetti';
 import AudioSpeedControl from '@/components/AudioSpeedControl';
 import ArticleHuntGame from '@/components/kids/ArticleHuntGame';
+import BidiText from '@/components/common/BidiText';
 
 const KidsGamesAndQuestions = () => {
   const [activeGameType, setActiveGameType] = useState(null);
@@ -203,9 +204,7 @@ const KidsGamesAndQuestions = () => {
           <div className="mb-10">
              <div className="bg-red-50 inline-block px-10 py-8 rounded-[2rem] border-2 border-red-100 relative mb-8">
                 {/* Question Text - Ensure it's readable */}
-                <h2 className="text-4xl md:text-5xl font-black text-slate-800 leading-tight" dir="ltr">
-                  {currentQ.question || "Frage..."}
-                </h2>
+                <BidiText as="h2" text={currentQ.question || 'Frage...'} className="text-4xl md:text-5xl font-black text-slate-800 leading-tight" />
 
                 {/* Audio Button - STRICTLY for Question only */}
                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
@@ -241,7 +240,7 @@ const KidsGamesAndQuestions = () => {
                          `}
                       >
                          {/* Text only, no speaker icons */}
-                         {opt}
+                         <BidiText as="span" text={opt} />
                       </motion.button>
                    ))}
                 </div>
@@ -266,7 +265,7 @@ const KidsGamesAndQuestions = () => {
                       >
                          {/* Visual cues only */}
                          {opt === 'Richtig' ? '✅' : '❌'}
-                         <div className="text-lg mt-2">{opt}</div>
+                         <BidiText as="div" text={opt} className="text-lg mt-2" />
                       </motion.button>
                    ))}
                 </div>

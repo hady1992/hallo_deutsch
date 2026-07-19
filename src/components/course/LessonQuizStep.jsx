@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
+import BidiText from '@/components/common/BidiText';
 
 const asText = (value) => (typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '');
 
@@ -81,7 +82,7 @@ const LessonQuizStep = ({ questions }) => {
         <span>السؤال {questionIndex + 1} من {safeQuestions.length}</span>
         <span>الصحيح: {score}</span>
       </div>
-      <h3 className="text-xl font-black leading-8 text-[#111111]">{question.question || question.title || question.text || 'اختر الإجابة الصحيحة'}</h3>
+      <BidiText as="h3" text={question.question || question.title || question.text || 'اختر الإجابة الصحيحة'} className="text-xl font-black leading-8 text-[#111111]" />
       {options.length > 0 ? (
         <div className="mt-5 grid gap-3">
           {options.map((option) => {
@@ -94,7 +95,6 @@ const LessonQuizStep = ({ questions }) => {
                 type="button"
                 onClick={() => selectAnswer(option)}
                 disabled={answered}
-                dir={/^[^\u0600-\u06ff]*$/.test(option) ? 'ltr' : 'rtl'}
                 className={`brand-focus min-h-12 rounded-md border px-4 py-3 text-start font-bold transition ${
                   correctChoice
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
@@ -103,7 +103,7 @@ const LessonQuizStep = ({ questions }) => {
                       : 'border-black/10 bg-white text-[#111111] hover:border-[#e8b21e]'
                 }`}
               >
-                {option}
+                <BidiText text={option} />
               </button>
             );
           })}
@@ -118,9 +118,9 @@ const LessonQuizStep = ({ questions }) => {
             {isCorrect ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
             {isCorrect ? 'إجابة صحيحة' : 'إجابة غير صحيحة'}
           </p>
-          {!isCorrect && correctAnswer && <p className="mt-2">الإجابة الصحيحة: <strong dir="ltr">{correctAnswer}</strong></p>}
+          {!isCorrect && correctAnswer && <p className="mt-2">الإجابة الصحيحة: <BidiText as="strong" text={correctAnswer} /></p>}
           {(question.explanation || question.explanationArabic) && (
-            <p className="mt-2 leading-7">{question.explanationArabic || question.explanation}</p>
+            <BidiText as="p" text={question.explanationArabic || question.explanation} className="mt-2 leading-7" />
           )}
           <button type="button" onClick={goNext} className="brand-focus mt-4 min-h-10 rounded-md bg-[#111111] px-5 font-black text-white">
             {questionIndex === safeQuestions.length - 1 ? 'عرض النتيجة' : 'السؤال التالي'}
@@ -132,4 +132,3 @@ const LessonQuizStep = ({ questions }) => {
 };
 
 export default LessonQuizStep;
-

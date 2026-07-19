@@ -6,6 +6,11 @@ import {
 } from '@/utils/contentDedupUtils';
 import { normalizeGrammarRuleForDisplay } from '@/utils/grammarNormalizer';
 import { normalizeLessonForDisplay } from '@/utils/lessonNormalizer';
+import {
+  fetchPublishedRowsCount,
+  fetchPublishedRowsPaginated,
+  splitIntoContentBatches,
+} from '@/services/contentPagination';
 
 const PROTECTED_KIDS_TYPES = new Set([
   'kids_vocabulary',
@@ -68,21 +73,9 @@ if (typeof window !== 'undefined' && !window.__halloDeutschContentCacheListener)
   window.addEventListener('dataImported', () => clearContentCache());
 }
 
-const queryPublishedContent = async (contentType, level = null, columns = '*') => {
-  let query = supabase
-    .from('content_items')
-    .select(columns)
-    .eq('content_type', contentType)
-    .eq('is_published', true);
-
-  if (level) query = query.eq('level', level);
-  return query;
-};
-
 const fetchCloudContent = async (contentType, level = null) => {
-  const { data, error } = await queryPublishedContent(contentType, level);
-  if (error) throw error;
-  return asArray(data).map((row) => unwrapRow(row, contentType));
+  const rows = await fetchPublishedRowsPaginated({ contentType, level });
+  return rows.map((row) => unwrapRow(row, contentType));
 };
 
 const loadProtectedStaticContent = async (contentType) => {
@@ -196,6 +189,35 @@ const requireAdminSession = async () => {
   return session.user;
 };
 
+const mutateContentIdsInBatches = async (ids, mutation) => {
+  for (const idBatch of splitIntoContentBatches(ids)) {
+    const { error } = await mutation(idBatch);
+    if (error) throw error;
+  }
+};
+
+const deleteContentIdsInBatches = async (contentType, ids) => mutateContentIdsInBatches(
+  ids,
+  (idBatch) => supabase
+    .from('content_items')
+    .delete()
+    .in('id', idBatch)
+    .eq('content_type', contentType)
+);
+
+const insertContentPayloadInBatches = async (payload) => {
+  const rows = [];
+  for (const payloadBatch of splitIntoContentBatches(payload)) {
+    const { data, error } = await supabase
+      .from('content_items')
+      .insert(payloadBatch)
+      .select();
+    if (error) return { rows, insertedIds: rows.map((row) => row.id).filter(Boolean), error };
+    rows.push(...asArray(data));
+  }
+  return { rows, insertedIds: rows.map((row) => row.id).filter(Boolean), error: null };
+};
+
 export const publishContentItems = async (contentType, items) => {
   const incoming = asArray(items).map((item, index) => ensureItemId(contentType, item, index));
   if (incoming.length === 0) return { success: true, count: 0, duplicates: 0, items: [] };
@@ -209,11 +231,17 @@ export const publishContentItems = async (contentType, items) => {
       return { success: true, count: 0, duplicates: skipped, items: [] };
     }
 
-    const { data, error } = await supabase
-      .from('content_items')
-      .insert(buildUnifiedPayload(contentType, unique, user.id))
-      .select();
-    if (error) throw error;
+    const insertResult = await insertContentPayloadInBatches(buildUnifiedPayload(contentType, unique, user.id));
+    if (insertResult.error) {
+      if (insertResult.insertedIds.length > 0) {
+        try {
+          await deleteContentIdsInBatches(contentType, insertResult.insertedIds);
+        } catch (rollbackError) {
+          console.error(`[ContentRepository] Failed to roll back partial ${contentType} publish:`, rollbackError);
+        }
+      }
+      throw insertResult.error;
+    }
 
     dispatchContentEvents(contentType);
     return {
@@ -221,7 +249,7 @@ export const publishContentItems = async (contentType, items) => {
       count: unique.length,
       duplicates: skipped,
       storageTable: 'content_items',
-      items: asArray(data).map((row) => unwrapRow(row, contentType)),
+      items: insertResult.rows.map((row) => unwrapRow(row, contentType)),
     };
   } catch (error) {
     console.error(`[ContentRepository] Failed to publish ${contentType}:`, error);
@@ -240,38 +268,45 @@ export const replacePublishedContentItems = async (contentType, items) => {
 
   try {
     const user = await requireAdminSession();
-    const { data: previousRows, error: readError } = await supabase
-      .from('content_items')
-      .select('*')
-      .eq('content_type', contentType)
-      .eq('is_published', true);
-    if (readError) throw readError;
+    const previousRows = await fetchPublishedRowsPaginated({ contentType, isPublished: true });
 
     const previousIds = asArray(previousRows).map((row) => row.id).filter(Boolean);
     if (previousIds.length > 0) {
-      const { error: unpublishError } = await supabase
-        .from('content_items')
-        .update({ is_published: false })
-        .in('id', previousIds)
-        .eq('content_type', contentType);
-      if (unpublishError) throw unpublishError;
+      await mutateContentIdsInBatches(
+        previousIds,
+        (idBatch) => supabase
+          .from('content_items')
+          .update({ is_published: false })
+          .in('id', idBatch)
+          .eq('content_type', contentType)
+      );
     }
 
-    const { data, error: insertError } = await supabase
-      .from('content_items')
-      .insert(buildUnifiedPayload(contentType, incoming, user.id))
-      .select();
+    const insertResult = await insertContentPayloadInBatches(buildUnifiedPayload(contentType, incoming, user.id));
 
-    if (insertError) {
-      if (previousIds.length > 0) {
-        const { error: rollbackError } = await supabase
-          .from('content_items')
-          .update({ is_published: true })
-          .in('id', previousIds)
-          .eq('content_type', contentType);
-        if (rollbackError) console.error(`[ContentRepository] Failed to roll back ${contentType}:`, rollbackError);
+    if (insertResult.error) {
+      if (insertResult.insertedIds.length > 0) {
+        try {
+          await deleteContentIdsInBatches(contentType, insertResult.insertedIds);
+        } catch (cleanupError) {
+          console.error(`[ContentRepository] Failed to clean partial ${contentType} replacement:`, cleanupError);
+        }
       }
-      throw insertError;
+      if (previousIds.length > 0) {
+        try {
+          await mutateContentIdsInBatches(
+            previousIds,
+            (idBatch) => supabase
+              .from('content_items')
+              .update({ is_published: true })
+              .in('id', idBatch)
+              .eq('content_type', contentType)
+          );
+        } catch (rollbackError) {
+          console.error(`[ContentRepository] Failed to roll back ${contentType}:`, rollbackError);
+        }
+      }
+      throw insertResult.error;
     }
 
     dispatchContentEvents(contentType);
@@ -280,7 +315,7 @@ export const replacePublishedContentItems = async (contentType, items) => {
       count: incoming.length,
       unpublished: previousIds.length,
       storageTable: 'content_items',
-      items: asArray(data).map((row) => unwrapRow(row, contentType)),
+      items: insertResult.rows.map((row) => unwrapRow(row, contentType)),
     };
   } catch (error) {
     console.error(`[ContentRepository] Failed to replace ${contentType}:`, error);
@@ -290,6 +325,10 @@ export const replacePublishedContentItems = async (contentType, items) => {
 
 export const getPublishedContent = async (contentType, level = null) => (
   normalizeContent(contentType, await fetchCloudContent(contentType, level))
+);
+
+export const getPublishedContentCount = (contentType, level = null) => (
+  fetchPublishedRowsCount({ contentType, level, isPublished: true })
 );
 
 export const deletePublishedContentItem = async (contentType, itemOrId) => {
@@ -335,14 +374,13 @@ const normalizeLessonSummary = (row) => {
 
 export const getCourseLessons = async (level) => {
   const normalizedLevel = String(level || '').toUpperCase();
-  const { data, error } = await queryPublishedContent(
-    'lessons',
-    normalizedLevel,
-    'id,level,topic,title,slug,metadata,is_published,created_at'
-  );
-  if (error) throw error;
+  const data = await fetchPublishedRowsPaginated({
+    contentType: 'lessons',
+    level: normalizedLevel,
+    columns: 'id,level,topic,title,slug,metadata,is_published,created_at',
+  });
 
-  return asArray(data)
+  return data
     .map(normalizeLessonSummary)
     .sort((a, b) => (
       a.unitOrder - b.unitOrder

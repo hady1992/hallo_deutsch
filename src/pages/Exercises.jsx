@@ -5,10 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dumbbell, ArrowRight, Layers, ListFilter, Hash, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getExercises } from '@/services/contentRepository';
+import { getExercises, getPublishedContentCount } from '@/services/contentRepository';
 import { getExerciseCategoryKey, getCategoryLabel, getExerciseAudioText } from '@/utils/exerciseAudio';
 import AudioButton from '@/components/AudioButton';
 import ExerciseResults from '@/components/ExerciseResults';
+import BidiText from '@/components/common/BidiText';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 
@@ -32,6 +33,7 @@ const Exercises = () => {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
   const [allExercises, setAllExercises] = useState([]);
+  const [publishedExerciseCount, setPublishedExerciseCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -40,7 +42,13 @@ const Exercises = () => {
       setLoading(true);
       setLoadError('');
       try {
-        const persistent = await getExercises();
+        const [persistent, exactCount] = await Promise.all([
+          getExercises(),
+          getPublishedContentCount('exercises').catch((countError) => {
+            console.warn('[Exercises] Failed to load exact published count:', countError);
+            return null;
+          }),
+        ]);
         // توحيد شكل الإجابة الصحيحة للعرض فقط: بعض التمارين المستوردة قديمًا قد
         // تكون بصيغة نصية، بينما هذه الصفحة تقارن بموضع الخيار (index) — نحوّلها
         // هنا فقط لغرض العرض، دون تغيير البيانات المخزّنة أصلًا.
@@ -56,6 +64,7 @@ const Exercises = () => {
             };
           });
         setAllExercises(normalized);
+        setPublishedExerciseCount(exactCount ?? normalized.length);
       } catch (e) {
         console.error('[Exercises] Failed to load published exercises:', e);
         setAllExercises([]);
@@ -213,6 +222,7 @@ const Exercises = () => {
                <p className="text-lg text-slate-500 max-w-2xl mx-auto">
                    اختر مستواك الدراسي للبدء في حل التمارين التفاعلية وتحسين مهاراتك.
                </p>
+               <p className="mt-3 font-bold text-amber-700">{publishedExerciseCount} تمرين منشور</p>
            </div>
 
            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -383,9 +393,7 @@ const Exercises = () => {
                         </div>
                         <CardContent className="p-8">
                             <div className="flex items-start justify-between gap-3 mb-2">
-                                <h2 className="german-text text-2xl font-bold text-slate-800 leading-relaxed flex-1">
-                                    {currentQuestion.question}
-                                </h2>
+                                <BidiText as="h2" text={currentQuestion.question} className="flex-1 text-2xl font-bold leading-relaxed text-slate-800" />
                                 <AudioButton
                                     text={getExerciseAudioText(currentQuestion)}
                                     lang="de-DE"
@@ -393,7 +401,7 @@ const Exercises = () => {
                                 />
                             </div>
                             {questionArabic && (
-                                <p className="text-slate-400 text-base mb-6">{questionArabic}</p>
+                                <BidiText as="p" text={questionArabic} fallbackDirection="rtl" className="mb-6 text-base text-slate-500" />
                             )}
                             {!questionArabic && <div className="mb-6" />}
 
@@ -402,6 +410,7 @@ const Exercises = () => {
                                     <button
                                         key={idx}
                                         onClick={() => handleAnswer(idx)}
+                                        dir="rtl"
                                         className={cn(
                                             "w-full p-4 rounded-xl border-2 transition-all hover:bg-slate-50 relative flex items-center justify-between group",
                                             answers[currentIndex] === idx ? "border-amber-500 bg-amber-50" : "border-slate-100 hover:border-amber-200"
@@ -413,9 +422,10 @@ const Exercises = () => {
                                         )}>
                                             {answers[currentIndex] === idx && <div className="w-2.5 h-2.5 bg-amber-600 rounded-full" />}
                                         </div>
-                                        <span className={cn("german-text font-medium text-lg flex-grow", answers[currentIndex] === idx ? "text-amber-900" : "text-slate-600")}>
-                                            {opt}
-                                        </span>
+                                        <BidiText
+                                            text={opt}
+                                            className={cn("min-w-0 flex-grow text-lg font-medium", answers[currentIndex] === idx ? "text-amber-900" : "text-slate-600")}
+                                        />
                                     </button>
                                 ))}
                             </div>

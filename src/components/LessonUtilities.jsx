@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Info, CheckCircle, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AudioButton from '@/components/AudioButton';
+import BidiText from '@/components/common/BidiText';
 
 export const LessonSection = ({ title, children, className = "" }) => (
   <div className={`mb-8 ${className}`}>
@@ -82,7 +83,7 @@ export const ExerciseBox = ({ question, answer }) => {
     <div className="bg-amber-50 rounded-lg p-4 my-4 border border-amber-100">
       <div className="flex items-start gap-3 mb-3">
         <HelpCircle className="text-amber-500 flex-shrink-0 mt-1" size={20} />
-        <span className="font-semibold text-amber-900">{question}</span>
+        <BidiText as="span" text={question} className="font-semibold text-amber-900 flex-1" />
       </div>
 
       <div className="mt-2">
@@ -104,8 +105,8 @@ export const ExerciseBox = ({ question, answer }) => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-2 pt-2 border-t border-amber-200 text-amber-800 font-medium flex items-center gap-2" dir="ltr">
-                <span>{answer}</span>
+              <div className="mt-2 pt-2 border-t border-amber-200 text-amber-800 font-medium flex items-center gap-2">
+                <BidiText as="span" text={answer} className="flex-1" />
                 {/* Attempt to clean answer from parentheses for cleaner TTS */}
                 <AudioButton text={answer.replace(/\(.*?\)/g, '')} size={16} />
               </div>

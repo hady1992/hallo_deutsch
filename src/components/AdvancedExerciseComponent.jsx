@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { shuffleAnswers } from '@/utils/answerShuffler';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import BidiText from '@/components/common/BidiText';
 
 const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -86,7 +87,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
             isAnswered && selectedOption === opt && !isCorrect && "border-red-500 bg-red-50 text-red-700"
           )}
         >
-          <span className="font-medium text-lg" dir="ltr">{opt}</span>
+          <BidiText as="span" text={opt} className="font-medium text-lg flex-1" />
           {isAnswered && opt === exercise.correctAnswer && <Check size={20} className="text-green-600" />}
           {isAnswered && selectedOption === opt && !isCorrect && <X size={20} className="text-red-600" />}
         </motion.button>
@@ -173,9 +174,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
                 {exercise.topic}
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 leading-tight mt-2" dir="ltr">
-              {exercise.question}
-            </h2>
+            <BidiText as="h2" text={exercise.question} className="text-2xl font-bold text-slate-800 leading-tight mt-2" />
           </div>
 
           {/* Robust Audio Button integration */}
@@ -239,7 +238,7 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
                 <span className="font-bold block mb-1 flex items-center gap-2">
                     <HelpCircle size={14} /> TIPP:
                 </span>
-                {exercise.hint}
+                <BidiText as="div" text={exercise.hint} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -260,13 +259,11 @@ const AdvancedExerciseComponent = ({ exercise, onComplete, onNext, hasNext }) =>
                   </h3>
                   {exercise.correctAnswer && !isCorrect && (
                     <span className="text-sm bg-white/60 px-2 py-1 rounded text-red-800 border border-red-100">
-                       Lösung: <span className="font-bold" dir="ltr">{exercise.correctAnswer}</span>
+                       Lösung: <BidiText as="span" text={exercise.correctAnswer} className="font-bold" />
                     </span>
                   )}
                 </div>
-                <p className="text-slate-700 leading-relaxed text-sm md:text-base">
-                  {exercise.explanation}
-                </p>
+                <BidiText as="p" text={exercise.explanation} className="text-slate-700 leading-relaxed text-sm md:text-base" />
               </motion.div>
             )}
           </AnimatePresence>

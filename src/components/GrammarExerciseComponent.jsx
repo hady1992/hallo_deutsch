@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import AudioButton from '@/components/AudioButton';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import BidiText from '@/components/common/BidiText';
 
 function GrammarExerciseComponent({ topic, onClose }) {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -90,7 +91,7 @@ function GrammarExerciseComponent({ topic, onClose }) {
     if (currentExercise.type === 'multipleChoice') {
       return (
         <div className="space-y-4">
-          <p className="text-xl font-semibold text-gray-800 mb-6">{currentExercise.question}</p>
+          <BidiText as="p" text={currentExercise.question} className="text-xl font-semibold text-gray-800 mb-6" />
           <div className="grid gap-3">
             {currentOptions.map((option, idx) => (
               <button
@@ -131,9 +132,8 @@ function GrammarExerciseComponent({ topic, onClose }) {
                     ? 'bg-red-100 border-red-500 text-red-800'
                     : 'bg-white border-gray-300 text-gray-800 hover:border-red-400 hover:bg-red-50'
                 }`}
-                dir="ltr"
               >
-                {option}
+                <BidiText as="span" text={option} />
               </button>
             ))}
           </div>
@@ -265,10 +265,10 @@ function GrammarExerciseComponent({ topic, onClose }) {
                     <h4 className={`font-bold mb-2 ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
                       {isCorrect ? 'ممتاز! إجابة صحيحة 🎉' : 'إجابة خاطئة'}
                     </h4>
-                    <p className="text-gray-700 mb-2">{currentExercise.explanation}</p>
+                    <BidiText as="p" text={currentExercise.explanation} className="text-gray-700 mb-2" />
                     {!isCorrect && (
                       <p className="font-semibold text-gray-800">
-                        الإجابة الصحيحة: <span className="text-green-700" dir="ltr">{currentExercise.correctAnswer}</span>
+                        الإجابة الصحيحة: <BidiText as="span" text={currentExercise.correctAnswer} className="text-green-700" />
                         <AudioButton text={currentExercise.correctAnswer} size={16} className="mr-2" />
                       </p>
                     )}

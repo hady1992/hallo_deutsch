@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/customSupabaseClient';
+import { fetchPublishedRowsPaginated, splitIntoContentBatches } from '@/services/contentPagination';
 import {
   dedupeByKey,
   getExamDedupKey,
@@ -103,12 +104,11 @@ const uploadBatchToSupabase = async (contentType, items, levelField = 'level') =
         // 1. Fetch existing IDs from Supabase to avoid duplicates
         // We assume 'content' -> 'id' holds the unique local ID
         // Note: This fetch can be heavy if table is huge. For this scale, it's okay.
-        const { data: existingData, error: fetchError } = await supabase
-            .from('content_items')
-            .select('content')
-            .eq('content_type', contentType);
-            
-        if (fetchError) throw fetchError;
+        const existingData = await fetchPublishedRowsPaginated({
+            contentType,
+            columns: 'id,content',
+            isPublished: null,
+        });
 
         const existingIds = new Set(existingData.map(row => row.content?.id));
 
@@ -131,11 +131,12 @@ const uploadBatchToSupabase = async (contentType, items, levelField = 'level') =
         }));
 
         // 4. Insert
-        const { error: insertError } = await supabase
-            .from('content_items')
-            .insert(payload);
-
-        if (insertError) throw insertError;
+        for (const payloadBatch of splitIntoContentBatches(payload)) {
+            const { error: insertError } = await supabase
+                .from('content_items')
+                .insert(payloadBatch);
+            if (insertError) throw insertError;
+        }
 
         return { success: true, count: newItems.length };
 

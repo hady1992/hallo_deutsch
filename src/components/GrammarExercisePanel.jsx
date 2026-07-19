@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { shuffleAnswers } from '@/utils/answerShuffler';
+import BidiText from '@/components/common/BidiText';
 
 const GrammarExercisePanel = ({ exercises, title }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -119,9 +120,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
       </div>
 
       <div className="p-6">
-        <h4 className="text-lg font-medium text-gray-800 mb-6 text-right" dir="auto">
-          {currentExercise.question}
-        </h4>
+        <BidiText as="h4" text={currentExercise.question} className="text-lg font-medium text-gray-800 mb-6" />
 
         {currentExercise.type === 'multipleChoice' ? (
           <div className="space-y-3">
@@ -137,7 +136,7 @@ const GrammarExercisePanel = ({ exercises, title }) => {
                 )}
                 disabled={isAnswered}
               >
-                <span>{option}</span>
+                <BidiText as="span" text={option} className="flex-1" />
                 {isAnswered && option === currentExercise.correctAnswer && <Check className="text-green-600 w-5 h-5" />}
                 {isAnswered && selectedOption === option && !isCorrect && <X className="text-red-600 w-5 h-5" />}
               </button>
@@ -171,9 +170,12 @@ const GrammarExercisePanel = ({ exercises, title }) => {
               className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100 text-sm text-red-800 text-right"
             >
               <p className="font-bold mb-1">الشرح:</p>
-              {currentExercise.explanation}
+              <BidiText as="div" text={currentExercise.explanation} />
               {!isCorrect && (
-                <p className="mt-2 text-green-700 font-bold">الإجابة الصحيحة: {currentExercise.correctAnswer}</p>
+                <div className="mt-2 text-green-700 font-bold">
+                  <span>الإجابة الصحيحة:</span>
+                  <BidiText as="span" text={currentExercise.correctAnswer} className="mt-1" />
+                </div>
               )}
             </motion.div>
           )}

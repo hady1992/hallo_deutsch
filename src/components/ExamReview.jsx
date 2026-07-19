@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, ArrowRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import BidiText from '@/components/common/BidiText';
 
 const ExamReview = ({ exam, userAnswers, onBack, onRetake }) => {
   return (
@@ -40,7 +41,7 @@ const ExamReview = ({ exam, userAnswers, onBack, onRetake }) => {
                     ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {idx + 1}
                   </span>
-                  <h3 className="text-xl font-bold text-slate-800 leading-relaxed">{q.question}</h3>
+                  <BidiText as="h3" text={q.question} className="text-xl font-bold text-slate-800 leading-relaxed flex-1" />
                 </div>
                 <div className="flex-shrink-0 mr-4">
                    {isCorrect
@@ -64,7 +65,7 @@ const ExamReview = ({ exam, userAnswers, onBack, onRetake }) => {
                       key={i}
                       className={`p-4 rounded-xl text-base border flex justify-between items-center transition-colors ${itemClass}`}
                     >
-                      <span>{opt}</span>
+                    <BidiText as="span" text={opt} className="flex-1" />
                       {isAnswer && <Check size={18} className="text-green-600" />}
                       {isSelected && !isCorrect && <X size={18} className="text-red-600" />}
                     </div>
@@ -84,7 +85,7 @@ const ExamReview = ({ exam, userAnswers, onBack, onRetake }) => {
                   <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
                      📚 الشرح التفصيلي:
                   </h4>
-                  <p className="text-slate-800 text-sm leading-relaxed">{q.explanation}</p>
+                  <BidiText as="p" text={q.explanation} className="text-slate-800 text-sm leading-relaxed" />
                 </div>
               </div>
             </motion.div>
