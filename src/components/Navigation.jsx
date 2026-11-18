@@ -5,6 +5,7 @@ import {
   BookOpen,
   Dumbbell,
   GraduationCap,
+  Headphones,
   Layers,
   Menu,
   Shield,
@@ -18,6 +19,7 @@ import { isAuthorizedAdminEmail } from '@/components/AdminGate';
 const NAV_ITEMS = [
   { path: '/', label: 'الرئيسية' },
   { path: '/levels', label: 'المستويات', icon: Layers },
+  { path: '/deutschsprint', label: 'الكتب', icon: Headphones },
   { path: '/vocabulary', label: 'المفردات', icon: BookOpen },
   { path: '/kids', label: 'أطفال', icon: Baby },
   { path: '/exercises', label: 'التمارين', icon: Dumbbell },
@@ -83,13 +85,13 @@ function Navigation() {
 
         <div className="hidden items-stretch lg:flex">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-            const isActive = location.pathname === path;
+            const isActive = location.pathname === path || (path === '/deutschsprint' && location.pathname.startsWith('/audio/'));
             return (
               <Link
                 key={path}
                 to={path}
                 aria-current={isActive ? 'page' : undefined}
-                className={`brand-focus relative flex min-h-11 items-center gap-1.5 px-3 text-sm font-bold transition-colors xl:px-4 ${
+                className={`brand-focus relative flex min-h-11 items-center gap-1.5 px-2 text-sm font-bold transition-colors xl:px-3 ${
                   isActive ? 'text-[#d71920]' : 'text-[#44403c] hover:text-[#b08916]'
                 }`}
               >
@@ -120,7 +122,7 @@ function Navigation() {
       >
         <div className="mx-auto grid max-w-xl gap-1">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-            const isActive = location.pathname === path;
+            const isActive = location.pathname === path || (path === '/deutschsprint' && location.pathname.startsWith('/audio/'));
             return (
               <Link
                 key={path}

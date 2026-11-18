@@ -2,6 +2,7 @@
   AddType application/javascript .js .mjs
   AddType text/css .css
   AddType application/wasm .wasm
+  AddType audio/mpeg .mp3
 </IfModule>
 
 <IfModule mod_rewrite.c>
@@ -15,6 +16,10 @@
   # Missing build assets must return 404. Rewriting them to index.html causes
   # the browser's strict module MIME error (text/html instead of JavaScript).
   RewriteCond %{REQUEST_URI} ^/assets/
+  RewriteRule ^ - [R=404,L]
+
+  # Missing recordings must not return the SPA HTML instead of audio.
+  RewriteCond %{REQUEST_URI} ^/media/deutschsprint/
   RewriteRule ^ - [R=404,L]
 
   RewriteRule ^ index.html [L]

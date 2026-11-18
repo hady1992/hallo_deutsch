@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { BookOpen, Clock3, Loader2 } from 'lucide-react';
+import { BookOpen, Clock3, Headphones, Loader2 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { getCourseLessons, getLessonBySlug } from '@/services/contentRepository';
 import LessonPlayer from '@/components/course/LessonPlayer';
@@ -105,6 +105,12 @@ const CourseLessonPage = () => {
                 )}
               </div>
             </header>
+
+          {level === 'A1' && lessonSlug === 'a1-01-01-alphabet-und-laute' && (
+            <Link to="/deutschsprint" className="brand-focus mb-6 flex items-center gap-3 rounded-lg border border-[#087F80]/30 bg-white p-4 font-bold text-[#087F80] hover:border-[#087F80]">
+              <Headphones size={23} className="shrink-0" aria-hidden="true" /> كتاب DeutschSprint A1 والتسجيلات المرافقة للدرس
+            </Link>
+          )}
 
           <LessonPlayer
             lesson={lesson}

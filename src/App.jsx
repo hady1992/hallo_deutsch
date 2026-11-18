@@ -25,6 +25,8 @@ const PlacementMigration = lazy(() => import('@/pages/PlacementMigration'));
 const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
 const VerbConjugationExplorer = lazy(() => import('@/components/VerbConjugationExplorer'));
 const GrammarRulesDatabase = lazy(() => import('@/components/GrammarRulesDatabase'));
+const DeutschSprint = lazy(() => import('@/pages/DeutschSprint'));
+const DeutschSprintAudio = lazy(() => import('@/pages/DeutschSprint').then((module) => ({ default: module.DeutschSprintAudio })));
 
 const RouteLoader = () => (
   <div dir="rtl" className="flex min-h-[55vh] items-center justify-center px-4 text-center">
@@ -75,6 +77,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/levels" element={<Levels />} />
+                <Route path="/deutschsprint" element={<DeutschSprint />} />
+                <Route path="/audio/:audioId" element={<DeutschSprintAudio />} />
                 <Route path="/level/:level" element={<CourseLevelPage />} />
                 <Route path="/level/:level/lesson/:lessonSlug" element={<CourseLessonPage />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
