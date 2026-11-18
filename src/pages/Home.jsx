@@ -7,6 +7,7 @@ import {
   BookOpen,
   CheckCircle2,
   Dumbbell,
+  Headphones,
   Languages,
   Layers,
   LayoutGrid,
@@ -122,6 +123,20 @@ function Home() {
               <span className={`absolute inset-x-5 bottom-0 h-0.5 ${accent === 'red' ? 'bg-[#d71920]' : 'bg-[#e8b21e]'}`} aria-hidden="true" />
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="bg-[#fcfaf6] px-4 pb-8 md:px-8 md:pb-10" aria-label="كتب DeutschSprint">
+        <div className="container mx-auto flex flex-col gap-5 rounded-xl border border-[#D5AC55]/60 bg-[#15344B] p-5 text-white md:flex-row md:items-center md:justify-between md:p-7">
+          <div className="flex items-start gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#D5AC55]"><Headphones size={25} aria-hidden="true" /></span>
+            <div>
+              <p dir="ltr" className="german-text text-sm font-black text-[#D5AC55]">DeutschSprint · A1</p>
+              <h2 className="mt-1 text-xl font-black">الكتب التعليمية والتسجيلات المرافقة</h2>
+              <p className="mt-1 text-sm leading-6 text-white/80">الدرس الأول من سلسلة الألمانية من الصفر.</p>
+            </div>
+          </div>
+          <Link to="/deutschsprint" className="brand-focus inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#087F80] px-5 py-3 font-bold text-white hover:bg-[#096c6d]">استكشف القسم <ArrowLeft size={18} aria-hidden="true" /></Link>
         </div>
       </section>
 
