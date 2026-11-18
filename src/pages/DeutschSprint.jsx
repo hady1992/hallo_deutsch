@@ -3,7 +3,9 @@ import { Helmet } from 'react-helmet';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Headphones } from 'lucide-react';
 import BookAudioPlayer from '@/components/BookAudioPlayer';
+import BookAudioPractice from '@/components/BookAudioPractice';
 import { A1_FIRST_LESSON_PATH, BOOK_AUDIO, DEUTSCHSPRINT_PATH, audioPath, findBookAudio } from '@/data/deutschsprintAudio';
+import { BOOK_PRACTICE } from '@/data/deutschsprintPractice';
 
 const SITE_URL = 'https://hallodeutschpro.com';
 
@@ -28,7 +30,7 @@ function TrackList({ activeId }) {
               <span className="block text-xs font-bold text-[#087F80]" dir="ltr">{track.id}</span>
               <span className="mt-1 block font-black text-[#15344B]">{track.title}</span>
               <span lang="de" dir="ltr" className="german-text mt-1 block text-sm text-slate-600">{track.german}</span>
-              <span className="mt-3 inline-block rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{track.source ? 'متاح للاستماع' : 'قيد التجهيز'}</span>
+              <span className="mt-3 inline-block rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{track.source ? 'التسجيل متاح' : 'تدريب نطق · التسجيل قيد التجهيز'}</span>
             </span>
             <ArrowLeft size={17} className="mt-3 shrink-0 text-[#087F80]" aria-hidden="true" />
           </Link>
@@ -52,7 +54,7 @@ export default function DeutschSprint() {
           <p className="mb-3 text-sm font-bold text-[#D5AC55]">الكتاب الأول · الدرس 01</p>
           <h1 className="text-3xl font-black leading-tight md:text-4xl">الأبجدية وأساسيات النطق</h1>
           <p lang="de" dir="ltr" className="german-text mt-3 text-lg font-bold text-white/80">Lektion 01 – Alphabet und Aussprache</p>
-          <p className="mt-4 max-w-xl leading-7 text-white/90">هنا تجد المقاطع الصوتية المرافقة للكتاب. اختر المقطع الذي يظهر رمزه في صفحتك، واستمع ثم كرّر.</p>
+          <p className="mt-4 max-w-xl leading-7 text-white/90">اختر المقطع الذي يظهر رمزه في صفحتك. يمكنك قراءة أمثلة الكتاب والتدرّب على النطق بصوت آلي ألماني إن كان متاحًا على جهازك، حتى نشر التسجيلات المعتمدة.</p>
         </div>
         <section className="mt-8" aria-labelledby="tracks-title">
           <h2 id="tracks-title" className="mb-4 text-xl font-black">المقاطع الصوتية للدرس الأول</h2>
@@ -84,6 +86,7 @@ export function DeutschSprintAudio() {
               <p className="mb-6 mt-4 leading-7 text-slate-700">{track.description}</p>
               <BookAudioPlayer key={track.id} track={track} />
             </section>
+            {BOOK_PRACTICE[track.id] && <BookAudioPractice key={track.id} practice={BOOK_PRACTICE[track.id]} />}
             <section className="mt-8" aria-labelledby="other-tracks"><h2 id="other-tracks" className="mb-4 text-xl font-black">مقاطع الدرس الأول</h2><TrackList activeId={track.id} /></section>
           </>
         ) : (
