@@ -1,6 +1,7 @@
 // Permanent public IDs printed in DeutschSprint books. Never reassign an ID.
 // Set source only when the matching recording has been reviewed and uploaded.
 export const DEUTSCHSPRINT_PATH = '/deutschsprint';
+export const DEUTSCHSPRINT_EXERCISES_PATH = '/deutschsprint/a1/lektion-01/uebungen';
 export const A1_FIRST_LESSON_PATH = '/level/a1/lesson/a1-01-01-alphabet-und-laute';
 
 export const BOOK_AUDIO = [

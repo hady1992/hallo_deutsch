@@ -85,7 +85,7 @@ function Navigation() {
 
         <div className="hidden items-stretch lg:flex">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-            const isActive = location.pathname === path || (path === '/deutschsprint' && location.pathname.startsWith('/audio/'));
+            const isActive = location.pathname === path || (path === '/deutschsprint' && (location.pathname.startsWith('/audio/') || location.pathname.startsWith('/deutschsprint/')));
             return (
               <Link
                 key={path}
@@ -122,7 +122,7 @@ function Navigation() {
       >
         <div className="mx-auto grid max-w-xl gap-1">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-            const isActive = location.pathname === path || (path === '/deutschsprint' && location.pathname.startsWith('/audio/'));
+            const isActive = location.pathname === path || (path === '/deutschsprint' && (location.pathname.startsWith('/audio/') || location.pathname.startsWith('/deutschsprint/')));
             return (
               <Link
                 key={path}

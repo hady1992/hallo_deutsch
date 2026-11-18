@@ -1,10 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Headphones } from 'lucide-react';
+import { ArrowLeft, BookOpen, ClipboardCheck, Headphones } from 'lucide-react';
 import BookAudioPlayer from '@/components/BookAudioPlayer';
 import BookAudioPractice from '@/components/BookAudioPractice';
-import { A1_FIRST_LESSON_PATH, BOOK_AUDIO, DEUTSCHSPRINT_PATH, audioPath, findBookAudio } from '@/data/deutschsprintAudio';
+import BookLessonExercises from '@/components/BookLessonExercises';
+import { A1_FIRST_LESSON_PATH, BOOK_AUDIO, DEUTSCHSPRINT_PATH, DEUTSCHSPRINT_EXERCISES_PATH, audioPath, findBookAudio } from '@/data/deutschsprintAudio';
 import { BOOK_PRACTICE } from '@/data/deutschsprintPractice';
 
 const SITE_URL = 'https://hallodeutschpro.com';
@@ -60,7 +61,12 @@ export default function DeutschSprint() {
           <h2 id="tracks-title" className="mb-4 text-xl font-black">المقاطع الصوتية للدرس الأول</h2>
           <TrackList />
         </section>
-        <Link to={A1_FIRST_LESSON_PATH} className="brand-focus mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg border border-[#087F80] px-4 py-3 font-bold text-[#087F80] hover:bg-[#087F80]/5"><BookOpen size={20} aria-hidden="true" /> انتقل إلى درس الأبجدية التفاعلي</Link>
+        <section className="mt-8 rounded-2xl border border-[#087F80]/30 bg-[#087F80]/5 p-5" aria-label="تمارين الكتاب">
+          <h2 className="flex items-center gap-2 text-xl font-black"><ClipboardCheck size={24} aria-hidden="true" className="text-[#087F80]" /> تمارين الدرس الأول</h2>
+          <p className="mt-2 text-sm leading-7 text-slate-700">الصفحتان 6–7 من الكتاب: مطابقة، حروف ناقصة، أصوات، تهجئة واختبار من 5 نقاط مع التصحيح.</p>
+          <Link to={DEUTSCHSPRINT_EXERCISES_PATH} className="brand-focus mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#087F80] px-4 py-3 font-bold text-white hover:bg-[#096c6d]">ابدأ التمارين <ArrowLeft size={18} aria-hidden="true" /></Link>
+        </section>
+        <Link to={A1_FIRST_LESSON_PATH} className="brand-focus mt-5 inline-flex min-h-12 items-center gap-2 rounded-lg border border-[#087F80] px-4 py-3 font-bold text-[#087F80] hover:bg-[#087F80]/5"><BookOpen size={20} aria-hidden="true" /> انتقل إلى درس الأبجدية التفاعلي</Link>
       </div>
     </div>
   );
@@ -87,6 +93,7 @@ export function DeutschSprintAudio() {
               <BookAudioPlayer key={track.id} track={track} />
             </section>
             {BOOK_PRACTICE[track.id] && <BookAudioPractice key={track.id} practice={BOOK_PRACTICE[track.id]} />}
+            <Link to={DEUTSCHSPRINT_EXERCISES_PATH} className="brand-focus mt-6 inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#087F80] px-4 py-3 font-bold text-white hover:bg-[#096c6d]"><ClipboardCheck size={20} aria-hidden="true" /> تمارين الدرس الأول</Link>
             <section className="mt-8" aria-labelledby="other-tracks"><h2 id="other-tracks" className="mb-4 text-xl font-black">مقاطع الدرس الأول</h2><TrackList activeId={track.id} /></section>
           </>
         ) : (
@@ -99,4 +106,19 @@ export function DeutschSprintAudio() {
       </div>
     </div>
   );
+}
+
+export function DeutschSprintExercises() {
+  return <div dir="rtl" className="min-h-screen bg-white px-4 pb-16 pt-24 text-[#15344B] md:px-8 md:pt-28">
+    <Helmet>
+      <title>تمارين الأبجدية | DeutschSprint A1</title>
+      <meta name="description" content="تمارين الدرس الأول واختبار الأبجدية الألمانية من كتاب DeutschSprint A1." />
+      <link rel="canonical" href={`${SITE_URL}${DEUTSCHSPRINT_EXERCISES_PATH}`} />
+    </Helmet>
+    <div className="mx-auto max-w-3xl">
+      <SprintHeader />
+      <BookLessonExercises />
+      <Link to={DEUTSCHSPRINT_PATH} className="brand-focus mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-[#087F80]"><ArrowLeft size={18} aria-hidden="true" /> العودة إلى الكتاب والتسجيلات</Link>
+    </div>
+  </div>;
 }
